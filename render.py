@@ -9,8 +9,6 @@ import sys
 
 import ocitysmap
 
-l = logging.getLogger('main')
-
 def main():
     usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
     parser = optparse.OptionParser(usage=usage,
@@ -31,22 +29,28 @@ def main():
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    l.info('OCitySMap v%s starting...' % __version__)
-
+    # Parse bounding box arguments
     zooms = {}
     if options.zooms:
         for zoom in options.zooms:
-            zooms[zoom[0]] = ocitysmap.BoundingBox.parse(zoom[1:])
+            try:
+                zooms[zoom[0]] = ocitysmap.BoundingBox.parse(zoom[1:])
+            except ValueError:
+                sys.stderr.write('ERROR: Invalid bounding box for zoom section %s!\n' % zoom[0])
+                return 1
+
+    boundingbox = None
+    try:
+        boundingbox = ocitysmap.BoundingBox.parse(args[1:])
+    except ValueError:
+        sys.stderr.write('ERROR: Invalid city bounding box!\n')
+        return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(args[0],
-                ocitysmap.BoundingBox.parse(args[1:]), zooms)
-    except ValueError, e:
-        l.error('ValueError: %s!', e)
-        return 1
+        renderer = ocitysmap.OCitySMap(args[0], boundingbox, zooms)
     except ocitysmap.BaseOCitySMapError, e:
-        l.error(e)
-        return 2
+        sys.stderr.write('ERROR: %s\n' % e)
+        return 1
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 

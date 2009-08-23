@@ -69,7 +69,7 @@ class OCitySMap:
         if not self.boundingbox:
             self.boundingbox = self.find_bounding_box(self.name)
 
-        l.info('Bounding box is %s.' % str(self.boundingbox))
+        l.info('City bounding box is %s.' % str(self.boundingbox))
 
     def find_bounding_box(self, name):
         """Find the bounding box of a city from its name.
