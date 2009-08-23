@@ -18,33 +18,48 @@ class BaseOCitySMapError(Exception):
 class UnsufficientDataError(BaseOCitySMapError):
     """Not enough data in the OSM database to proceed."""
 
+class BoundingBox:
+    def __init__(self, lat1, long1, lat2, long2):
+        (self._lat1, self._long1) = float(lat1), float(long1)
+        (self._lat2, self._long2) = float(lat2), float(long2)
+
+        # Validate bounding box?
+
+    @staticmethod
+    def parse(points):
+        (lat1, long1) = points[0].split(',')
+        (lat2, long2) = points[1].split(',')
+        return BoundingBox(lat1, long1, lat2, long2)
+
+    def get_top_left(self):
+        return (self._lat1, self._long1)
+
+    def get_bottom_right(self):
+        return (self._lat2, self._long2)
+
+    def ptstr(self, point):
+        return '%.4f,%.4f' % (point[0], point[1])
+
+    def __str__(self):
+        return '(%s %s)' % (self.ptstr(self.get_top_left()),
+                            self.ptstr(self.get_bottom_right()))
+
+
 class OCitySMap:
     def __init__(self, name, boundingbox=None, zooms=[]):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
             name (string): The name of the city we're created the map of.
-            boundingbox (4-uple): Tuple of 4 decimal GPS coordinates defining
-                the bounding box of the city in the form (top-left, top-right,
-                bottom-right, bottom-left). If not provided, OCitySMap tries to
-                find the bounding box from the OSM data. UnsufficientDataError
-                will be thrown if OCitySMap can't determine the bounding box.
-            zooms (list): A list of zoom sections to add to the map. The list
-                contains 5-uples describing each zoom section, starting by its
-                title and followed by its boundix box GPS coordinates, in the
-                same order as above.
+            boundingbox (BoundingBox): An optional BoundingBox object defining
+                the city's bounding box. If not given, OCitySMap will try to
+                guess the bounding box from the OSM data. An UnsufficientDataError
+                exception will be raised in the bounding box can't be guessed.
+            zooms (dict): A dictionnary of zoom sections to add to the map. The
+                dictionnary maps a zoom box title to its bounding box
+                (BoundingBox objects).
         """
-        self.name = name
-
-        if boundingbox and len(boundingbox) != 4:
-            raise ValueError, "Invalid bounding box"
-        self.boundingbox = boundingbox
-
-        self.zooms = {}
-        for zoom in zooms:
-            if len(zoom) != 5:
-                raise ValueError, "Invalid zoom box"
-            self.zooms[zoom[0]] = zoom[1:]
+        (self.name, self.boundingbox, self.zooms) = (name, boundingbox, zooms)
 
         l.info('OCitySMap renderer for %s.' % self.name)
         l.info('%d zoom section(s).' % len(self.zooms))

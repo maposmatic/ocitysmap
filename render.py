@@ -12,7 +12,7 @@ import ocitysmap
 l = logging.getLogger('main')
 
 def main():
-    usage = '%prog [options] <cityname> [top-left top-right bottom-right bottom-left]'
+    usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-o', '--output', dest='output', metavar='FILE',
@@ -20,12 +20,12 @@ def main():
                       help='Specify the output file name (defaults '
                            'to citymap.svg.')
     parser.add_option('-z', '--zoom', dest='zooms', action='append',
-                      nargs=5, metavar='NAME BBOX',
+                      nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
                            'bounding box.')
 
     (options, args) = parser.parse_args()
-    if not (len(args) == 1 or len(args) == 5):
+    if len(args) != 1 and len(args) != 3:
         parser.print_help()
         return 1
 
@@ -33,9 +33,14 @@ def main():
 
     l.info('OCitySMap v%s starting...' % __version__)
 
+    zooms = {}
+    if options.zooms:
+        for zoom in options.zooms:
+            zooms[zoom[0]] = ocitysmap.BoundingBox.parse(zoom[1:])
+
     try:
-        renderer = ocitysmap.OCitySMap(args[0], tuple(args[1:5]),
-                                       options.zooms)
+        renderer = ocitysmap.OCitySMap(args[0],
+                ocitysmap.BoundingBox.parse(args[1:]), zooms)
     except ValueError, e:
         l.error('ValueError: %s!', e)
         return 1
