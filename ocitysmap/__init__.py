@@ -9,6 +9,8 @@ __author__ = 'The Hackfest2009 team'
 __version__ = '0.1'
 
 import logging
+import pgdb
+import math
 
 l = logging.getLogger('ocitysmap')
 
@@ -44,6 +46,63 @@ class BoundingBox:
         return '(%s %s)' % (self.ptstr(self.get_top_left()),
                             self.ptstr(self.get_bottom_right()))
 
+def _gen_vertical_square_label(x):
+    label = ''
+    while x != -1:
+        label = chr(ord('A') + x % 26) + label
+        x /= 26
+        x -= 1
+    return label
+
+def _gen_horizontal_square_label(x):
+    return str(x + 1)
+
+class MapDescriptor:
+    def __init__(self, bbox, db):
+        self.bbox = bbox
+        cursor = db.cursor()
+
+        # Compute width and heights in meters of the bounding box
+        cursor.execute("""select
+                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
+                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
+                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
+                            bbox.get_top_left()[0], bbox.get_bottom_right()[1]))
+        width = cursor.fetchall()[0][0]
+        cursor.execute("""select
+                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
+                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
+                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
+                            bbox.get_bottom_right()[0], bbox.get_top_left()[1]))
+        height = cursor.fetchall()[0][0]
+
+        # Compute number of squares, assumming a size of 500 meters
+        # per square
+        width_square_count  = width / 500
+        height_square_count = height / 500
+
+        # Compute the size in angles of the squares
+        self.width_square_angle  = (abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1]) /
+                                    width_square_count)
+        self.height_square_angle = (abs(bbox.get_top_left()[0] - bbox.get_bottom_right()[0]) /
+                                    height_square_count)
+
+        # Compute the lists of longitudes and latitudes of the
+        # horizontal and vertical lines delimiting the square
+        self.vertical_lines   = [bbox.get_top_left()[1] + x * self.width_square_angle
+                                 for x in xrange(0, int(math.ceil(width_square_count )) + 1)]
+        self.horizontal_lines = [bbox.get_top_left()[0] - x * self.height_square_angle
+                                 for x in xrange(0, int(math.ceil(height_square_count)) + 1)]
+
+        # Compute the lists of labels
+        self.vertical_labels   = [_gen_vertical_square_label(x)
+                                  for x in xrange(0, int(math.ceil(width_square_count)))]
+        self.horizontal_labels = [_gen_horizontal_square_label(x)
+                                  for x in xrange(0, int(math.ceil(height_square_count)))]
+        print self.vertical_lines
+        print self.horizontal_lines
+        print self.vertical_labels
+        print self.horizontal_labels
 
 class OCitySMap:
     def __init__(self, name, boundingbox=None, zooms=[]):
@@ -68,6 +127,9 @@ class OCitySMap:
 
         if not self.boundingbox:
             self.boundingbox = self.find_bounding_box(self.name)
+
+        db = pgdb.connect('Notre Base', 'test', 'test', 'surf.local', 'testdb')
+        self.mapdesc = MapDescriptor(self.boundingbox, db)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
