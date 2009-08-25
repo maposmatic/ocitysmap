@@ -25,7 +25,7 @@ APPELLATIONS = [ "Allée", "Avenue", "Boulevard", "Carrefour", "Chaussée",
 DETERMINANTS = [" des", " du", " de la", " de l'", " de", " d'", ""]
 
 SPACE_REDUCE = re.compile(r"\s+")
-PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?(?P<name>.*)" %
+PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
                            ("|".join(APPELLATIONS),
                             "|".join(DETERMINANTS)))
 
