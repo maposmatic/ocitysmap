@@ -13,8 +13,6 @@ import pgdb
 import math
 import re
 
-import map_grid
-
 l = logging.getLogger('ocitysmap')
 
 EARTH_RADIUS = 6370986 # meters
@@ -76,6 +74,8 @@ class BoundingBox:
                 radius_lat * math.radians(delta_long))
 
 
+import map_grid
+
 def _gen_vertical_square_label(x):
     label = ''
     while x != -1:
@@ -123,6 +123,16 @@ class GridDescriptor:
         l.debug("horizontal lines: %s" % self.horizontal_lines)
         l.debug("vertical labels: %s" % self.vertical_labels)
         l.debug("horizontal labels: %s" % self.horizontal_labels)
+
+    def generate_shape_file(self, filename):
+        g = map_grid.GridFile(filename)
+        for v in self.vertical_lines:
+            g.add_vert_line(v)
+        for h in self.horizontal_lines:
+            g.add_horiz_line(h)
+        g.flush()
+        return g
+
 
 def _humanize_street_label(street):
     """Creates a street label usable in the street list adjacent to the map
@@ -180,15 +190,6 @@ def _humanize_street_label(street):
                                  _gen_vertical_square_label(last[0]),
                                  _gen_horizontal_square_label(last[1]))
     return (name, label)
-
-    def generate_shape_file(self, filename):
-        g = map_grid.GridFile(filename)
-        for v in self.vertical_lines:
-            g.add_vert_line(v)
-        for h in self.horizontal_lines:
-            g.add_horiz_line(h)
-        g.flush()
-        return g
 
 
 class OCitySMap:
