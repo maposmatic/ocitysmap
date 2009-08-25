@@ -14,6 +14,8 @@ import math
 
 l = logging.getLogger('ocitysmap')
 
+EARTH_RADIUS = 6370986 # meters
+
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
 
@@ -46,6 +48,15 @@ class BoundingBox:
         return '(%s %s)' % (self.ptstr(self.get_top_left()),
                             self.ptstr(self.get_bottom_right()))
 
+    def spheric_sizes(self):
+        """Metric size at latitude.
+        returns the tuple (metric_size_lat, metric_size_long)
+        """
+        delta_lat = abs(self._lat1 - self._lat2)
+        delta_long = abs(self._long1 - self._long2)
+        radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat1))
+        return (EARTH_RADIUS * math.radians(delta_lat),
+                radius_lat * math.radians(delta_long))
 
 import map_grid
 
@@ -64,21 +75,7 @@ def _gen_horizontal_square_label(x):
 class GridDescriptor:
     def __init__(self, bbox, db):
         self.bbox = bbox
-        cursor = db.cursor()
-
-        # Compute width and heights in meters of the bounding box
-        cursor.execute("""select
-                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
-                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
-                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
-                            bbox.get_top_left()[0], bbox.get_bottom_right()[1]))
-        width = cursor.fetchall()[0][0]
-        cursor.execute("""select
-                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
-                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
-                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
-                            bbox.get_bottom_right()[0], bbox.get_top_left()[1]))
-        height = cursor.fetchall()[0][0]
+        height, width = bbox.spheric_sizes()
 
         # Compute number of squares, assumming a size of 500 meters
         # per square
