@@ -11,10 +11,27 @@ __version__ = '0.1'
 import logging
 import pgdb
 import math
+import re
+
+import map_grid
 
 l = logging.getLogger('ocitysmap')
 
 EARTH_RADIUS = 6370986 # meters
+
+APPELLATIONS = [ "Allée", "Avenue", "Boulevard", "Carrefour", "Chaussée",
+                 "Chemin", "Cité", "Clos", "Côte", "Cour", "Cours", "Degré",
+                 "Esplanade", "Impasse", "Liaison", "Mail", "Montée",
+                 "Passage", "Place", "Placette", "Pont", "Promenade", "Quai",
+                 "Résidence", "Rond-Point", "Rang", "Route", "Rue", "Ruelle",
+                 "Square", "Traboule", "Traverse", "Venelle", "Voie",
+                 "Rond-point" ]
+DETERMINANTS = [ " des", " du", " de la", " de l'", " de", " d'", "" ]
+
+SPACE_REDUCE = re.compile(r"\s+")
+PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
+                           ("|".join(APPELLATIONS),
+                            "|".join(DETERMINANTS)), re.IGNORECASE)
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -49,16 +66,14 @@ class BoundingBox:
                             self.ptstr(self.get_bottom_right()))
 
     def spheric_sizes(self):
-        """Metric size at latitude.
-        returns the tuple (metric_size_lat, metric_size_long)
+        """Metric distances at the bounding box top latitude.
+        Returns the tuple (metric_size_lat, metric_size_long)
         """
         delta_lat = abs(self._lat1 - self._lat2)
         delta_long = abs(self._long1 - self._long2)
         radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat1))
         return (EARTH_RADIUS * math.radians(delta_lat),
                 radius_lat * math.radians(delta_long))
-
-import map_grid
 
 
 def _gen_vertical_square_label(x):
@@ -83,16 +98,20 @@ class GridDescriptor:
         self.height_square_count = height / 500
 
         # Compute the size in angles of the squares
-        self.width_square_angle  = (abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1]) /
+        self.width_square_angle  = (abs(bbox.get_top_left()[1] -
+                                        bbox.get_bottom_right()[1]) /
                                     self.width_square_count)
-        self.height_square_angle = (abs(bbox.get_top_left()[0] - bbox.get_bottom_right()[0]) /
+        self.height_square_angle = (abs(bbox.get_top_left()[0] -
+                                        bbox.get_bottom_right()[0]) /
                                     self.height_square_count)
 
         # Compute the lists of longitudes and latitudes of the
         # horizontal and vertical lines delimiting the square
-        self.vertical_lines   = [bbox.get_top_left()[1] + x * self.width_square_angle
+        self.vertical_lines   = [bbox.get_top_left()[1] +
+                                 x * self.width_square_angle
                                  for x in xrange(0, int(math.ceil(self.width_square_count )) + 1)]
-        self.horizontal_lines = [bbox.get_top_left()[0] - x * self.height_square_angle
+        self.horizontal_lines = [bbox.get_top_left()[0] -
+                                 x * self.height_square_angle
                                  for x in xrange(0, int(math.ceil(self.height_square_count)) + 1)]
 
         # Compute the lists of labels
@@ -100,10 +119,67 @@ class GridDescriptor:
                                   for x in xrange(0, int(math.ceil(self.width_square_count)))]
         self.horizontal_labels = [_gen_horizontal_square_label(x)
                                   for x in xrange(0, int(math.ceil(self.height_square_count)))]
-        print self.vertical_lines
-        print self.horizontal_lines
-        print self.vertical_labels
-        print self.horizontal_labels
+        l.debug("vertical lines: %s" % self.vertical_lines)
+        l.debug("horizontal lines: %s" % self.horizontal_lines)
+        l.debug("vertical labels: %s" % self.vertical_labels)
+        l.debug("horizontal labels: %s" % self.horizontal_labels)
+
+def _humanize_street_label(street):
+    """Creates a street label usable in the street list adjacent to the map
+    (like 'Bréhat (Allée des)' from the street definition tuple."""
+
+    def unprefix_street(name):
+        name = name.strip()
+        name = SPACE_REDUCE.sub(" ", name)
+        return PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+
+    def couple_compare(x,y):
+        a = y[0] - x[0]
+        if a:
+            return a
+        return y[1] - x[1]
+
+    def distance(a,b):
+        return (b[0]-a[0])**2 + (b[1]-a[1])**2
+
+    name = unprefix_street(street[0])
+    squares = street[1]
+    minx = min([x[0] for x in squares])
+    maxx = max([x[0] for x in squares])
+    miny = min([x[1] for x in squares])
+    maxy = max([x[1] for x in squares])
+    if len(squares) == 1:
+        label = (_gen_vertical_square_label(squares[0][0]) +
+                 _gen_horizontal_square_label(squares[0][1]))
+    elif minx == maxx:
+        label = ('%s%s-%s' % (_gen_vertical_square_label(minx),
+                              _gen_horizontal_square_label(miny),
+                              _gen_horizontal_square_label(maxy)))
+    elif miny == maxy:
+        label = ('%s-%s%s' % (_gen_vertical_square_label(minx),
+                              _gen_vertical_square_label(maxx),
+                              _gen_horizontal_square_label(miny)))
+    elif (maxx - minx + 1) * (maxy - miny + 1) == len(squares):
+        label = ('%s-%s%s-%s' % (_gen_vertical_square_label(minx),
+                                 _gen_vertical_square_label(maxx),
+                                 _gen_horizontal_square_label(miny),
+                                 _gen_horizontal_square_label(maxy)))
+    else:
+        squares_x_first = sorted(squares, couple_compare)
+        squares_y_first = sorted(squares, lambda x,y: couple_compare(y,x))
+        if (distance(squares_x_first[0], squares_x_first[-1]) >
+            distance(squares_y_first[0], squares_y_first[-1])):
+            first = squares_x_first[0]
+            last = squares_x_first[-1]
+        else:
+            first = squares_y_first[0]
+            last = squares_y_first[-1]
+
+        label = '%s%s...%s%s' % (_gen_vertical_square_label(first[0]),
+                                 _gen_horizontal_square_label(first[1]),
+                                 _gen_vertical_square_label(last[0]),
+                                 _gen_horizontal_square_label(last[1]))
+    return (name, label)
 
     def generate_shape_file(self, filename):
         g = map_grid.GridFile(filename)
@@ -143,13 +219,13 @@ class OCitySMap:
         self.griddesc = GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db)
-        print self.streets
+        l.debug('Streets: %s' % self.streets)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
     def find_bounding_box(self, name):
         """Find the bounding box of a city from its name.
-        
+
         Args:
             name (string): The city name.
         Returns a 4-uple of GPS coordinates describing the bounding box around
@@ -173,29 +249,37 @@ class OCitySMap:
         cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
         for i in xrange(0, int(math.ceil(self.griddesc.width_square_count))):
             for j in xrange(0, int(math.ceil(self.griddesc.height_square_count))):
-                lon1 = self.boundingbox.get_top_left()[1] + i * self.griddesc.width_square_angle
-                lon2 = self.boundingbox.get_top_left()[1] + (i + 1) * self.griddesc.width_square_angle
-                lat1 = self.boundingbox.get_top_left()[0] - j * self.griddesc.height_square_angle
-                lat2 = self.boundingbox.get_top_left()[0] - (j + 1) * self.griddesc.height_square_angle
-                poly = "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))" % \
-                    (lon1, lat1, lon1, lat2, lon2, lat2, lon2, lat1, lon1, lat1)
+                lon1 = (self.boundingbox.get_top_left()[1] +
+                        i * self.griddesc.width_square_angle)
+                lon2 = (self.boundingbox.get_top_left()[1] +
+                        (i + 1) * self.griddesc.width_square_angle)
+                lat1 = (self.boundingbox.get_top_left()[0] -
+                        j * self.griddesc.height_square_angle)
+                lat2 = (self.boundingbox.get_top_left()[0] -
+                        (j + 1) * self.griddesc.height_square_angle)
+                poly = ("POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))" %
+                        (lon1, lat1, lon1, lat2, lon2,
+                         lat2, lon2, lat1, lon1, lat1))
                 cursor.execute("""insert into map_areas (x, y, geom)
-                                         values (%d, %d, st_geomfromtext('%s', 4002))""" % \
-                                   (i, j, poly))
+                                  values (%d, %d, st_geomfromtext('%s', 4002))""" %
+                               (i, j, poly))
+
         db.commit()
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                where name != '')
+                                where name != '' and highway is not null)
                           as foo
                           group by name
                           order by name;""")
-        l = cursor.fetchall()
-        l = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in l]
-        return l
 
+        sl = cursor.fetchall()
+        sl = [(street[0], [map(int, x.split(','))
+            for x in street[1].split(';')[:-1]]) for street in sl]
+        return sorted(map(_humanize_street_label, sl),
+                          lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
     def render_to_file(self, osm_map_file, out_filename):
         g = self.griddesc.generate_shape_file('x.shp')
