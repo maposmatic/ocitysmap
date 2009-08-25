@@ -70,7 +70,7 @@ class GridFile:
 
     def get_filepath(self):
         """
-        Get the path to the destination shape file
+        Return the path to the destination shape file
         """
         return self._filepath
 
