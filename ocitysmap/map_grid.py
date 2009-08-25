@@ -112,14 +112,14 @@ class MapCanvas:
         @param str_color (string) Color definition (html)
         @param font_size (int) Font size of the label
         """
-        labelstyle = "%s:%s" % (str_color, font_size)
         pt = self._proj.forward(mapnik.Coord(x,  y))
-        self._labels.add_point(pt.x, pt.y, 'style_' + labelstyle,
+        self._labels.add_point(pt.x, pt.y,
+                               'style_%s:%s' % (str_color, font_size),
                                str_label)
-        self._labelstyles.add(labelstyle)
+        self._labelstyles.add((str_color, font_size))
 
-    def _render_label_style(self, labelstyle):
-        str_color, font_size = labelstyle.split(':')
+    def _render_label_style(self, str_color, font_size):
+        labelstyle = '%s:%s' % (str_color, font_size)
 
         s = mapnik.Style()
         r = mapnik.Rule()
@@ -138,7 +138,7 @@ class MapCanvas:
         lyr.styles.append('labels_' + labelstyle)
         self._map.layers.append(lyr)
 
-    def add_shp(self, path_shpfile, str_color = mapnik.Color('black')):
+    def add_shapefile(self, path_shpfile, str_color = mapnik.Color('black')):
         """
         Add a shape file to display on top of the map
         @param path_shpfile (string) path to the shape file to render
@@ -160,7 +160,7 @@ class MapCanvas:
 
     def render_map(self):
         for labelstyle in self._labelstyles:
-            self._render_label_style(labelstyle)
+            self._render_label_style(*labelstyle)
 
         for lyrtype, lyrparms in self._shapes:
             self._render_shp(*lyrparms)
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     # A few tests
 
     # Create the grid shape file
-    g = GridFile("toto.shp")
+    g = GridFile("mygrid.shp")
     g.add_horiz_line(44.48)
     g.add_vert_line(-1.08)
     g.flush()
@@ -184,20 +184,22 @@ if __name__ == "__main__":
                           800, 600)
     sanguinet.add_label(-1.075, 44.483, "Toto")
     sanguinet.add_label(-1.075, 44.479, "Titi", '#ff00ff', 30)
-    sanguinet.add_shp(g.get_filepath())
+    sanguinet.add_shapefile(g.get_filepath())
+
+    # Render the whole thing
     m = sanguinet.render_map()
     
-    # Render the whole thing as png, svg, etc.
-    mapnik.save_map(m,"map.xml")
-    mapnik.render_to_file(m, 'map.png')
+    # Save the rendered map into different file formats
+    mapnik.save_map(m,"sanguinet.xml")
+    mapnik.render_to_file(m, 'sanguinet.png')
 
     try:
         import cairo
-        surface = cairo.SVGSurface('map.svg', m.width,m.height)
+        surface = cairo.SVGSurface('sanguinet.svg', m.width,m.height)
         mapnik.render(m, surface)
-        surface = cairo.PDFSurface('map.pdf', m.width,m.height)
+        surface = cairo.PDFSurface('sanguinet.pdf', m.width,m.height)
         mapnik.render(m, surface)
-        surface = cairo.PSSurface('map.ps', m.width,m.height)
+        surface = cairo.PSSurface('sanguinet.ps', m.width,m.height)
         mapnik.render(m, surface)
     except Exception, ex:
         print '\n\nSkipping cairo examples as Pycairo not available:', ex
