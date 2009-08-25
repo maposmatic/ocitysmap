@@ -109,10 +109,18 @@ class MapCanvas:
                                             bbox.get_bottom_right()[0])
         self._map         = mapnik.Map(grwidth, grheight, self._projname)
         mapnik.load_map(self._map, mapfile_path)
+
+        # Keep geographic bounding box, ignoring one dimension of the
+        # specified grwidth/grheight constraints
+        self._map.aspect_fix_mode = mapnik.aspect_fix_mode.SHRINK_CANVAS
+
+        # The data to render in the resulting scene
         self._labels      = mapnik.PointDatasource()
-        self._labelstyles = set()
-        self._shapes      = []
-        self._dirty       = True
+        self._labelstyles = set() # Set of label styles, used to
+                                  # define the sets of layers
+        self._shapes      = []    # Data from the shape files
+        self._dirty       = True  # Rendering needed because data have
+                                  # been added
 
     def add_label(self, x, y, str_label, str_color = "red", font_size = 11):
         """
