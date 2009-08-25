@@ -78,27 +78,27 @@ class MapDescriptor:
 
         # Compute number of squares, assumming a size of 500 meters
         # per square
-        width_square_count  = width / 500
-        height_square_count = height / 500
+        self.width_square_count  = width / 500
+        self.height_square_count = height / 500
 
         # Compute the size in angles of the squares
         self.width_square_angle  = (abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1]) /
-                                    width_square_count)
+                                    self.width_square_count)
         self.height_square_angle = (abs(bbox.get_top_left()[0] - bbox.get_bottom_right()[0]) /
-                                    height_square_count)
+                                    self.height_square_count)
 
         # Compute the lists of longitudes and latitudes of the
         # horizontal and vertical lines delimiting the square
         self.vertical_lines   = [bbox.get_top_left()[1] + x * self.width_square_angle
-                                 for x in xrange(0, int(math.ceil(width_square_count )) + 1)]
+                                 for x in xrange(0, int(math.ceil(self.width_square_count )) + 1)]
         self.horizontal_lines = [bbox.get_top_left()[0] - x * self.height_square_angle
-                                 for x in xrange(0, int(math.ceil(height_square_count)) + 1)]
+                                 for x in xrange(0, int(math.ceil(self.height_square_count)) + 1)]
 
         # Compute the lists of labels
         self.vertical_labels   = [_gen_vertical_square_label(x)
-                                  for x in xrange(0, int(math.ceil(width_square_count)))]
+                                  for x in xrange(0, int(math.ceil(self.width_square_count)))]
         self.horizontal_labels = [_gen_horizontal_square_label(x)
-                                  for x in xrange(0, int(math.ceil(height_square_count)))]
+                                  for x in xrange(0, int(math.ceil(self.height_square_count)))]
         print self.vertical_lines
         print self.horizontal_lines
         print self.vertical_labels
