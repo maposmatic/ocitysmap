@@ -99,10 +99,60 @@ class MapDescriptor:
                                   for x in xrange(0, int(math.ceil(self.width_square_count)))]
         self.horizontal_labels = [_gen_horizontal_square_label(x)
                                   for x in xrange(0, int(math.ceil(self.height_square_count)))]
-        print self.vertical_lines
-        print self.horizontal_lines
-        print self.vertical_labels
-        print self.horizontal_labels
+        l.debug("vertical lines: %s" % self.vertical_lines)
+        l.debug("horizontal lines: %s" % self.horizontal_lines)
+        l.debug("vertical labels: %s" % self.vertical_labels)
+        l.debug("horizontal labels: %s" % self.horizontal_labels)
+
+def _humanize_street_label(street):
+
+    def couple_compare(x,y):
+        a = y[0] - x[0]
+        if a:
+            return a
+        return y[1] - x[1]
+
+    def distance(a,b):
+        return (b[0]-a[0])**2 + (b[1]-a[1])**2
+
+    name = street[0]
+    squares = street[1]
+    minx = min([x[0] for x in squares])
+    maxx = max([x[0] for x in squares])
+    miny = min([x[1] for x in squares])
+    maxy = max([x[1] for x in squares])
+    if len(squares) == 1:
+        label = (_gen_vertical_square_label(squares[0][0]) +
+                 _gen_horizontal_square_label(squares[0][1]))
+    elif minx == maxx:
+        label = ('%s%s-%s' % (_gen_vertical_square_label(minx),
+                              _gen_horizontal_square_label(miny),
+                              _gen_horizontal_square_label(maxy)))
+    elif miny == maxy:
+        label = ('%s-%s%s' % (_gen_vertical_square_label(minx),
+                              _gen_vertical_square_label(maxx),
+                              _gen_horizontal_square_label(miny)))
+    elif (maxx - minx + 1) * (maxy - miny + 1) == len(squares):
+        label = ('%s-%s%s-%s' % (_gen_vertical_square_label(minx),
+                                 _gen_vertical_square_label(maxx),
+                                 _gen_horizontal_square_label(miny),
+                                 _gen_horizontal_square_label(maxy)))
+    else:
+        squares_x_first = sorted(squares, couple_compare)
+        squares_y_first = sorted(squares, lambda x,y: couple_compare(y,x))
+        if (distance(squares_x_first[0], squares_x_first[-1]) >
+            distance(squares_y_first[0], squares_y_first[-1])):
+            first = squares_x_first[0]
+            last = squares_x_first[-1]
+        else:
+            first = squares_y_first[0]
+            last = squares_y_first[-1]
+
+        label = '%s%s...%s%s' % (_gen_vertical_square_label(first[0]),
+                                 _gen_horizontal_square_label(first[1]),
+                                 _gen_vertical_square_label(last[0]),
+                                 _gen_horizontal_square_label(last[1]))
+    return (name, label)
 
 class OCitySMap:
     def __init__(self, name, boundingbox=None, zooms=[]):
@@ -132,7 +182,7 @@ class OCitySMap:
         self.mapdesc = MapDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db)
-        print self.streets
+        l.debug('Streets: %s' % self.streets)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -181,6 +231,6 @@ class OCitySMap:
                           as foo
                           group by name
                           order by name;""")
-        l = cursor.fetchall()
-        l = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in l]
-        return l
+        sl = cursor.fetchall()
+        sl = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
+        return map(_humanize_street_label, sl)
