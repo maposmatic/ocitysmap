@@ -4,6 +4,11 @@
 import os, mapnik
 from osgeo import ogr
 
+try:
+    import cairo
+except ImportError:
+    cairo = None
+
 
 class GLOBALS:
     MAIN_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
@@ -103,6 +108,7 @@ class MapCanvas:
         self._labels      = mapnik.PointDatasource()
         self._labelstyles = set()
         self._shapes      = []
+        self._dirty       = True
 
     def add_label(self, x, y, str_label, str_color = "red", font_size = 11):
         """
@@ -117,6 +123,7 @@ class MapCanvas:
                                'style_%s:%s' % (str_color, font_size),
                                str_label)
         self._labelstyles.add((str_color, font_size))
+        self._dirty = True
 
     def _render_label_style(self, str_color, font_size):
         labelstyle = '%s:%s' % (str_color, font_size)
@@ -145,6 +152,7 @@ class MapCanvas:
         @param str_color (string) Color definition (html)
         """
         self._shapes.append(['SHPFILE', (path_shpfile, str_color)])
+        self._dirty = True
 
     def _render_shp(self, path_shpfile, str_color):
         shpid = os.path.basename(path_shpfile)
@@ -167,7 +175,43 @@ class MapCanvas:
 
         bbox = _project_envelope(self._proj, self._envelope)
         self._map.zoom_to_box(bbox)
+        self._dirty = False
         return self._map
+
+    def save_map(self, output_filename,
+                 file_type = None,
+                 force = False):
+        if self._dirty or force:
+            self.render_map()
+
+        if file_type is None:
+            file_type = output_filename.split('.')[-1]
+        
+        file_type = file_type.lower()
+        if file_type == 'xml':
+            mapnik.save_map(self._map, output_filename)
+        elif file_type == 'png':
+            mapnik.render_to_file(self._map, output_filename, 'png')
+        elif file_type in ('jpg', 'jpeg'):
+            mapnik.render_to_file(self._map, output_filename, 'jpeg')
+        elif file_type == 'svg' and cairo is not None:
+            surface = cairo.SVGSurface(output_filename,
+                                       self._map.width,
+                                       self._map.height)
+            mapnik.render(self._map, surface)
+        elif file_type == 'pdf' and cairo is not None:
+            surface = cairo.PDFSurface(output_filename,
+                                       self._map.width,
+                                       self._map.height)
+            mapnik.render(self._map, surface)
+        elif file_type == 'ps' and cairo is not None:
+            surface = cairo.PSSurface(output_filename,
+                                       self._map.width,
+                                       self._map.height)
+            mapnik.render(self._map, surface)
+        else:
+            raise ValueError('Unsupported output format: %s' % file_type)
+
 
 if __name__ == "__main__":
     # A few tests
@@ -186,20 +230,8 @@ if __name__ == "__main__":
     sanguinet.add_label(-1.075, 44.479, "Titi", '#ff00ff', 30)
     sanguinet.add_shapefile(g.get_filepath())
 
-    # Render the whole thing
-    m = sanguinet.render_map()
-    
     # Save the rendered map into different file formats
-    mapnik.save_map(m,"sanguinet.xml")
-    mapnik.render_to_file(m, 'sanguinet.png')
-
-    try:
-        import cairo
-        surface = cairo.SVGSurface('sanguinet.svg', m.width,m.height)
-        mapnik.render(m, surface)
-        surface = cairo.PDFSurface('sanguinet.pdf', m.width,m.height)
-        mapnik.render(m, surface)
-        surface = cairo.PSSurface('sanguinet.ps', m.width,m.height)
-        mapnik.render(m, surface)
-    except Exception, ex:
-        print '\n\nSkipping cairo examples as Pycairo not available:', ex
+    for fname in ('sanguinet.xml', 'sanguinet.png',
+                  'sanguinet.svg', 'sanguinet.pdf',
+                  'sanguinet.ps', 'sanguinet.jpg'):
+        sanguinet.save_map(fname)
