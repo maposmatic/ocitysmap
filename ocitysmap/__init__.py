@@ -14,6 +14,8 @@ import math
 
 l = logging.getLogger('ocitysmap')
 
+EARTH_RADIUS = 6370986 # meters
+
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
 
@@ -46,6 +48,19 @@ class BoundingBox:
         return '(%s %s)' % (self.ptstr(self.get_top_left()),
                             self.ptstr(self.get_bottom_right()))
 
+    def spheric_sizes(self):
+        """Metric size at latitude.
+        returns the tuple (metric_size_lat, metric_size_long)
+        """
+        delta_lat = abs(self._lat1 - self._lat2)
+        delta_long = abs(self._long1 - self._long2)
+        radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat1))
+        return (EARTH_RADIUS * math.radians(delta_lat),
+                radius_lat * math.radians(delta_long))
+
+import map_grid
+
+
 def _gen_vertical_square_label(x):
     label = ''
     while x != -1:
@@ -57,24 +72,10 @@ def _gen_vertical_square_label(x):
 def _gen_horizontal_square_label(x):
     return str(x + 1)
 
-class MapDescriptor:
+class GridDescriptor:
     def __init__(self, bbox, db):
         self.bbox = bbox
-        cursor = db.cursor()
-
-        # Compute width and heights in meters of the bounding box
-        cursor.execute("""select
-                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
-                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
-                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
-                            bbox.get_top_left()[0], bbox.get_bottom_right()[1]))
-        width = cursor.fetchall()[0][0]
-        cursor.execute("""select
-                          st_distance_sphere(st_geomfromtext('POINT(%f %f)', 4002),
-                                             st_geomfromtext('POINT(%f %f)', 4002))""" % \
-                           (bbox.get_top_left()[0], bbox.get_top_left()[1],
-                            bbox.get_bottom_right()[0], bbox.get_top_left()[1]))
-        height = cursor.fetchall()[0][0]
+        height, width = bbox.spheric_sizes()
 
         # Compute number of squares, assumming a size of 500 meters
         # per square
@@ -154,6 +155,16 @@ def _humanize_street_label(street):
                                  _gen_horizontal_square_label(last[1]))
     return (name, label)
 
+    def generate_shape_file(self, filename):
+        g = map_grid.GridFile(filename)
+        for v in self.vertical_lines:
+            g.add_vert_line(v)
+        for h in self.horizontal_lines:
+            g.add_horiz_line(h)
+        g.flush()
+        return g
+
+
 class OCitySMap:
     def __init__(self, name, boundingbox=None, zooms=[]):
         """Creates a new OCitySMap renderer instance for the given city.
@@ -179,7 +190,7 @@ class OCitySMap:
             self.boundingbox = self.find_bounding_box(self.name)
 
         db = pgdb.connect('Notre Base', 'test', 'test', 'surf.local', 'testdb')
-        self.mapdesc = MapDescriptor(self.boundingbox, db)
+        self.griddesc = GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db)
         l.debug('Streets: %s' % self.streets)
@@ -210,12 +221,12 @@ class OCitySMap:
         cursor.execute("drop table if exists map_areas")
         cursor.execute("create table map_areas (x integer, y integer)")
         cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
-        for i in xrange(0, int(math.ceil(self.mapdesc.width_square_count))):
-            for j in xrange(0, int(math.ceil(self.mapdesc.height_square_count))):
-                lon1 = self.boundingbox.get_top_left()[1] + i * self.mapdesc.width_square_angle
-                lon2 = self.boundingbox.get_top_left()[1] + (i + 1) * self.mapdesc.width_square_angle
-                lat1 = self.boundingbox.get_top_left()[0] - j * self.mapdesc.height_square_angle
-                lat2 = self.boundingbox.get_top_left()[0] - (j + 1) * self.mapdesc.height_square_angle
+        for i in xrange(0, int(math.ceil(self.griddesc.width_square_count))):
+            for j in xrange(0, int(math.ceil(self.griddesc.height_square_count))):
+                lon1 = self.boundingbox.get_top_left()[1] + i * self.griddesc.width_square_angle
+                lon2 = self.boundingbox.get_top_left()[1] + (i + 1) * self.griddesc.width_square_angle
+                lat1 = self.boundingbox.get_top_left()[0] - j * self.griddesc.height_square_angle
+                lat2 = self.boundingbox.get_top_left()[0] - (j + 1) * self.griddesc.height_square_angle
                 poly = "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))" % \
                     (lon1, lat1, lon1, lat2, lon2, lat2, lon2, lat1, lon1, lat1)
                 cursor.execute("""insert into map_areas (x, y, geom)
@@ -231,6 +242,14 @@ class OCitySMap:
                           as foo
                           group by name
                           order by name;""")
-        sl = cursor.fetchall()
-        sl = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
-        return map(_humanize_street_label, sl)
+        l = cursor.fetchall()
+        l = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in l]
+        return l
+
+
+    def render_to_file(self, osm_map_file, out_filename):
+        g = self.griddesc.generate_shape_file('x.shp')
+        city = map_grid.MapCanvas(osm_map_file,
+                                  self.boundingbox)
+        city.add_shapefile(g.get_filepath())
+        city.save_map(out_filename)

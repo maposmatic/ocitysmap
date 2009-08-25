@@ -5,7 +5,7 @@ __version__ = '0.1'
 
 import logging
 import optparse
-import sys
+import sys, os
 
 import ocitysmap
 
@@ -21,11 +21,19 @@ def main():
                       nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
                            'bounding box.')
+    parser.add_option('-m', '--osm', dest='osm_map', metavar='PATH',
+                      help='Path to the osm.xml file')
 
     (options, args) = parser.parse_args()
     if len(args) != 1 and len(args) != 3:
         parser.print_help()
         return 1
+
+    if not options.osm_map:
+        try:
+            options.osm_map = os.environ['OSM_XML']
+        except KeyError:
+            parser.error("Invalid -m option and no OSM_XML env var")
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -54,6 +62,7 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
+    renderer.render_to_file(options.osm_map, options.output)
     return 0
 
 if __name__ == '__main__':
