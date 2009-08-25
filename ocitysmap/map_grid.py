@@ -167,6 +167,11 @@ class MapCanvas:
         self._map.layers.append(lyr)
 
     def render_map(self):
+        """
+        Render map in memory. Automatically called by save_map(), only
+        when needed.
+        @return the mapnik map object
+        """
         for labelstyle in self._labelstyles:
             self._render_label_style(*labelstyle)
 
@@ -181,6 +186,16 @@ class MapCanvas:
     def save_map(self, output_filename,
                  file_type = None,
                  force = False):
+        """
+        Save the map as an image. By default, the format is inferred
+        from the filename (its extension). It can be forced with the
+        'file_type' parameter.
+        @param output_filename (string) file to generate
+        @param file_type (string) None, or 'xml', 'png', 'jpg', 'ps',
+        'pdf', 'svg'
+        @param force (bool) fore render_map() to be called, even if it
+        does not appear to have changed since last render_map()
+        """
         if self._dirty or force:
             self.render_map()
 
