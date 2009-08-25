@@ -11,8 +11,23 @@ __version__ = '0.1'
 import logging
 import pgdb
 import math
+import re
 
 l = logging.getLogger('ocitysmap')
+
+APPELLATIONS = [ "Allée", "Avenue", "Boulevard", "Carrefour", "Chaussée",
+                 "Chemin", "Cité", "Clos", "Côte", "Cour", "Cours", "Degré",
+                 "Esplanade", "Impasse", "Liaison", "Mail", "Montée",
+                 "Passage", "Place", "Placette", "Pont", "Promenade", "Quai",
+                 "Résidence", "Rond-Point", "Rang", "Route", "Rue", "Ruelle",
+                 "Square", "Traboule", "Traverse", "Venelle", "Voie", "Rond-point" ]
+
+DETERMINANTS = [" des", " du", " de la", " de l'", " de", " d'", ""]
+
+SPACE_REDUCE = re.compile(r"\s+")
+PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?(?P<name>.*)" %
+                           ("|".join(APPELLATIONS),
+                            "|".join(DETERMINANTS)))
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -106,6 +121,11 @@ class MapDescriptor:
 
 def _humanize_street_label(street):
 
+    def unprefix_street(name):
+        name = name.strip()
+        name = SPACE_REDUCE.sub(" ", name)
+        return PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+
     def couple_compare(x,y):
         a = y[0] - x[0]
         if a:
@@ -115,7 +135,7 @@ def _humanize_street_label(street):
     def distance(a,b):
         return (b[0]-a[0])**2 + (b[1]-a[1])**2
 
-    name = street[0]
+    name = unprefix_street(street[0])
     squares = street[1]
     minx = min([x[0] for x in squares])
     maxx = max([x[0] for x in squares])
@@ -188,7 +208,7 @@ class OCitySMap:
 
     def find_bounding_box(self, name):
         """Find the bounding box of a city from its name.
-        
+
         Args:
             name (string): The city name.
         Returns a 4-uple of GPS coordinates describing the bounding box around
@@ -232,7 +252,6 @@ class OCitySMap:
                           group by name
                           order by name;""")
         sl = cursor.fetchall()
-        sl = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
-        return map(_humanize_street_label, sl)
-
+        sl = [(street[0], [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
+        return sorted(map(_humanize_street_label, sl), lambda x, y: cmp(x[0], y[0]))
 
