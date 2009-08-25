@@ -34,6 +34,9 @@ def main():
             options.osm_map = os.environ['OSM_XML']
         except KeyError:
             parser.error("Invalid -m option and no OSM_XML env var")
+    if not os.path.exists(options.osm_map):
+        parser.error("Invalid path to the osm.xml file (%s)"
+                     % options.osm_map)
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
