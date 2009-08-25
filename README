@@ -8,4 +8,11 @@ including a street index and city grid.
 For example, for a simple Sanguinet rendering, run:
  ./render.py Sanguinet 44.4883,-1.0901 44.4778,-1.0637
 
+And to render Colomiers, run
+ ./render.py Colomiers 43.6395,1.2821 43.5852,1.369
+
+Dependencies
+ - python-pygresql
+ - a PostGIS database filled with OpenStreetMap data
+
 By dave, d2, kos_tom, gael, fred and sam.
