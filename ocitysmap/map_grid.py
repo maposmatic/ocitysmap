@@ -2,6 +2,8 @@
 import mapnik
 from osgeo import ogr
 
+class GLOBALS:
+    MAIN_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
 
 class GridFile:
     def __init__(self, out_filename, envelope, layer_name = "Grid"):
@@ -23,7 +25,13 @@ class GridFile:
         f.Destroy()
 
     def add_vert_line(self, x):
-        pass
+        line = ogr.Geometry(type = ogr.wkbLineString)
+        line.AddPoint_2D(x, self._envelope.miny)
+        line.AddPoint_2D(x, self._envelope.maxy)
+        f = ogr.Feature(feature_def = self._layer.GetLayerDefn())
+        f.SetGeometryDirectly(line)
+        self._layer.CreateFeature(f)
+        f.Destroy()
 
     def flush(self):
         self._ds.Destroy()
@@ -37,8 +45,14 @@ class GridFile:
 
 g = GridFile("toto.shp", mapnik.Envelope(-1.0901,44.4883,-1.0637,44.4778))
 g.add_horiz_line(44.48)
+g.add_vert_line(-1.08)
 g.flush()
 
+def _project_envelope(proj, envelope):
+    """Returns a new envelop, projected along the given projection object"""
+    c0 = proj.forward(mapnik.Coord(envelope.minx, envelope.miny))
+    c1 = proj.forward(mapnik.Coord(envelope.maxx, envelope.maxy))
+    return mapnik.Envelope(c0.x, c0.y, c1.x, c1.y)
 
 def shpfile(mmm):
     s,r = mapnik.Style(),mapnik.Rule()
@@ -53,18 +67,14 @@ def shpfile(mmm):
     mmm.layers.append(lyr)
 
 class BasicMap:
-    def __init__(self, mapfile_path, ul_x, ul_y, lr_x, lr_y):
-        """
-        TODO: mettre 800,600 en parametre
-        """
-        self._projname = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
-        self._proj = mapnik.Projection(self._projname)
-        self._ul   = (ul_x, ul_y)
-        self._lr   = (lr_x, lr_y)
-        self._map  = mapnik.Map(800,600, self._projname)
+    def __init__(self, mapfile_path, envelope, grwidth = 800, grheight = 600):
+        self._projname = GLOBALS.MAIN_PROJECTION
+        self._proj     = mapnik.Projection(self._projname)
+        self._envelope = envelope
+        self._map      = mapnik.Map(grwidth, grheight, self._projname)
         mapnik.load_map(self._map, mapfile_path)
-        self._labels = mapnik.PointDatasource()
-        self._shapes = []
+        self._labels   = mapnik.PointDatasource()
+        self._shapes   = []
 
     def add_label(self, x, y, str_label):
         pt = self._proj.forward(mapnik.Coord(x,  y))
@@ -98,20 +108,15 @@ class BasicMap:
 
         shpfile(self._map)
 
-        c0 = self._proj.forward(mapnik.Coord(self._ul[0], self._ul[1]))
-        c1 = self._proj.forward(mapnik.Coord(self._lr[0], self._lr[1]))
-        bbox = mapnik.Envelope(c0.x,c0.y,c1.x,c1.y)
-        print bbox
+        bbox = _project_envelope(self._proj, self._envelope)
         self._map.zoom_to_box(bbox)
-        ### self._map.zoom_all()
-
         return self._map
 
 
-
+envelope = mapnik.Envelope(-1.0901,44.4883,
+                            -1.0637,44.4778)
 sanguinet = BasicMap("/home/decot/downloads/svn/mapnik-osm/osm.xml",
-                     -1.0901,44.4883,
-                     -1.0637,44.4778)
+                     envelope)
 sanguinet.add_label(-1.075, 44.483, "Toto")
 them = sanguinet.render_map()
 
