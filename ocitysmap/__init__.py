@@ -27,7 +27,7 @@ DETERMINANTS = [" des", " du", " de la", " de l'", " de", " d'", ""]
 SPACE_REDUCE = re.compile(r"\s+")
 PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
                            ("|".join(APPELLATIONS),
-                            "|".join(DETERMINANTS)))
+                            "|".join(DETERMINANTS)), re.IGNORECASE)
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -253,5 +253,5 @@ class OCitySMap:
                           order by name;""")
         sl = cursor.fetchall()
         sl = [(street[0], [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
-        return sorted(map(_humanize_street_label, sl), lambda x, y: cmp(x[0], y[0]))
+        return sorted(map(_humanize_street_label, sl), lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
