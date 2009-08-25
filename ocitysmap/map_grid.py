@@ -3,6 +3,7 @@
 
 import os, mapnik
 from osgeo import ogr
+from ocitysmap import BoundingBox
 
 try:
     import cairo
@@ -92,17 +93,20 @@ class MapCanvas:
     """
     OSM in the background of a canvas used to draw grids and text.
     """
-    def __init__(self, mapfile_path, envelope, grwidth = 800, grheight = 600):
+    def __init__(self, mapfile_path, bbox, grwidth = 800, grheight = 600):
         """
         @param mapfile_path (string) path the the osm.xml map file
-        @param envelope (mapnik.Envelope) bounding box to render, in
+        @param envelope (BoundingBox) bounding box to render, in
         latlong (4326) coordinates
         @param grwidth/grwidth (int) graphical width/height of the
         rendered area for raster output
         """
         self._projname    = GLOBALS.MAIN_PROJECTION
         self._proj        = mapnik.Projection(self._projname)
-        self._envelope    = envelope
+        self._envelope    = mapnik.Envelope(bbox.get_top_left()[1],
+                                            bbox.get_top_left()[0],
+                                            bbox.get_bottom_right()[1],
+                                            bbox.get_bottom_right()[0])
         self._map         = mapnik.Map(grwidth, grheight, self._projname)
         mapnik.load_map(self._map, mapfile_path)
         self._labels      = mapnik.PointDatasource()
@@ -239,8 +243,8 @@ if __name__ == "__main__":
     
     # Declare a map with a grid and some text
     sanguinet = MapCanvas("/home/decot/downloads/svn/mapnik-osm/osm.xml",
-                          mapnik.Envelope(-1.0901, 44.4883, -1.0637, 44.4778),
-                          800, 600)
+                          BoundingBox(44.4883, -1.0901,
+                                      44.4778, -1.0637))
     sanguinet.add_label(-1.075, 44.483, "Toto")
     sanguinet.add_label(-1.075, 44.479, "Titi", '#ff00ff', 30)
     sanguinet.add_shapefile(g.get_filepath())
