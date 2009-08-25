@@ -227,10 +227,12 @@ class OCitySMap:
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                where name != '')
+                                where name != '' and highway is not null)
                           as foo
                           group by name
                           order by name;""")
         sl = cursor.fetchall()
         sl = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in sl]
         return map(_humanize_street_label, sl)
+
+
