@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 
 import os, mapnik
 from osgeo import ogr
@@ -14,14 +16,12 @@ class GridFile:
     any attempt to add grid lines will fail (exception).
     The coordinates are not related to any projection
     """
-    def __init__(self, out_filename, envelope, layer_name = "Grid"):
+    def __init__(self, out_filename, layer_name = "Grid"):
         """
         @param out_filename (string) path to the output shape file we generate
-        @param envelope (mapnik.Envelope) the bounding box for the grid
         @param layer_name (string) layer name in the shape file
         """
         self._filepath = out_filename
-        self._envelope = envelope
         driver = ogr.GetDriverByName('ESRI Shapefile')
         if os.path.exists(out_filename):
             # Delete the detination file first
@@ -35,8 +35,8 @@ class GridFile:
         Add a new latitude line at the given latitude
         """
         line = ogr.Geometry(type = ogr.wkbLineString)
-        line.AddPoint_2D(self._envelope.minx, y)
-        line.AddPoint_2D(self._envelope.maxx, y)
+        line.AddPoint_2D(-180, y)
+        line.AddPoint_2D(180, y)
         f = ogr.Feature(feature_def = self._layer.GetLayerDefn())
         f.SetGeometryDirectly(line)
         self._layer.CreateFeature(f)
@@ -47,8 +47,8 @@ class GridFile:
         Add a new longitude line at the given longitude
         """
         line = ogr.Geometry(type = ogr.wkbLineString)
-        line.AddPoint_2D(x, self._envelope.miny)
-        line.AddPoint_2D(x, self._envelope.maxy)
+        line.AddPoint_2D(x, -80)
+        line.AddPoint_2D(x, 80)
         f = ogr.Feature(feature_def = self._layer.GetLayerDefn())
         f.SetGeometryDirectly(line)
         self._layer.CreateFeature(f)
@@ -171,21 +171,23 @@ class MapCanvas:
 
 if __name__ == "__main__":
     # A few tests
-    envelope = mapnik.Envelope(-1.0901, 44.4883, -1.0637, 44.4778)
-    
-    g = GridFile("toto.shp", envelope)
+
+    # Create the grid shape file
+    g = GridFile("toto.shp")
     g.add_horiz_line(44.48)
     g.add_vert_line(-1.08)
     g.flush()
     
+    # Declare a map with a grid and some text
     sanguinet = MapCanvas("/home/decot/downloads/svn/mapnik-osm/osm.xml",
-                          envelope)
+                          mapnik.Envelope(-1.0901, 44.4883, -1.0637, 44.4778),
+                          800, 600)
     sanguinet.add_label(-1.075, 44.483, "Toto")
     sanguinet.add_label(-1.075, 44.479, "Titi", '#ff00ff', 30)
     sanguinet.add_shp(g.get_filepath())
     m = sanguinet.render_map()
     
-    ## shpfile(m)
+    # Render the whole thing as png, svg, etc.
     mapnik.save_map(m,"map.xml")
     mapnik.render_to_file(m, 'map.png')
 
@@ -195,6 +197,7 @@ if __name__ == "__main__":
         mapnik.render(m, surface)
         surface = cairo.PDFSurface('map.pdf', m.width,m.height)
         mapnik.render(m, surface)
-    except:
-        print '\n\nSkipping cairo examples as Pycairo not available'
-
+        surface = cairo.PSSurface('map.ps', m.width,m.height)
+        mapnik.render(m, surface)
+    except Exception, ex:
+        print '\n\nSkipping cairo examples as Pycairo not available:', ex
