@@ -131,6 +131,9 @@ class OCitySMap:
         db = pgdb.connect('Notre Base', 'test', 'test', 'surf.local', 'testdb')
         self.mapdesc = MapDescriptor(self.boundingbox, db)
 
+        self.streets = self.get_streets(db)
+        print self.streets
+
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
     def find_bounding_box(self, name):
@@ -145,3 +148,39 @@ class OCitySMap:
         l.info('Looking for bounding box around %s...' % name)
         raise UnsufficientDataError, "Not enough data to find city bounding box!"
 
+    def get_streets(self, db):
+
+        """Get the list of streets in the bounding box, and for each
+        street, the list of squares that it intersects.
+
+        Returns a list of the form [(street_name, [[0, 1], [1, 1]]),
+                                    (street2_name, [[1, 2]])]
+        """
+        cursor = db.cursor()
+        cursor.execute("drop table if exists map_areas")
+        cursor.execute("create table map_areas (x integer, y integer)")
+        cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
+        for i in xrange(0, int(math.ceil(self.mapdesc.width_square_count))):
+            for j in xrange(0, int(math.ceil(self.mapdesc.height_square_count))):
+                lon1 = self.boundingbox.get_top_left()[1] + i * self.mapdesc.width_square_angle
+                lon2 = self.boundingbox.get_top_left()[1] + (i + 1) * self.mapdesc.width_square_angle
+                lat1 = self.boundingbox.get_top_left()[0] - j * self.mapdesc.height_square_angle
+                lat2 = self.boundingbox.get_top_left()[0] - (j + 1) * self.mapdesc.height_square_angle
+                poly = "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))" % \
+                    (lon1, lat1, lon1, lat2, lon2, lat2, lon2, lat1, lon1, lat1)
+                cursor.execute("""insert into map_areas (x, y, geom)
+                                         values (%d, %d, st_geomfromtext('%s', 4002))""" % \
+                                   (i, j, poly))
+        db.commit()
+        cursor.execute("""select name, textcat_all(x || ',' || y || ';')
+                          from (select distinct name, x, y
+                                from planet_osm_line
+                                join map_areas
+                                on st_intersects(way, st_transform(geom, 900913))
+                                where name != '')
+                          as foo
+                          group by name
+                          order by name;""")
+        l = cursor.fetchall()
+        l = [(street[0].decode('utf-8'), [map(int, x.split(',')) for x in street[1].split(';')[:-1]]) for street in l]
+        return l
