@@ -3,7 +3,7 @@
 
 import os, mapnik
 from osgeo import ogr
-from ocitysmap import BoundingBox
+from coords import BoundingBox
 
 try:
     import cairo
