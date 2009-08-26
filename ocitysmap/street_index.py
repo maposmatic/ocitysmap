@@ -1,10 +1,7 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging
-import pgdb
-import math
-import re
-import sys
+import sys, os, tempfile, pgdb, re, math
 
 import map_canvas, grid, utils
 
@@ -179,11 +176,36 @@ class OCitySMap:
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
     def render_into_files(self, osm_map_file, out_filenames, zoom_factor):
+        """
+        Render the current boundingbox into the destination files.
+        @param osm_map_file (string) path to the osm.xml file
+        @param out_filenames (iterable of strings) image files to generate
+        @param zoom_factor None, a tuple (pixels_x, pixel_y) or
+        'zoom:X' with X an integer [1..18]
+        """
+        # Create a temporary dir for the shapefiles and call _render_into_files
+        tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
+        l.debug('redering tmp dir: %s' % tmpdir)
+        try:
+            return self._render_into_files(tmpdir, osm_map_file,
+                                           out_filenames, zoom_factor)
+        finally:
+            for root, dirs, files in os.walk(tmpdir, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            os.rmdir(tmpdir)
+
+    def _render_into_files(self, tmpdir,
+                           osm_map_file, out_filenames, zoom_factor):
+        # Does the real job of rendering the map
         GRID_COLOR = '#8BB381'
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
-        g = self.griddesc.generate_shape_file('x.shp', bbox)
+        g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
+                                                           'grid.shp'), bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         city.add_shapefile(g.get_filepath(), GRID_COLOR)
         l.debug('adding labels...')
