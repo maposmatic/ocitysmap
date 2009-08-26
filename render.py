@@ -23,6 +23,9 @@ def main():
                       nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
                            'bounding box.')
+    parser.add_option('-f', '--zoom-factor',
+                      metavar='[0-18]', help='Zoom factor for the'
+                      'rendering (default=16)', type='int', default =16)
     parser.add_option('-x', '--osm-xml', dest='osm_xml', metavar='PATH',
                       help='Path to the osm.xml file')
 
@@ -39,6 +42,11 @@ def main():
     if not os.path.exists(options.osm_xml):
         parser.error("Invalid path to the osm.xml file (%s)"
                      % options.osm_xml)
+
+    try:
+        options.zoom_factor = int(options.zoom_factor)
+    except ValueError:
+        parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
     if not options.output:
         options.output = ['citymap.svg']
@@ -68,7 +76,8 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    renderer.render_into_files(options.osm_xml, options.output)
+    renderer.render_into_files(options.osm_xml, options.output,
+                               "zoom:%d" % options.zoom_factor)
     return 0
 
 if __name__ == '__main__':

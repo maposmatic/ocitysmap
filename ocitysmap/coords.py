@@ -49,3 +49,13 @@ class BoundingBox:
         """Return a new bbox of the same size + dlat/dlong added on the sides"""
         return BoundingBox(self._lat1+dlat, self._long1 - dlong,
                            self._lat2-dlat, self._long2 + dlong)
+
+    def get_pixel_size_for_zoom_factor(self, zoom = 17):
+        """Return the size in pixels (tuple width,height) needed to
+        render the bounding box at the given zoom factor"""
+        delta_lat = abs(self._lat1 - self._lat2)
+        delta_long = abs(self._long1 - self._long2)
+        pix_x = delta_long * (2 ** (zoom + 8)) / 360
+        pix_y = delta_lat * (2 ** (zoom + 8)) / 180
+        return (int(math.ceil(pix_x)),
+                int(math.ceil(pix_y)))

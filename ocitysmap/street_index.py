@@ -178,14 +178,14 @@ class OCitySMap:
         return sorted(map(_humanize_street_label, sl),
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
-    def render_into_files(self, osm_map_file, out_filenames):
+    def render_into_files(self, osm_map_file, out_filenames, zoom_factor):
         GRID_COLOR = '#8BB381'
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         g = self.griddesc.generate_shape_file('x.shp')
 
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
-        city = map_canvas.MapCanvas(osm_map_file, bbox)
+        city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         city.add_shapefile(g.get_filepath(), GRID_COLOR)
         l.debug('adding labels...')
         for idx, label in enumerate(self.griddesc.vertical_labels):

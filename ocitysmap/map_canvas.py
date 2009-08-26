@@ -93,21 +93,27 @@ class MapCanvas:
     """
     OSM in the background of a canvas used to draw grids and text.
     """
-    def __init__(self, mapfile_path, bbox, grwidth = 800, grheight = 600):
+    def __init__(self, mapfile_path, geographic_bbox, graph_bbox = None):
         """
         @param mapfile_path (string) path the the osm.xml map file
-        @param envelope (BoundingBox) bounding box to render, in
+        @param geographic_bbox (BoundingBox) bounding box to render, in
         latlong (4326) coordinates
-        @param grwidth/grwidth (int) graphical width/height of the
-        rendered area for raster output
+        @param graph_bbox (int) graphical width/height of the
+        rendered area for raster output (None = auto)
         """
         self._projname    = GLOBALS.MAIN_PROJECTION
         self._proj        = mapnik.Projection(self._projname)
-        self._envelope    = mapnik.Envelope(bbox.get_top_left()[1],
-                                            bbox.get_top_left()[0],
-                                            bbox.get_bottom_right()[1],
-                                            bbox.get_bottom_right()[0])
-        self._map         = mapnik.Map(grwidth, grheight, self._projname)
+        if graph_bbox is None:
+            graph_bbox = geographic_bbox.get_pixel_size_for_zoom_factor()
+        elif str(graph_bbox).startswith('zoom:'):
+            graph_bbox = geographic_bbox.get_pixel_size_for_zoom_factor(int(graph_bbox[5:]))
+        self._envelope    = mapnik.Envelope(geographic_bbox.get_top_left()[1],
+                                            geographic_bbox.get_top_left()[0],
+                                            geographic_bbox.get_bottom_right()[1],
+                                            geographic_bbox.get_bottom_right()[0])
+        self._map         = mapnik.Map(graph_bbox[0],
+                                       graph_bbox[1],
+                                       self._projname)
         mapnik.load_map(self._map, mapfile_path)
 
         # Keep geographic bounding box, ignoring one dimension of the
