@@ -161,13 +161,14 @@ class MapCanvas:
         lyr.styles.append('labels_%x' % H)
         self._map.layers.append(lyr)
 
-    def add_shapefile(self, path_shpfile, str_color = mapnik.Color('black')):
+    def add_shapefile(self, path_shpfile, str_color = 'grey'):
         """
         Add a shape file to display on top of the map
         @param path_shpfile (string) path to the shape file to render
         @param str_color (string) Color definition (html)
         """
-        self._shapes.append(['SHPFILE', (path_shpfile, str_color)])
+        self._shapes.append(['SHPFILE', (path_shpfile,
+                                         mapnik.Color(str_color))])
         self._dirty = True
 
     def _render_shp(self, path_shpfile, str_color):

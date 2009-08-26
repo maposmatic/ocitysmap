@@ -293,26 +293,33 @@ class OCitySMap:
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
     def render_into_files(self, osm_map_file, out_filenames):
+        GRID_COLOR = '#8BB381'
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         g = self.griddesc.generate_shape_file('x.shp')
 
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
         city = map_grid.MapCanvas(osm_map_file, bbox)
-        city.add_shapefile(g.get_filepath())
+        city.add_shapefile(g.get_filepath(), GRID_COLOR)
         l.debug('adding labels...')
         for idx, label in enumerate(self.griddesc.vertical_labels):
             x = self.griddesc.vertical_lines[idx] \
                 + self.griddesc.width_square_angle/2.
             y = self.griddesc.horizontal_lines[0] \
                 + self.griddesc.height_square_angle/4.
-            city.add_label(x, y, label)
+            city.add_label(x, y, label,
+                           str_color = GRID_COLOR,
+                           font_size = 25,
+                           font_family = "DejaVu Sans Bold")
         for idx, label in enumerate(self.griddesc.horizontal_labels):
             x = self.griddesc.vertical_lines[0] \
                 - self.griddesc.width_square_angle/4.
             y = self.griddesc.horizontal_lines[idx] \
                 - self.griddesc.height_square_angle/2.
-            city.add_label(x, y, label)
+            city.add_label(x, y, label,
+                           str_color = GRID_COLOR,
+                           font_size = 25,
+                           font_family = "DejaVu Sans Bold")
         l.debug('rendering map...')
         city.render_map()
         for fname in out_filenames:
