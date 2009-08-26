@@ -11,6 +11,12 @@ For example, for a simple Sanguinet rendering, run:
 And to render Colomiers, run
  ./render.py Colomiers 43.6395,1.2821 43.5852,1.369
 
+To render Toulouse, run
+ ./render.py Toulouse 43.5326515845001,1.35039553881146 43.6687092781784,1.5153795624458
+
+To render Arles, run
+ ./render.py Arles 43.3269328732288,4.42607913033835 43.7604091424137,4.87635236769157
+
 Dependencies
  - python-pygresql
  - a PostGIS database filled with OpenStreetMap data
