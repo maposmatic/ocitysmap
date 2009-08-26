@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 
-import os, mapnik
+import os, mapnik, logging
 from osgeo import ogr
 from coords import BoundingBox
 
@@ -10,6 +10,7 @@ try:
 except ImportError:
     cairo = None
 
+l = logging.getLogger('ocitysmap')
 
 class GLOBALS:
     MAIN_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
@@ -181,7 +182,7 @@ class MapCanvas:
         shpid = os.path.basename(path_shpfile)
         s,r = mapnik.Style(), mapnik.Rule()
         r.symbols.append(mapnik.PolygonSymbolizer(str_color))
-        r.symbols.append(mapnik.LineSymbolizer(str_color, 1))
+        r.symbols.append(mapnik.LineSymbolizer(str_color, 5))
         s.rules.append(r)
         self._map.append_style('style_' + shpid, s)
         lyr = mapnik.Layer(shpid)
@@ -201,8 +202,11 @@ class MapCanvas:
         for lyrtype, lyrparms in self._shapes:
             self._render_shp(*lyrparms)
 
+        l.debug("redering to bbox %s as %sx%s..."
+                % (self._envelope, self._map.height, self._map.width))
         bbox = _project_envelope(self._proj, self._envelope)
         self._map.zoom_to_box(bbox)
+        l.debug("rendered to bbox %sx%s." % (self._map.height, self._map.width))
         self._dirty = False
         return self._map
 
@@ -228,7 +232,9 @@ class MapCanvas:
         file_type = file_type.lower()
         if file_type == 'xml':
             mapnik.save_map(self._map, output_filename)
-        elif file_type == 'png':
+        elif file_type == 'png': # 8-bits by default
+            mapnik.render_to_file(self._map, output_filename, 'png256')
+        elif file_type == 'png24': # 24-bits
             mapnik.render_to_file(self._map, output_filename, 'png')
         elif file_type in ('jpg', 'jpeg'):
             mapnik.render_to_file(self._map, output_filename, 'jpeg')
