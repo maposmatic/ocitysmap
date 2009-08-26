@@ -23,11 +23,13 @@ class GridFile:
     any attempt to add grid lines will fail (exception).
     The coordinates are not related to any projection
     """
-    def __init__(self, out_filename, layer_name = "Grid"):
+    def __init__(self, envelope, out_filename, layer_name = "Grid"):
         """
+        @param envelope (BoundingBox) envelope of the grid lines
         @param out_filename (string) path to the output shape file we generate
         @param layer_name (string) layer name in the shape file
         """
+        self._envelope = envelope
         self._filepath = out_filename
         driver = ogr.GetDriverByName('ESRI Shapefile')
         if os.path.exists(out_filename):
@@ -42,8 +44,8 @@ class GridFile:
         Add a new latitude line at the given latitude
         """
         line = ogr.Geometry(type = ogr.wkbLineString)
-        line.AddPoint_2D(-180, y)
-        line.AddPoint_2D(180, y)
+        line.AddPoint_2D(self._envelope.get_top_left()[1], y)
+        line.AddPoint_2D(self._envelope.get_bottom_right()[1], y)
         f = ogr.Feature(feature_def = self._layer.GetLayerDefn())
         f.SetGeometryDirectly(line)
         self._layer.CreateFeature(f)
@@ -54,8 +56,8 @@ class GridFile:
         Add a new longitude line at the given longitude
         """
         line = ogr.Geometry(type = ogr.wkbLineString)
-        line.AddPoint_2D(x, -80)
-        line.AddPoint_2D(x, 80)
+        line.AddPoint_2D(x, self._envelope.get_top_left()[0])
+        line.AddPoint_2D(x, self._envelope.get_bottom_right()[0])
         f = ogr.Feature(feature_def = self._layer.GetLayerDefn())
         f.SetGeometryDirectly(line)
         self._layer.CreateFeature(f)
@@ -206,7 +208,8 @@ class MapCanvas:
                 % (self._envelope, self._map.height, self._map.width))
         bbox = _project_envelope(self._proj, self._envelope)
         self._map.zoom_to_box(bbox)
-        l.debug("rendered to bbox %sx%s." % (self._map.height, self._map.width))
+        l.debug("rendered to bbox %s as %sx%s." \
+                    % (bbox, self._map.height, self._map.width))
         self._dirty = False
         return self._map
 

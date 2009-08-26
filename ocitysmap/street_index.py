@@ -181,10 +181,9 @@ class OCitySMap:
     def render_into_files(self, osm_map_file, out_filenames, zoom_factor):
         GRID_COLOR = '#8BB381'
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
-        g = self.griddesc.generate_shape_file('x.shp')
-
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
+        g = self.griddesc.generate_shape_file('x.shp', bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         city.add_shapefile(g.get_filepath(), GRID_COLOR)
         l.debug('adding labels...')
