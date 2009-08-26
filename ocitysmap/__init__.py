@@ -43,7 +43,11 @@ class BoundingBox:
         (self._lat1, self._long1) = float(lat1), float(long1)
         (self._lat2, self._long2) = float(lat2), float(long2)
 
-        # Validate bounding box?
+        # make sure lat1/long1 is the upper left, and the others the btm right
+        if (self._lat1 < self._lat2):
+            self._lat1, self._lat2 = self._lat2, self._lat1
+        if (self._long1 > self._long2):
+            self._long1, self._long2 = self._long2, self._long1
 
     @staticmethod
     def parse(points):
@@ -73,6 +77,11 @@ class BoundingBox:
         radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat1))
         return (EARTH_RADIUS * math.radians(delta_lat),
                 radius_lat * math.radians(delta_long))
+
+    def create_expanded(self, dlat, dlong):
+        """Return a new bbox of the same size + dlat/dlong added on the sides"""
+        return BoundingBox(self._lat1+dlat, self._long1 - dlong,
+                           self._lat2-dlat, self._long2 + dlong)
 
 
 import map_grid
@@ -286,9 +295,24 @@ class OCitySMap:
     def render_into_files(self, osm_map_file, out_filenames):
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         g = self.griddesc.generate_shape_file('x.shp')
-        city = map_grid.MapCanvas(osm_map_file,
-                                  self.boundingbox)
+
+        bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
+                                                self.griddesc.width_square_angle/2.)
+        city = map_grid.MapCanvas(osm_map_file, bbox)
         city.add_shapefile(g.get_filepath())
+        l.debug('adding labels...')
+        for idx, label in enumerate(self.griddesc.vertical_labels):
+            x = self.griddesc.vertical_lines[idx] \
+                + self.griddesc.width_square_angle/2.
+            y = self.griddesc.horizontal_lines[0] \
+                + self.griddesc.height_square_angle/4.
+            city.add_label(x, y, label)
+        for idx, label in enumerate(self.griddesc.horizontal_labels):
+            x = self.griddesc.vertical_lines[0] \
+                - self.griddesc.width_square_angle/4.
+            y = self.griddesc.horizontal_lines[idx] \
+                - self.griddesc.height_square_angle/2.
+            city.add_label(x, y, label)
         l.debug('rendering map...')
         city.render_map()
         for fname in out_filenames:
