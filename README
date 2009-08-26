@@ -17,6 +17,9 @@ To render Toulouse, run
 To render Arles, run
  ./render.py Arles 43.3269328732288,4.42607913033835 43.7604091424137,4.87635236769157
 
+To render Paris, run
+ ./render.py Paris 48.8155243047565,2.22405964791711 48.9021584078545,2.46979772401737
+
 Dependencies
  - python-pygresql
  - a PostGIS database filled with OpenStreetMap data
