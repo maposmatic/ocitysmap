@@ -12,6 +12,7 @@ import logging
 import pgdb
 import math
 import re
+import sys
 
 l = logging.getLogger('ocitysmap')
 
@@ -282,9 +283,21 @@ class OCitySMap:
         return sorted(map(_humanize_street_label, sl),
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
 
-    def render_to_file(self, osm_map_file, out_filename):
+    def render_into_files(self, osm_map_file, out_filenames):
+        l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         g = self.griddesc.generate_shape_file('x.shp')
         city = map_grid.MapCanvas(osm_map_file,
                                   self.boundingbox)
         city.add_shapefile(g.get_filepath())
-        city.save_map(out_filename)
+        l.debug('rendering map...')
+        city.render_map()
+        for fname in out_filenames:
+            l.debug('saving as %s...' % fname)
+            try:
+                city.save_map(fname)
+            except Exception, ex:
+                print >>sys.stderr, \
+                    "Error while rendering to %s: %s" % (fname, ex)
+            except:
+                print >>sys.stderr, \
+                    "Error while rendering to %s." % (fname)

@@ -10,18 +10,20 @@ import sys, os
 import ocitysmap
 
 def main():
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
     usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-o', '--output', dest='output', metavar='FILE',
-                      default='citymap.svg',
-                      help='Specify the output file name (defaults '
-                           'to citymap.svg.')
+                      help='Specify the output file name. Defaults to'
+                           'citymap.svg. May be specified multiple times.',
+                      action='append')
     parser.add_option('-z', '--zoom', dest='zooms', action='append',
                       nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
                            'bounding box.')
-    parser.add_option('-m', '--osm', dest='osm_map', metavar='PATH',
+    parser.add_option('-x', '--osm-xml', dest='osm_xml', metavar='PATH',
                       help='Path to the osm.xml file')
 
     (options, args) = parser.parse_args()
@@ -29,16 +31,17 @@ def main():
         parser.print_help()
         return 1
 
-    if not options.osm_map:
+    if not options.osm_xml:
         try:
-            options.osm_map = os.environ['OSM_XML']
+            options.osm_xml = os.environ['OSM_XML']
         except KeyError:
             parser.error("Invalid -m option and no OSM_XML env var")
-    if not os.path.exists(options.osm_map):
+    if not os.path.exists(options.osm_xml):
         parser.error("Invalid path to the osm.xml file (%s)"
-                     % options.osm_map)
+                     % options.osm_xml)
 
-    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    if not options.output:
+        options.output = ['citymap.svg']
 
     # Parse bounding box arguments
     zooms = {}
@@ -65,7 +68,7 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    renderer.render_to_file(options.osm_map, options.output)
+    renderer.render_into_files(options.osm_xml, options.output)
     return 0
 
 if __name__ == '__main__':
