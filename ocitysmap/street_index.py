@@ -207,28 +207,40 @@ class OCitySMap:
         g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
                                                            'grid.shp'), bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
-        city.add_shapefile(g.get_filepath(), GRID_COLOR)
         l.debug('adding labels...')
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
         if half_km_in_pixels < 10:
-            font_size = 8
+            font_size  = 8
+            line_width = 1
         elif half_km_in_pixels < 25:
             font_size = 12
+            line_width = 1
         elif half_km_in_pixels < 50:
             font_size = 25
+            line_width = 2
         elif half_km_in_pixels < 100:
             font_size = 50
+            line_width = 3
         elif half_km_in_pixels < 150:
             font_size = 75
+            line_width = 4
         elif half_km_in_pixels < 200:
             font_size = 100
+            line_width = 5
         elif half_km_in_pixels < 400:
             font_size = 200
+            line_width = 6
         else:
             font_size = 250
+            line_width = 7
 
+        # Add the grid
+        city.add_shapefile(g.get_filepath(), GRID_COLOR, .5,
+                           line_width)
+
+        # Add the labels
         for idx, label in enumerate(self.griddesc.vertical_labels):
             x = self.griddesc.vertical_lines[idx] \
                 + self.griddesc.width_square_angle/2.
@@ -236,6 +248,7 @@ class OCitySMap:
                 + self.griddesc.height_square_angle/4.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
+                           alpha = .6,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
         for idx, label in enumerate(self.griddesc.horizontal_labels):
@@ -245,6 +258,7 @@ class OCitySMap:
                 - self.griddesc.height_square_angle/2.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
+                           alpha = .6,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
         l.debug('rendering map...')

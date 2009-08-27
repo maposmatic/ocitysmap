@@ -41,7 +41,7 @@ class GridDescriptor:
         l.debug("vertical labels: %s" % self.vertical_labels)
         l.debug("horizontal labels: %s" % self.horizontal_labels)
 
-    def generate_shape_file(self, filename, bbox):
+    def generate_shape_file(self, filename, bbox, line_width = 1):
         g = map_canvas.GridFile(bbox, filename)
         for v in self.vertical_lines:
             g.add_vert_line(v)

@@ -137,34 +137,39 @@ class MapCanvas:
         self._dirty       = True  # Rendering needed because data have
                                   # been added
 
-    def add_label(self, x, y, str_label, str_color = "red", font_size = 11,
+    def add_label(self, x, y, str_label,
+                  str_color = "red", alpha = 0.5,
+                  font_size = 11,
                   font_family = "DejaVu Sans Book"):
         """
         Add a label on top of the map.
         @param x,y Coordinates of the label, in latlong coordinates (4326)
         @param str_label (string) Text to display
         @param str_color (string) Color definition (html)
+        @param alpha (float 0..1) Color opacity
         @param font_size (int) Font size of the label
         @param font_family (string) Name of the font
         """
         pt = self._proj.forward(mapnik.Coord(x,  y))
-        labelstyle = (str_color, font_size, font_family)
+        labelstyle = (str_color, alpha, font_size, font_family)
         self._labels.add_point(pt.x, pt.y,
                                'style_%x' % hash(labelstyle),
                                str_label)
         self._labelstyles.add(labelstyle)
         self._dirty = True
 
-    def _render_label_style(self, str_color, font_size, font_family):
-        labelstyle = (str_color, font_size, font_family)
+    def _render_label_style(self, str_color, alpha, font_size, font_family):
+        labelstyle = (str_color, alpha, font_size, font_family)
         H = hash(labelstyle)
 
         s = mapnik.Style()
         r = mapnik.Rule()
+        c = mapnik.Color(str_color)
+        c.a = int(255 * alpha)
         symb = mapnik.TextSymbolizer('style_%x' % H,
                                      font_family,
                                      int(font_size),
-                                     mapnik.Color(str_color))
+                                     c)
         symb.allow_overlap       = True
         symb.set_label_placement = mapnik.label_placement.POINT_PLACEMENT
         r.symbols.append(symb)
@@ -176,21 +181,25 @@ class MapCanvas:
         lyr.styles.append('labels_%x' % H)
         self._map.layers.append(lyr)
 
-    def add_shapefile(self, path_shpfile, str_color = 'grey'):
+    def add_shapefile(self, path_shpfile, str_color = 'grey', alpha = 0.5,
+                      line_width = 1.):
         """
         Add a shape file to display on top of the map
         @param path_shpfile (string) path to the shape file to render
         @param str_color (string) Color definition (html)
+        @param alpha (float 0..1) Color opacity
+        @param line_width (float) line width in raster pixels
         """
-        self._shapes.append(['SHPFILE', (path_shpfile,
-                                         mapnik.Color(str_color))])
+        col = mapnik.Color(str_color)
+        col.a = int(255 * alpha)
+        self._shapes.append(['SHPFILE', (path_shpfile, col, line_width)])
         self._dirty = True
 
-    def _render_shp(self, path_shpfile, str_color):
+    def _render_shp(self, path_shpfile, obj_color, line_width):
         shpid = os.path.basename(path_shpfile)
         s,r = mapnik.Style(), mapnik.Rule()
-        r.symbols.append(mapnik.PolygonSymbolizer(str_color))
-        r.symbols.append(mapnik.LineSymbolizer(str_color, 1.1))
+        r.symbols.append(mapnik.PolygonSymbolizer(obj_color))
+        r.symbols.append(mapnik.LineSymbolizer(obj_color, line_width))
         s.rules.append(r)
         self._map.append_style('style_' + shpid, s)
         lyr = mapnik.Layer(shpid)
