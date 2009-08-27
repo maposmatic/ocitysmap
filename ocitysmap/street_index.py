@@ -1,11 +1,13 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging
-import sys, os, tempfile, pgdb, re, math, cairo
+import sys, os, tempfile, pgdb, re, math, cairo, locale
 
 import map_canvas, grid, utils
 
 l = logging.getLogger('ocitysmap')
+
+locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
 
 APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
                  u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", u"Degré",
@@ -20,6 +22,12 @@ SPACE_REDUCE = re.compile(r"\s+")
 PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
                            ("|".join(APPELLATIONS),
                             "|".join(DETERMINANTS)), re.IGNORECASE | re.UNICODE)
+# for IndexPageGenerator._upper_unaccent_string
+E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
+O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -111,13 +119,24 @@ class IndexPageGenerator:
             'em' : em,
             }
 
+    def _upper_unaccent_string(self, s):
+        s = E_ACCENT.sub("e", s)
+        s = I_ACCENT.sub("i", s)
+        s = A_ACCENT.sub("a", s)
+        s = O_ACCENT.sub("o", s)
+        s = U_ACCENT.sub("u", s)
+        return s.upper()
+
+    def _equal_without_accent(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
     def _fits_in_page(self, cr, paperwidth, paperheight, fontsize):
         fp = self._get_font_parameters(cr, fontsize)
 
-        prevletter = None
+        prevletter = u''
         heading_letter_count = 0
         for street in self.streets:
-            if street[0][0] != prevletter:
+            if not self._equal_without_accent(street[0][0], prevletter):
                 heading_letter_count += 1
                 prevletter = street[0][0]
 
@@ -166,10 +185,10 @@ class IndexPageGenerator:
 
         y = 0
         x = em
-        prevletter = None
+        prevletter = u''
         for street in self.streets:
             # Letter label
-            if street[0][0] != prevletter:
+            if not self._equal_without_accent(street[0][0], prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
@@ -301,7 +320,7 @@ class OCitySMap:
         sl = [(unicode(street[0].decode("utf-8")), [map(int, x.split(','))
             for x in street[1].split(';')[:-1]]) for street in sl]
         sl = sorted(map(_humanize_street_label, sl),
-                          lambda x, y: cmp(x[0].lower(), y[0].lower()))
+                          lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
         return sl
 
     def render_index(self, filename, paperwidth, paperheight):
