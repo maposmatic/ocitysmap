@@ -338,6 +338,7 @@ class OCitySMap:
         @param out_filenames (iterable of strings) image files to generate
         @param zoom_factor None, a tuple (pixels_x, pixel_y) or
         'zoom:X' with X an integer [1..18]
+        returns the MApnik map object used to render the map
         """
         # Create a temporary dir for the shapefiles and call _render_into_files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
@@ -430,7 +431,7 @@ class OCitySMap:
 
         # Rendering...
         l.debug('rendering map...')
-        city.render_map()
+        _map = city.render_map()
         for fname in out_filenames:
             l.debug('saving as %s...' % fname)
             try:
@@ -441,3 +442,5 @@ class OCitySMap:
             except:
                 print >>sys.stderr, \
                     "Error while rendering to %s." % (fname)
+
+        return _map

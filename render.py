@@ -78,10 +78,11 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    renderer.render_index("pifpafpouf.png", 1600, 1200)
+    _map = renderer.render_into_files(options.osm_xml, options.output,
+                                      "zoom:%d" % options.zoom_factor)
 
-    renderer.render_into_files(options.osm_xml, options.output,
-                               "zoom:%d" % options.zoom_factor)
+    renderer.render_index("pifpafpouf.png", _map.width, _map.height)
+
     return 0
 
 if __name__ == '__main__':
