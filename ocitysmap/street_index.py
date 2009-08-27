@@ -295,6 +295,15 @@ class OCitySMap:
                                     (street2_name, [[1, 2]])]
         """
         cursor = db.cursor()
+
+        # We start by building a map_areas table that contains the
+        # list of the squares used to divide the global city map. Each
+        # entry of this table represent one of these square, with x, y
+        # being the square identifiers, and geom being its
+        # geographical geometry. This temporary table allows to
+        # conveniently perform a joint with the planet_osm_line table,
+        # so that getting the list of squares for a given set of
+        # streets can be performed in a single query
         cursor.execute("drop table if exists map_areas")
         cursor.execute("create table map_areas (x integer, y integer)")
         cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
@@ -315,7 +324,26 @@ class OCitySMap:
                                   values (%d, %d, st_geomfromtext('%s', 4002))""" %
                                (i, j, poly))
 
+        # Create a view that associates the name of a city with the
+        # area covering it. As of today, only parts of the french
+        # cities have these administrative boundaries available in
+        # OSM. When available, this boundary is used to filter out the
+        # streets that are not inside the selected city but still in
+        # the bounding box rendered on the map. So these streets will
+        # be shown but not listed in the street index.
+        cursor.execute("""create or replace view cities_area
+                          as select name as city, st_buildarea(way) as area
+                          from planet_osm_line
+                          where boundary='administrative' and admin_level='8';""")
         db.commit()
+
+        # The inner select query creates the list of (street, square)
+        # for all the squares in the temporary map_areas table. The
+        # left_join + the test on cities_area is used to filter out
+        # the streets outside the city administrative boundaries. The
+        # outer select builds an easy to parse list of the squares for
+        # each street. A typical result entry is:
+        #  [ "Rue du Moulin", "0,1;1,2;1,3" ]
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
@@ -334,9 +362,16 @@ class OCitySMap:
                           order by name;""" % city)
 
         sl = cursor.fetchall()
+
+        # We transform the string representing the squares list into a
+        # Python list
         sl = [( unicode(street[0].decode("utf-8")),
                 [ map(int, x.split(',')) for x in street[1].split(';')[:-1] ] )
               for street in sl]
+
+        # Street prefixes are postfixed, a human readable label is
+        # built to represent the list of squares, and the list is
+        # alphabetically-sorted.
         sl = sorted(map(_humanize_street_label, sl),
                           lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
         return sl
