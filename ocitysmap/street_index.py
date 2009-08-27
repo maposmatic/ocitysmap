@@ -100,7 +100,7 @@ class IndexPageGenerator:
     def _get_font_parameters(self, cr, fontsize):
         cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         cr.set_font_size(fontsize * 1.2)
-        heading_fheight = cr.font_extents()[2]
+        heading_fascent, heading_fdescent, heading_fheight = cr.font_extents()[:3]
 
         cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         cr.set_font_size(fontsize)
@@ -114,6 +114,7 @@ class IndexPageGenerator:
 
         return {
             'colwidth' : colwidth,
+            'heading_fascent' : heading_fascent,
             'heading_fheight' : heading_fheight,
             'fheight' : fheight,
             'em' : em,
@@ -177,6 +178,7 @@ class IndexPageGenerator:
 
         fp = self._get_font_parameters(cr, fontsize)
         heading_fheight = fp['heading_fheight']
+        heading_fascent = fp['heading_fascent']
         fheight = fp['fheight']
         colwidth = fp['colwidth']
         em = fp['em']
@@ -186,7 +188,8 @@ class IndexPageGenerator:
         prevletter = u''
         for street in self.streets:
             # Letter label
-            if not self._equal_without_accent(street[0][0], prevletter):
+            firstletter = street[0][0]
+            if not self._equal_without_accent(firstletter, prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
@@ -194,12 +197,21 @@ class IndexPageGenerator:
                     x += colwidth
                 # Reserve height for the heading letter label
                 y += heading_fheight
+
+                cr.set_source_rgb(0.9, 0.9, 0.9)
+                cr.rectangle(x, y - heading_fascent, colwidth - em, heading_fheight)
+                cr.fill()
+
+                cr.set_source_rgb(0, 0, 0)
+
                 # Draw the heading letter label
-                cr.move_to(x, y)
                 cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                 cr.set_font_size(fontsize * 1.2)
-                cr.show_text(street[0][0])
-                prevletter = street[0][0]
+                w = cr.text_extents(firstletter)[2]
+                indent = (colwidth - 2 * em - w) / 2
+                cr.move_to(x + indent, y)
+                cr.show_text(firstletter)
+                prevletter = firstletter
 
             # Reserve height for the street
             y += fheight
