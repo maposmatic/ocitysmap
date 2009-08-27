@@ -347,6 +347,7 @@ class OCitySMap:
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
+        l.debug('500m = %f pixels' % half_km_in_pixels)
         if half_km_in_pixels < 10:
             font_size  = 8
             line_width = 1
@@ -366,7 +367,7 @@ class OCitySMap:
             font_size = 100
             line_width = 5
         elif half_km_in_pixels < 400:
-            font_size = 200
+            font_size = 150
             line_width = 6
         else:
             font_size = 250
