@@ -5,6 +5,8 @@ import sys, os, tempfile, pgdb, re, math, cairo, locale
 
 import map_canvas, grid, utils
 
+from draw_utils import borderize
+
 l = logging.getLogger('ocitysmap')
 
 locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
@@ -168,8 +170,7 @@ class IndexPageGenerator:
 
         return minfontsize
 
-    def render(self, surface, paperwidth, paperheight):
-        cr = cairo.Context(surface)
+    def render(self, cr, paperwidth, paperheight):
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
         cr.set_source_rgb(0.0, 0.0, 0.0)
@@ -334,35 +335,48 @@ class OCitySMap:
         return sl
 
 
-    def _render_one_prefix(self, output_prefix, format, paperwidth, paperheight):
+    def _render_one_prefix(self, title, output_prefix, format, paperwidth, paperheight):
         format = format.lower()
         outfile = "%s_index.%s" % (output_prefix, format)
         l.debug("rendering " + outfile + "...")
 
         generator = IndexPageGenerator(self.streets)
         if format == 'png' or format == 'png24':
-            surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
-            generator.render(surface, paperwidth, paperheight)
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
+                                         paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
             surface.write_to_png(outfile)
             surface.finish()
         elif format == 'svg':
-            surface = cairo.SVGSurface(outfile, paperwidth, paperheight)
-            generator.render(surface, paperwidth, paperheight)
+            surface = cairo.SVGSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
             surface.finish()
         elif format == 'pdf':
-            surface = cairo.PDFSurface(outfile, paperwidth, paperheight)
-            generator.render(surface, paperwidth, paperheight)
+            surface = cairo.PDFSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
             surface.finish()
         elif format == 'ps':
-            surface = cairo.PSSurface(outfile, paperwidth, paperheight)
-            generator.render(surface, paperwidth, paperheight)
+            surface = cairo.PSSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
             surface.finish()
         else:
             raise ValueError
 
-    def render_index(self, output_prefix, output_format, paperwidth, paperheight):
+    def render_index(self, title, output_prefix, output_format, paperwidth, paperheight):
         for f in output_format:
-            self._render_one_prefix(output_prefix, f, paperwidth, paperheight)
+            self._render_one_prefix(title, output_prefix, f, paperwidth, paperheight)
 
     def render_into_files(self, osm_map_file, out_prefix, out_format, zoom_factor):
         """

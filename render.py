@@ -86,7 +86,7 @@ def main():
                                       options.output_format,
                                       "zoom:%d" % options.zoom_factor)
 
-    renderer.render_index(options.output_prefix, options.output_format,
+    renderer.render_index("City's Map", options.output_prefix, options.output_format,
                           _map.width, _map.height)
 
     return 0
