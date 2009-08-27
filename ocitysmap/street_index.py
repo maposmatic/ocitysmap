@@ -184,6 +184,9 @@ class IndexPageGenerator:
         colwidth = fp['colwidth']
         em = fp['em']
 
+        remaining = paperwidth % colwidth
+        colwidth += (remaining / int(paperwidth / colwidth))
+
         y = 0
         x = em
         prevletter = u''
