@@ -53,9 +53,17 @@ class BoundingBox:
     def get_pixel_size_for_zoom_factor(self, zoom = 17):
         """Return the size in pixels (tuple width,height) needed to
         render the bounding box at the given zoom factor"""
-        delta_lat  = abs(self._lat1 - self._lat2)
         delta_long = abs(self._long1 - self._long2)
         # 2^zoom tiles (1 tile = 256 pix) for the whole earth
         pix_x = delta_long * (2 ** (zoom + 8)) / 360
-        pix_y = delta_lat  * (2 ** (zoom + 8)) / 180 # 237 ?????
+
+        # http://en.wikipedia.org/wiki/Mercator_projection
+        def yplan(lat):
+            return math.log(math.tan(math.pi/4. + math.radians(lat)/2.))
+
+        # OSM maps are drawn between -85 deg and + 85, the whole amplitude
+        # is 256*2^(zoom)
+        pix_y = (yplan(self._lat1) - yplan(self._lat2)) \
+                * (2 ** (zoom + 7)) / yplan(85)
+
         return (int(math.ceil(pix_x)), int(math.ceil(pix_y)))

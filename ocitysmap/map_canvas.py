@@ -114,6 +114,12 @@ class MapCanvas:
                                             geographic_bbox.get_top_left()[0],
                                             geographic_bbox.get_bottom_right()[1],
                                             geographic_bbox.get_bottom_right()[0])
+        # Determine the size of a meter in pixels (float)
+        xmeters, ymeters = geographic_bbox.spheric_sizes()
+        xpixels = graph_bbox[0] / xmeters
+        ypixels = graph_bbox[1] / ymeters
+        self.one_meter_in_pixels = min(xpixels, ypixels)
+
         self._map         = mapnik.Map(graph_bbox[0],
                                        graph_bbox[1],
                                        self._projname)
@@ -184,7 +190,7 @@ class MapCanvas:
         shpid = os.path.basename(path_shpfile)
         s,r = mapnik.Style(), mapnik.Rule()
         r.symbols.append(mapnik.PolygonSymbolizer(str_color))
-        r.symbols.append(mapnik.LineSymbolizer(str_color, 5))
+        r.symbols.append(mapnik.LineSymbolizer(str_color, 1.1))
         s.rules.append(r)
         self._map.append_style('style_' + shpid, s)
         lyr = mapnik.Layer(shpid)
@@ -204,7 +210,7 @@ class MapCanvas:
         for lyrtype, lyrparms in self._shapes:
             self._render_shp(*lyrparms)
 
-        l.debug("redering to bbox %s as %sx%s..."
+        l.debug("rendering to bbox %s as %sx%s..."
                 % (self._envelope, self._map.height, self._map.width))
         bbox = _project_envelope(self._proj, self._envelope)
         self._map.zoom_to_box(bbox)

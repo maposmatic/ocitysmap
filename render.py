@@ -47,6 +47,8 @@ def main():
         options.zoom_factor = int(options.zoom_factor)
     except ValueError:
         parser.error("Invalid zoom factor: %s" % options.zoom_factor)
+    if options.zoom_factor < 0 or options.zoom_factor > 18:
+        parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
     if not options.output:
         options.output = ['citymap.svg']

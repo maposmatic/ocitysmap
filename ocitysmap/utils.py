@@ -9,4 +9,3 @@ def gen_vertical_square_label(x):
 
 def gen_horizontal_square_label(x):
     return str(x + 1)
-
