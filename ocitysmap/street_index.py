@@ -298,8 +298,9 @@ class OCitySMap:
                           order by name;""")
 
         sl = cursor.fetchall()
-        sl = [(unicode(street[0].decode("utf-8")), [map(int, x.split(','))
-            for x in street[1].split(';')[:-1]]) for street in sl]
+        sl = [( unicode(street[0].decode("utf-8")),
+                [ map(int, x.split(',')) for x in street[1].split(';')[:-1] ] )
+              for street in sl]
         sl = sorted(map(_humanize_street_label, sl),
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
         return sl
