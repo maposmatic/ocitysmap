@@ -239,9 +239,6 @@ class IndexPageGenerator:
             if y + fheight > paperheight:
                 y = 0
                 x += colwidth
-        cr.show_page()
-
-
 
 class OCitySMap:
     def __init__(self, name, boundingbox=None, zooms=[]):
