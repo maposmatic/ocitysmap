@@ -331,11 +331,12 @@ class OCitySMap:
         surface.write_to_png(filename)
         surface.finish()
 
-    def render_into_files(self, osm_map_file, out_filenames, zoom_factor):
+    def render_into_files(self, osm_map_file, out_prefix, out_format, zoom_factor):
         """
         Render the current boundingbox into the destination files.
         @param osm_map_file (string) path to the osm.xml file
-        @param out_filenames (iterable of strings) image files to generate
+        @param out_prefix (string) prefix to use for generated files
+        @param out_format (iterable of strings) format of image files to generate
         @param zoom_factor None, a tuple (pixels_x, pixel_y) or
         'zoom:X' with X an integer [1..18]
         returns the MApnik map object used to render the map
@@ -345,7 +346,7 @@ class OCitySMap:
         l.debug('rendering tmp dir: %s' % tmpdir)
         try:
             return self._render_into_files(tmpdir, osm_map_file,
-                                           out_filenames, zoom_factor)
+                                           ["%s.%s" % (out_prefix, f) for f in out_format], zoom_factor)
         finally:
             for root, dirs, files in os.walk(tmpdir, topdown=False):
                 for name in files:

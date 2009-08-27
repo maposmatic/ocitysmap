@@ -15,15 +15,19 @@ def main():
     usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
-    parser.add_option('-o', '--output', dest='output', metavar='FILE',
-                      help='Specify the output file name. Defaults to'
-                           'citymap.svg. May be specified multiple times.',
+    parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
+                      help='Specify the prefix of generated files.'
+                           'Defaults to "citymap"',
+                      default='citymap')
+    parser.add_option('-f', '--format', dest='output_format', metavar='FMT',
+                      help='Specify the output formats. Defaults to'
+                           'SVG. May be specified multiple times.',
                       action='append')
-    parser.add_option('-z', '--zoom', dest='zooms', action='append',
+    parser.add_option('-e', '--enclosure', dest='zooms', action='append',
                       nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
                            'bounding box.')
-    parser.add_option('-f', '--zoom-factor',
+    parser.add_option('-z', '--zoom-factor',
                       metavar='[0-18]', help='Zoom factor for the'
                       'rendering (default=16)', type='int', default =16)
     parser.add_option('-x', '--osm-xml', dest='osm_xml', metavar='PATH',
@@ -50,8 +54,8 @@ def main():
     if options.zoom_factor < 0 or options.zoom_factor > 18:
         parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
-    if not options.output:
-        options.output = ['citymap.svg']
+    if not options.output_format:
+        options.output_format = ['svg']
 
     # Parse bounding box arguments
     zooms = {}
@@ -78,7 +82,8 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(options.osm_xml, options.output,
+    _map = renderer.render_into_files(options.osm_xml, options.output_prefix,
+                                      options.output_format,
                                       "zoom:%d" % options.zoom_factor)
 
     renderer.render_index("pifpafpouf.png", _map.width, _map.height)
