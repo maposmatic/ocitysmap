@@ -258,7 +258,6 @@ class OCitySMap:
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db)
-        l.debug('Streets: %s' % self.streets)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -325,22 +324,25 @@ class OCitySMap:
 
     def _render_one_prefix(self, output_prefix, format, paperwidth, paperheight):
         format = format.lower()
+        outfile = "%s_index.%s" % (output_prefix, format)
+        l.debug("rendering " + outfile + "...")
+
+        generator = IndexPageGenerator(self.streets)
         if format == 'png' or format == 'png24':
             surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
-            generator = IndexPageGenerator(self.streets)
             generator.render(surface, paperwidth, paperheight)
-            surface.write_to_png("%s_index.%s" % (output_prefix, format))
+            surface.write_to_png(outfile)
             surface.finish()
         elif format == 'svg':
-            surface = cairo.SVGSurface("%s_index.%s" % (output_prefix, format),
-                                       paperwidth, paperheight)
-            generator = IndexPageGenerator(self.streets)
+            surface = cairo.SVGSurface(outfile, paperwidth, paperheight)
             generator.render(surface, paperwidth, paperheight)
             surface.finish()
         elif format == 'pdf':
-            surface = cairo.PDFSurface("%s_index.%s" % (output_prefix, format),
-                                       paperwidth, paperheight)
-            generator = IndexPageGenerator(self.streets)
+            surface = cairo.PDFSurface(outfile, paperwidth, paperheight)
+            generator.render(surface, paperwidth, paperheight)
+            surface.finish()
+        elif format == 'ps':
+            surface = cairo.PSSurface(outfile, paperwidth, paperheight)
             generator.render(surface, paperwidth, paperheight)
             surface.finish()
         else:
