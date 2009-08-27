@@ -54,23 +54,23 @@ class GridDescriptor:
         if len(self.horizontal_lines) < 2 or len(self.vertical_lines) < 2:
             return None
 
+        height_lat = (self.horizontal_lines[-2] - self.horizontal_lines[-1])/20
+
         if base_lat < self.horizontal_lines[-1]:
             line_lat = base_lat + (self.horizontal_lines[-1] - base_lat) / 3.
-            bbox = coords.BoundingBox(self.horizontal_lines[-1],
-                                      self.vertical_lines[0],
-                                      base_lat,
-                                      self.vertical_lines[1])
         else:
             line_lat = self.horizontal_lines[-1] \
                 + (self.horizontal_lines[-2] - self.horizontal_lines[-1]) \
                 / 5.
-            bbox = coords.BoundingBox(self.horizontal_lines[-2],
-                                      self.vertical_lines[0],
-                                      self.horizontal_lines[-1],
-                                      self.vertical_lines[1])
+
+        bbox = coords.BoundingBox(line_lat + height_lat,
+                                  self.vertical_lines[0],
+                                  line_lat - height_lat,
+                                  self.vertical_lines[1])
 
         g = map_canvas.GridFile(bbox, filename) # bbox, filename)
         g.add_horiz_line(line_lat)
-        g.add_vert_line(bbox.get_top_left()[1] - 1.) # shape needs a >0 height
+        g.add_vert_line(self.vertical_lines[0])
+        g.add_vert_line(self.vertical_lines[1])
         g.flush()
         return g
