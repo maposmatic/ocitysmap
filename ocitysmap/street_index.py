@@ -167,9 +167,7 @@ class IndexPageGenerator:
 
         return minfontsize
 
-    def render(self, surface):
-        paperwidth = surface.get_width()
-        paperheight = surface.get_height()
+    def render(self, surface, paperwidth, paperheight):
         cr = cairo.Context(surface)
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
@@ -324,12 +322,33 @@ class OCitySMap:
                           lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
         return sl
 
-    def render_index(self, filename, paperwidth, paperheight):
-        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
-        generator = IndexPageGenerator(self.streets)
-        generator.render(surface)
-        surface.write_to_png(filename)
-        surface.finish()
+
+    def _render_one_prefix(self, output_prefix, format, paperwidth, paperheight):
+        format = format.lower()
+        if format == 'png':
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
+            generator = IndexPageGenerator(self.streets)
+            generator.render(surface, paperwidth, paperheight)
+            surface.write_to_png("%s_index.%s" % (output_prefix, format))
+            surface.finish()
+        elif format == 'svg':
+            surface = cairo.SVGSurface("%s_index.%s" % (output_prefix, format),
+                                       paperwidth, paperheight)
+            generator = IndexPageGenerator(self.streets)
+            generator.render(surface, paperwidth, paperheight)
+            surface.finish()
+        elif format == 'pdf':
+            surface = cairo.PDFSurface("%s_index.%s" % (output_prefix, format),
+                                       paperwidth, paperheight)
+            generator = IndexPageGenerator(self.streets)
+            generator.render(surface, paperwidth, paperheight)
+            surface.finish()
+        else:
+            raise ValueError
+
+    def render_index(self, output_prefix, output_format, paperwidth, paperheight):
+        for f in output_format:
+            self._render_one_prefix(output_prefix, f, paperwidth, paperheight)
 
     def render_into_files(self, osm_map_file, out_prefix, out_format, zoom_factor):
         """
