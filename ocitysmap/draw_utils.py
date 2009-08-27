@@ -1,9 +1,20 @@
 
 import cairo
 
-def borderize(insurf, insurf_w, insurf_h, renderer,
+def borderize(renderer, insurf_w, insurf_h,
               title,
               outsurf, outsurf_w, outsurf_h, out_margin):
+    """
+    Fill the given surface with the contents of another one and a
+    frame around it
+    @param renderer (function : cairo_context -> None) Function
+    drawing inside the frame
+    @param insurf_w/h (int) width/height of the inside rendering
+    @param title (string) title to write on the frame
+    @param outsurf (cairo surface) surface to draw the whole thing into
+    @param outsurf_w/h (int) width/height of the resulting framed image
+    @param out_margin (int) size of the margin around the inner image
+    """
 
     ctx = cairo.Context(outsurf)
 
