@@ -185,7 +185,7 @@ class OCitySMap:
         """
         # Create a temporary dir for the shapefiles and call _render_into_files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
-        l.debug('redering tmp dir: %s' % tmpdir)
+        l.debug('rendering tmp dir: %s' % tmpdir)
         try:
             return self._render_into_files(tmpdir, osm_map_file,
                                            out_filenames, zoom_factor)
@@ -204,8 +204,7 @@ class OCitySMap:
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
-        g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
-                                                           'grid.shp'), bbox)
+        l.debug('bbox is: %s' % bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         l.debug('adding labels...')
 
@@ -237,8 +236,9 @@ class OCitySMap:
             line_width = 7
 
         # Add the grid
-        city.add_shapefile(g.get_filepath(), GRID_COLOR, .5,
-                           line_width)
+        g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
+                                                           'grid.shp'), bbox)
+        city.add_shapefile(g.get_filepath(), GRID_COLOR, .6, line_width)
 
         # Add the labels
         for idx, label in enumerate(self.griddesc.vertical_labels):
@@ -248,7 +248,7 @@ class OCitySMap:
                 + self.griddesc.height_square_angle/4.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .6,
+                           alpha = .7,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
         for idx, label in enumerate(self.griddesc.horizontal_labels):
@@ -258,9 +258,17 @@ class OCitySMap:
                 - self.griddesc.height_square_angle/2.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .6,
+                           alpha = .7,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
+
+        # Add the scale
+        s = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
+                                                                 'scale.shp'),
+                                                    bbox.get_bottom_right()[0])
+        city.add_shapefile(s.get_filepath(), 'black', .9, 1)
+
+        # Rendering...
         l.debug('rendering map...')
         city.render_map()
         for fname in out_filenames:

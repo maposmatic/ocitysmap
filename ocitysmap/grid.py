@@ -1,6 +1,6 @@
 
 import math, logging
-import map_canvas, utils
+import map_canvas, utils,  coords
 
 l = logging.getLogger('ocitysmap')
 
@@ -26,10 +26,10 @@ class GridDescriptor:
         # horizontal and vertical lines delimiting the square
         self.vertical_lines   = [bbox.get_top_left()[1] +
                                  x * self.width_square_angle
-                                 for x in xrange(0, int(math.ceil(self.width_square_count )) + 1)]
+                                 for x in xrange(0, int(math.floor(self.width_square_count )) + 1)]
         self.horizontal_lines = [bbox.get_top_left()[0] -
                                  x * self.height_square_angle
-                                 for x in xrange(0, int(math.ceil(self.height_square_count)) + 1)]
+                                 for x in xrange(0, int(math.floor(self.height_square_count)) + 1)]
 
         # Compute the lists of labels
         self.vertical_labels   = [utils.gen_vertical_square_label(x)
@@ -41,11 +41,36 @@ class GridDescriptor:
         l.debug("vertical labels: %s" % self.vertical_labels)
         l.debug("horizontal labels: %s" % self.horizontal_labels)
 
-    def generate_shape_file(self, filename, bbox, line_width = 1):
+    def generate_shape_file(self, filename, bbox):
         g = map_canvas.GridFile(bbox, filename)
         for v in self.vertical_lines:
             g.add_vert_line(v)
         for h in self.horizontal_lines:
             g.add_horiz_line(h)
+        g.flush()
+        return g
+
+    def generate_scale_shape_file(self, filename, base_lat):
+        if len(self.horizontal_lines) < 2 or len(self.vertical_lines) < 2:
+            return None
+
+        if base_lat < self.horizontal_lines[-1]:
+            line_lat = base_lat + (self.horizontal_lines[-1] - base_lat) / 3.
+            bbox = coords.BoundingBox(self.horizontal_lines[-1],
+                                      self.vertical_lines[0],
+                                      base_lat,
+                                      self.vertical_lines[1])
+        else:
+            line_lat = self.horizontal_lines[-1] \
+                + (self.horizontal_lines[-2] - self.horizontal_lines[-1]) \
+                / 5.
+            bbox = coords.BoundingBox(self.horizontal_lines[-2],
+                                      self.vertical_lines[0],
+                                      self.horizontal_lines[-1],
+                                      self.vertical_lines[1])
+
+        g = map_canvas.GridFile(bbox, filename) # bbox, filename)
+        g.add_horiz_line(line_lat)
+        g.add_vert_line(bbox.get_top_left()[1] - 1.) # shape needs a >0 height
         g.flush()
         return g
