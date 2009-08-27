@@ -33,13 +33,15 @@ def borderize(renderer, insurf_w, insurf_h,
 
     # Draw the title
     ctx.save()
-    ctx.translate(out_margin * 2., out_margin * .85)
+    ctx.move_to(out_margin * 2., out_margin * .85)
+    xlat1, _ = ctx.get_current_point()
     ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
                          cairo.FONT_WEIGHT_NORMAL)
     ctx.set_font_size(out_margin)
     fascent, fdescent, fheight, fxadvance, fyadvance = ctx.font_extents()
     ctx.show_text(title)
-    xlat, _ = ctx.get_current_point()
+    xlat2, _ = ctx.get_current_point()
+    xlat = xlat2 - xlat1
     ctx.restore()
 
     # Draw the rounded rectangle
