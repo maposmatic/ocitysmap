@@ -311,14 +311,15 @@ class OCitySMap:
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                where name != '' and highway is not null)
+                                where trim(name) != '' and highway is not null)
                           as foo
                           group by name
                           order by name;""")
 
         sl = cursor.fetchall()
-        sl = [(unicode(street[0].decode("utf-8")), [map(int, x.split(','))
-            for x in street[1].split(';')[:-1]]) for street in sl]
+        sl = [( unicode(street[0].decode("utf-8")),
+                [ map(int, x.split(',')) for x in street[1].split(';')[:-1] ] )
+              for street in sl]
         sl = sorted(map(_humanize_street_label, sl),
                           lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
         return sl
@@ -340,7 +341,7 @@ class OCitySMap:
         """
         # Create a temporary dir for the shapefiles and call _render_into_files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
-        l.debug('redering tmp dir: %s' % tmpdir)
+        l.debug('rendering tmp dir: %s' % tmpdir)
         try:
             return self._render_into_files(tmpdir, osm_map_file,
                                            out_filenames, zoom_factor)
@@ -359,13 +360,13 @@ class OCitySMap:
         l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
-        g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
-                                                           'grid.shp'), bbox)
+        l.debug('bbox is: %s' % bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         l.debug('adding labels...')
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
+        l.debug('500m = %f pixels' % half_km_in_pixels)
         if half_km_in_pixels < 10:
             font_size  = 8
             line_width = 1
@@ -385,15 +386,16 @@ class OCitySMap:
             font_size = 100
             line_width = 5
         elif half_km_in_pixels < 400:
-            font_size = 200
+            font_size = 150
             line_width = 6
         else:
             font_size = 250
             line_width = 7
 
         # Add the grid
-        city.add_shapefile(g.get_filepath(), GRID_COLOR, .5,
-                           line_width)
+        g = self.griddesc.generate_shape_file(os.path.join(tmpdir,
+                                                           'grid.shp'), bbox)
+        city.add_shapefile(g.get_filepath(), GRID_COLOR, .6, line_width)
 
         # Add the labels
         for idx, label in enumerate(self.griddesc.vertical_labels):
@@ -403,7 +405,7 @@ class OCitySMap:
                 + self.griddesc.height_square_angle/4.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .6,
+                           alpha = .7,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
         for idx, label in enumerate(self.griddesc.horizontal_labels):
@@ -413,9 +415,20 @@ class OCitySMap:
                 - self.griddesc.height_square_angle/2.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .6,
+                           alpha = .7,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
+
+        # Add the scale
+        s, lat, lg \
+            = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
+                                                                   'scale.shp'),
+                                                      bbox.get_bottom_right()[0])
+        city.add_shapefile(s.get_filepath(), 'black', .9, 1)
+
+        city.add_label(lg, lat, "500m", font_size = 16, str_color = 'black')
+
+        # Rendering...
         l.debug('rendering map...')
         city.render_map()
         for fname in out_filenames:

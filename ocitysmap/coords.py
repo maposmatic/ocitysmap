@@ -46,9 +46,10 @@ class BoundingBox:
                 radius_lat * math.radians(delta_long))
 
     def create_expanded(self, dlat, dlong):
-        """Return a new bbox of the same size + dlat/dlong added on the sides"""
-        return BoundingBox(self._lat1+dlat, self._long1 - dlong,
-                           self._lat2-dlat, self._long2 + dlong)
+        """Return a new bbox of the same size + dlat/dlong added
+           on the top-left sides"""
+        return BoundingBox(self._lat1 + dlat, self._long1 - dlong,
+                           self._lat2, self._long2)
 
     def get_pixel_size_for_zoom_factor(self, zoom = 17):
         """Return the size in pixels (tuple width,height) needed to

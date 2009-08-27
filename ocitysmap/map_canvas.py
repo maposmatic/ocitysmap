@@ -115,10 +115,14 @@ class MapCanvas:
                                             geographic_bbox.get_bottom_right()[1],
                                             geographic_bbox.get_bottom_right()[0])
         # Determine the size of a meter in pixels (float)
-        xmeters, ymeters = geographic_bbox.spheric_sizes()
+        ymeters, xmeters = geographic_bbox.spheric_sizes()
         xpixels = graph_bbox[0] / xmeters
         ypixels = graph_bbox[1] / ymeters
         self.one_meter_in_pixels = min(xpixels, ypixels)
+        l.debug('Geo size: %sx%s, pixels=%sx%s, 1m=%s|%s' \
+                    % (xmeters, ymeters,
+                       graph_bbox[0], graph_bbox[1],
+                       xpixels, ypixels))
 
         self._map         = mapnik.Map(graph_bbox[0],
                                        graph_bbox[1],
@@ -213,11 +217,11 @@ class MapCanvas:
         when needed.
         @return the mapnik map object
         """
-        for labelstyle in self._labelstyles:
-            self._render_label_style(*labelstyle)
-
         for lyrtype, lyrparms in self._shapes:
             self._render_shp(*lyrparms)
+
+        for labelstyle in self._labelstyles:
+            self._render_label_style(*labelstyle)
 
         l.debug("rendering to bbox %s as %sx%s..."
                 % (self._envelope, self._map.height, self._map.width))
