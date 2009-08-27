@@ -325,7 +325,7 @@ class OCitySMap:
 
     def _render_one_prefix(self, output_prefix, format, paperwidth, paperheight):
         format = format.lower()
-        if format == 'png':
+        if format == 'png' or format == 'png24':
             surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
             generator = IndexPageGenerator(self.streets)
             generator.render(surface, paperwidth, paperheight)

@@ -254,9 +254,9 @@ class MapCanvas:
         file_type = file_type.lower()
         if file_type == 'xml':
             mapnik.save_map(self._map, output_filename)
-        elif file_type == 'png': # 8-bits by default
+        elif file_type == 'png8': # 8-bits
             mapnik.render_to_file(self._map, output_filename, 'png256')
-        elif file_type == 'png24': # 24-bits
+        elif file_type == 'png': # 24-bits by default
             mapnik.render_to_file(self._map, output_filename, 'png')
         elif file_type in ('jpg', 'jpeg'):
             mapnik.render_to_file(self._map, output_filename, 'jpeg')
