@@ -270,7 +270,7 @@ class OCitySMap:
         db = pgdb.connect('Notre Base', 'test', 'test', 'surf.local', 'testdb')
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
-        self.streets = self.get_streets(db)
+        self.streets = self.get_streets(db, self.name)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -286,7 +286,7 @@ class OCitySMap:
         l.info('Looking for bounding box around %s...' % name)
         raise UnsufficientDataError, "Not enough data to find city bounding box!"
 
-    def get_streets(self, db):
+    def get_streets(self, db, city):
 
         """Get the list of streets in the bounding box, and for each
         street, the list of squares that it intersects.
@@ -321,10 +321,17 @@ class OCitySMap:
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                where trim(name) != '' and highway is not null)
+                                left join cities_area on city='%s'
+                                where trim(name) != '' and highway is not null
+                                and case when cities_area.area is null
+                                then
+                                  true
+                                else
+                                  st_intersects(way, cities_area.area)
+                                end)
                           as foo
                           group by name
-                          order by name;""")
+                          order by name;""" % city)
 
         sl = cursor.fetchall()
         sl = [( unicode(street[0].decode("utf-8")),
