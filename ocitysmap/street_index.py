@@ -292,7 +292,7 @@ class OCitySMap:
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                where name != '' and highway is not null)
+                                where trim(name) != '' and highway is not null)
                           as foo
                           group by name
                           order by name;""")
