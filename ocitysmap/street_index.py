@@ -5,6 +5,8 @@ import sys, os, tempfile, pgdb, re, math, cairo, locale
 
 import map_canvas, grid, utils
 
+from draw_utils import borderize
+
 l = logging.getLogger('ocitysmap')
 
 locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
@@ -100,7 +102,7 @@ class IndexPageGenerator:
     def _get_font_parameters(self, cr, fontsize):
         cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         cr.set_font_size(fontsize * 1.2)
-        heading_fheight = cr.font_extents()[2]
+        heading_fascent, heading_fdescent, heading_fheight = cr.font_extents()[:3]
 
         cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         cr.set_font_size(fontsize)
@@ -114,6 +116,7 @@ class IndexPageGenerator:
 
         return {
             'colwidth' : colwidth,
+            'heading_fascent' : heading_fascent,
             'heading_fheight' : heading_fheight,
             'fheight' : fheight,
             'em' : em,
@@ -167,10 +170,7 @@ class IndexPageGenerator:
 
         return minfontsize
 
-    def render(self, surface):
-        paperwidth = surface.get_width()
-        paperheight = surface.get_height()
-        cr = cairo.Context(surface)
+    def render(self, cr, paperwidth, paperheight):
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
         cr.set_source_rgb(0.0, 0.0, 0.0)
@@ -179,6 +179,7 @@ class IndexPageGenerator:
 
         fp = self._get_font_parameters(cr, fontsize)
         heading_fheight = fp['heading_fheight']
+        heading_fascent = fp['heading_fascent']
         fheight = fp['fheight']
         colwidth = fp['colwidth']
         em = fp['em']
@@ -188,7 +189,8 @@ class IndexPageGenerator:
         prevletter = u''
         for street in self.streets:
             # Letter label
-            if not self._equal_without_accent(street[0][0], prevletter):
+            firstletter = street[0][0]
+            if not self._equal_without_accent(firstletter, prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
@@ -196,12 +198,21 @@ class IndexPageGenerator:
                     x += colwidth
                 # Reserve height for the heading letter label
                 y += heading_fheight
+
+                cr.set_source_rgb(0.9, 0.9, 0.9)
+                cr.rectangle(x, y - heading_fascent, colwidth - em, heading_fheight)
+                cr.fill()
+
+                cr.set_source_rgb(0, 0, 0)
+
                 # Draw the heading letter label
-                cr.move_to(x, y)
                 cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                 cr.set_font_size(fontsize * 1.2)
-                cr.show_text(street[0][0])
-                prevletter = street[0][0]
+                w = cr.text_extents(firstletter)[2]
+                indent = (colwidth - 2 * em - w) / 2
+                cr.move_to(x + indent, y)
+                cr.show_text(firstletter)
+                prevletter = firstletter
 
             # Reserve height for the street
             y += fheight
@@ -260,7 +271,6 @@ class OCitySMap:
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db)
-        l.debug('Streets: %s' % self.streets)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -324,12 +334,49 @@ class OCitySMap:
                           lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
         return sl
 
-    def render_index(self, filename, paperwidth, paperheight):
-        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
+
+    def _render_one_prefix(self, title, output_prefix, format, paperwidth, paperheight):
+        format = format.lower()
+        outfile = "%s_index.%s" % (output_prefix, format)
+        l.debug("rendering " + outfile + "...")
+
         generator = IndexPageGenerator(self.streets)
-        generator.render(surface)
-        surface.write_to_png(filename)
-        surface.finish()
+        if format == 'png' or format == 'png24':
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
+                                         paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
+            surface.write_to_png(outfile)
+            surface.finish()
+        elif format == 'svg':
+            surface = cairo.SVGSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
+            surface.finish()
+        elif format == 'pdf':
+            surface = cairo.PDFSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
+            surface.finish()
+        elif format == 'ps':
+            surface = cairo.PSSurface(outfile, paperwidth + 400, paperheight + 400)
+            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+                      paperwidth, paperheight,
+                      title, surface,
+                      paperwidth + 400, paperheight + 400, 200)
+            surface.finish()
+        else:
+            raise ValueError
+
+    def render_index(self, title, output_prefix, output_format, paperwidth, paperheight):
+        for f in output_format:
+            self._render_one_prefix(title, output_prefix, f, paperwidth, paperheight)
 
     def render_into_files(self, osm_map_file, out_prefix, out_format, zoom_factor):
         """
