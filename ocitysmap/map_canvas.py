@@ -266,8 +266,8 @@ class MapCanvas:
             surface = cairo.SVGSurface(output_filename,
                                        self._map.width+400,
                                        self._map.height+400)
-            borderize(surface, self._map.width, self._map.height,
-                      lambda ctx: mapnik.render(self._map, ctx),
+            borderize(lambda ctx: mapnik.render(self._map, ctx),
+                      self._map.width, self._map.height,
                       title,
                       surface, self._map.width+400,
                       self._map.height+400, 200)
@@ -276,8 +276,8 @@ class MapCanvas:
             surface = cairo.PDFSurface(output_filename,
                                        self._map.width+400,
                                        self._map.height+400)
-            borderize(surface, self._map.width, self._map.height,
-                      lambda ctx: mapnik.render(self._map, ctx),
+            borderize(lambda ctx: mapnik.render(self._map, ctx),
+                      self._map.width, self._map.height,
                       title,
                       surface, self._map.width+400,
                       self._map.height+400, 200)
@@ -286,8 +286,8 @@ class MapCanvas:
             surface = cairo.PSSurface(output_filename,
                                       self._map.width+400,
                                       self._map.height+400)
-            borderize(surface, self._map.width, self._map.height,
-                      lambda ctx: mapnik.render(self._map, ctx),
+            borderize(lambda ctx: mapnik.render(self._map, ctx),
+                      self._map.width, self._map.height,
                       title,
                       surface, self._map.width+400,
                       self._map.height+400, 200)
