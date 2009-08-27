@@ -4,6 +4,7 @@
 import os, mapnik, logging
 from osgeo import ogr
 from coords import BoundingBox
+from draw_utils import borderize
 
 try:
     import cairo
@@ -233,6 +234,7 @@ class MapCanvas:
         return self._map
 
     def save_map(self, output_filename,
+                 title = "City's map",
                  file_type = None,
                  force = False):
         """
@@ -262,19 +264,34 @@ class MapCanvas:
             mapnik.render_to_file(self._map, output_filename, 'jpeg')
         elif file_type == 'svg' and cairo is not None:
             surface = cairo.SVGSurface(output_filename,
-                                       self._map.width,
-                                       self._map.height)
-            mapnik.render(self._map, surface)
+                                       self._map.width+400,
+                                       self._map.height+400)
+            borderize(surface, self._map.width, self._map.height,
+                      lambda ctx: mapnik.render(self._map, ctx),
+                      title,
+                      surface, self._map.width+400,
+                      self._map.height+400, 200)
+            
         elif file_type == 'pdf' and cairo is not None:
             surface = cairo.PDFSurface(output_filename,
-                                       self._map.width,
-                                       self._map.height)
-            mapnik.render(self._map, surface)
+                                       self._map.width+400,
+                                       self._map.height+400)
+            borderize(surface, self._map.width, self._map.height,
+                      lambda ctx: mapnik.render(self._map, ctx),
+                      title,
+                      surface, self._map.width+400,
+                      self._map.height+400, 200)
+
         elif file_type == 'ps' and cairo is not None:
             surface = cairo.PSSurface(output_filename,
-                                       self._map.width,
-                                       self._map.height)
-            mapnik.render(self._map, surface)
+                                      self._map.width+400,
+                                      self._map.height+400)
+            borderize(surface, self._map.width, self._map.height,
+                      lambda ctx: mapnik.render(self._map, ctx),
+                      title,
+                      surface, self._map.width+400,
+                      self._map.height+400, 200)
+
         else:
             raise ValueError('Unsupported output format: %s' % file_type)
 
