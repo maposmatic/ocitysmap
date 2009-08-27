@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging
-import sys, os, tempfile, pgdb, re, math
+import sys, os, tempfile, pgdb, re, math, cairo
 
 import map_canvas, grid, utils
 
@@ -83,6 +83,133 @@ def _humanize_street_label(street):
                                  utils.gen_vertical_square_label(last[0]),
                                  utils.gen_horizontal_square_label(last[1]))
     return (name, label)
+
+class IndexPageGenerator:
+    def __init__(self, streets):
+        self.streets = streets
+
+    def _get_font_parameters(self, cr, fontsize):
+        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        cr.set_font_size(fontsize * 1.2)
+        heading_fheight = cr.font_extents()[2]
+
+        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        cr.set_font_size(fontsize)
+        fascent, fdescent, fheight, fxadvance, fyadvance = cr.font_extents()
+
+        em = cr.text_extents("m")[2]
+
+        widths = map(lambda x: cr.text_extents(x[0])[2] + cr.text_extents(x[1])[2], self.streets)
+        maxwidth = max(widths)
+        colwidth = maxwidth + 3 * em
+
+        return {
+            'colwidth' : colwidth,
+            'heading_fheight' : heading_fheight,
+            'fheight' : fheight,
+            'em' : em,
+            }
+
+    def _fits_in_page(self, cr, paperwidth, paperheight, fontsize):
+        fp = self._get_font_parameters(cr, fontsize)
+
+        prevletter = None
+        heading_letter_count = 0
+        for street in self.streets:
+            if street[0][0] != prevletter:
+                heading_letter_count += 1
+                prevletter = street[0][0]
+
+        colheight = len(self.streets) * fp['fheight'] + heading_letter_count * fp['heading_fheight']
+
+        paperncols = math.floor(paperwidth / fp['colwidth'])
+        if paperncols == 0:
+            return False
+        # Add a small space before/after each column
+        colheight += paperncols * fp['fheight']
+        colheight /= paperncols
+        return colheight < paperheight
+
+    def _compute_font_size(self, cr, paperwidth, paperheight):
+        minfontsize = 6
+        maxfontsize = 128
+
+        if not self._fits_in_page(cr, paperwidth, paperheight, minfontsize):
+            print "Index does not fit even with font size %d" % minfontsize
+            sys.exit(1)
+
+        while maxfontsize - minfontsize != 1:
+            meanfontsize = int((maxfontsize + minfontsize) / 2)
+            if self._fits_in_page(cr, paperwidth, paperheight, meanfontsize):
+                minfontsize = meanfontsize
+            else:
+                maxfontsize = meanfontsize
+
+        return minfontsize
+
+    def render(self, surface):
+        paperwidth = surface.get_width()
+        paperheight = surface.get_height()
+        cr = cairo.Context(surface)
+        cr.set_source_rgb(1, 1, 1)
+        cr.paint()
+        cr.set_source_rgb(0.0, 0.0, 0.0)
+
+        fontsize = self._compute_font_size(cr, paperwidth, paperheight)
+
+        fp = self._get_font_parameters(cr, fontsize)
+        heading_fheight = fp['heading_fheight']
+        fheight = fp['fheight']
+        colwidth = fp['colwidth']
+        em = fp['em']
+
+        y = 0
+        x = em
+        prevletter = None
+        for street in self.streets:
+            # Letter label
+            if street[0][0] != prevletter:
+                # Make sure we have no orphelin heading letter label at the
+                # end of a column
+                if y + heading_fheight + fheight > paperheight:
+                    y = 0
+                    x += colwidth
+                # Reserve height for the heading letter label
+                y += heading_fheight
+                # Draw the heading letter label
+                cr.move_to(x, y)
+                cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+                cr.set_font_size(fontsize * 1.2)
+                cr.show_text(street[0][0])
+                prevletter = street[0][0]
+
+            # Reserve height for the street
+            y += fheight
+            cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            cr.set_font_size(fontsize)
+            # Compute length of the dashed line between the street name and
+            # the squares label
+            street_name_width = cr.text_extents(street[0])[4]
+            squares_label_width = cr.text_extents(street[1])[2]
+            line_width = colwidth - street_name_width - squares_label_width - 2 * em
+            # Draw street name
+            cr.move_to(x, y)
+            cr.show_text(street[0])
+            # Draw dashed line
+            strokewidth = max(fontsize / 12, 1)
+            cr.set_line_width(strokewidth)
+            cr.set_dash([ strokewidth, strokewidth * 2 ])
+            cr.move_to(x + street_name_width + em / 2, y - 0.1 * em)
+            cr.rel_line_to(line_width, 0)
+            cr.stroke()
+            # Draw squares label
+            cr.move_to(x + colwidth - em - squares_label_width, y)
+            cr.show_text(street[1])
+            if y + fheight > paperheight:
+                y = 0
+                x += colwidth
+        cr.show_page()
+
 
 
 class OCitySMap:
@@ -174,6 +301,13 @@ class OCitySMap:
             for x in street[1].split(';')[:-1]]) for street in sl]
         return sorted(map(_humanize_street_label, sl),
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
+
+    def render_index(self, filename, paperwidth, paperheight):
+        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
+        generator = IndexPageGenerator(self.streets)
+        generator.render(surface)
+        surface.write_to_png(filename)
+        surface.finish()
 
     def render_into_files(self, osm_map_file, out_filenames, zoom_factor):
         """
