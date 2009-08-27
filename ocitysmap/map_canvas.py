@@ -217,11 +217,11 @@ class MapCanvas:
         when needed.
         @return the mapnik map object
         """
-        for labelstyle in self._labelstyles:
-            self._render_label_style(*labelstyle)
-
         for lyrtype, lyrparms in self._shapes:
             self._render_shp(*lyrparms)
+
+        for labelstyle in self._labelstyles:
+            self._render_label_style(*labelstyle)
 
         l.debug("rendering to bbox %s as %sx%s..."
                 % (self._envelope, self._map.height, self._map.width))
