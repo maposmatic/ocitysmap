@@ -51,6 +51,9 @@ class GridDescriptor:
         return g
 
     def generate_scale_shape_file(self, filename, base_lat):
+        """
+        Returns a tuple (gridfile, lat, long) of the scale widget
+        """
         if len(self.horizontal_lines) < 2 or len(self.vertical_lines) < 2:
             return None
 
@@ -73,4 +76,5 @@ class GridDescriptor:
         g.add_vert_line(self.vertical_lines[0])
         g.add_vert_line(self.vertical_lines[1])
         g.flush()
-        return g
+        return (g, line_lat + height_lat,
+                (self.vertical_lines[0] + self.vertical_lines[1]) / 2)

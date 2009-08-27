@@ -263,10 +263,13 @@ class OCitySMap:
                            font_family = "DejaVu Sans Bold")
 
         # Add the scale
-        s = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
-                                                                 'scale.shp'),
-                                                    bbox.get_bottom_right()[0])
+        s, lat, lg \
+            = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
+                                                                   'scale.shp'),
+                                                      bbox.get_bottom_right()[0])
         city.add_shapefile(s.get_filepath(), 'black', .9, 1)
+
+        city.add_label(lg, lat, "500m", font_size = 16, str_color = 'black')
 
         # Rendering...
         l.debug('rendering map...')
