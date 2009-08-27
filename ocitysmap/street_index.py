@@ -7,19 +7,19 @@ import map_canvas, grid, utils
 
 l = logging.getLogger('ocitysmap')
 
-APPELLATIONS = [ "Allée", "Avenue", "Boulevard", "Carrefour", "Chaussée",
-                 "Chemin", "Cité", "Clos", "Côte", "Cour", "Cours", "Degré",
-                 "Esplanade", "Impasse", "Liaison", "Mail", "Montée",
-                 "Passage", "Place", "Placette", "Pont", "Promenade", "Quai",
-                 "Résidence", "Rond-Point", "Rang", "Route", "Rue", "Ruelle",
-                 "Square", "Traboule", "Traverse", "Venelle", "Voie",
-                 "Rond-point" ]
-DETERMINANTS = [ " des", " du", " de la", " de l'", " de", " d'", "" ]
+APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
+                 u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", u"Degré",
+                 u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
+                 u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", u"Quai",
+                 u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", u"Ruelle",
+                 u"Square", u"Traboule", u"Traverse", u"Venelle", u"Voie",
+                 u"Rond-point" ]
+DETERMINANTS = [ u" des", u" du", u" de la", u" de l'", u" de", u" d'", u"" ]
 
 SPACE_REDUCE = re.compile(r"\s+")
 PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
                            ("|".join(APPELLATIONS),
-                            "|".join(DETERMINANTS)), re.IGNORECASE)
+                            "|".join(DETERMINANTS)), re.IGNORECASE | re.UNICODE)
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -34,7 +34,8 @@ def _humanize_street_label(street):
     def unprefix_street(name):
         name = name.strip()
         name = SPACE_REDUCE.sub(" ", name)
-        return PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        name = PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
 
     def couple_compare(x,y):
         a = y[0] - x[0]
@@ -297,10 +298,11 @@ class OCitySMap:
                           order by name;""")
 
         sl = cursor.fetchall()
-        sl = [(street[0], [map(int, x.split(','))
+        sl = [(unicode(street[0].decode("utf-8")), [map(int, x.split(','))
             for x in street[1].split(';')[:-1]]) for street in sl]
-        return sorted(map(_humanize_street_label, sl),
+        sl = sorted(map(_humanize_street_label, sl),
                           lambda x, y: cmp(x[0].lower(), y[0].lower()))
+        return sl
 
     def render_index(self, filename, paperwidth, paperheight):
         surface = cairo.ImageSurface(cairo.FORMAT_RGB24, paperwidth, paperheight)
