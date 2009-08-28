@@ -296,6 +296,8 @@ class OCitySMap:
         l.info('Looking for bounding box around %s...' % name)
         raise UnsufficientDataError, "Not enough data to find city bounding box!"
 
+    _regexp_contour = re.compile('^POLYGON\(\((\S*) (\S*),\S* (\S*),(\S*) \S*,\S* \S*,\S* \S*\),\(([^)]*)\)\)$')
+
     def get_city_contour(self, db, city):
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(
@@ -307,7 +309,22 @@ class OCitySMap:
         sl = cursor.fetchall()
         cell00 = sl[0][0].strip()
         if not cell00: return None
-        return cell00
+
+        # Parse the answer, in order to add a margin around the area
+        print "ORIG", cell00
+        prev_locale = locale.getlocale(locale.LC_ALL)
+        locale.setlocale(locale.LC_ALL, "C")
+        try:
+            matches = self._regexp_contour.match(cell00)
+            ymin, xmin, xmax, ymax, inside = matches.groups()
+            xmin, ymin, ymax, xmax = map(float, (xmin, ymin, ymax, xmax))
+            xmin -= 1. ; xmax += 1.
+            ymin -= 1. ; ymax += 1.
+            return "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f),(%s))" \
+                % (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
+                   inside)
+        finally:
+            locale.setlocale(locale.LC_ALL, prev_locale)
 
     def get_streets(self, db, city):
 
