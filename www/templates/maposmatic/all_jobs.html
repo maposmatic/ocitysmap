@@ -18,7 +18,11 @@
       Rendering in progress...
       {% endifequal %}
       {% ifequal job.status 2 %}
-      Rendering done or failed
+      {% ifequal job.resultmsg "ok" %}
+      Rendering successfull
+      {% else %}
+      Rendering failed, reason: <i>{{ job.resultmsg }}</i>
+      {% endifequal %}
       {% endifequal %}
     </td>
   </tr>
