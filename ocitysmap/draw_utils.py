@@ -52,7 +52,7 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
     # Draw the rounded rectangle
     ctx.save()
-    ctx.set_line_width(out_margin/5.)
+    ctx.set_line_width(max(out_margin/9., 2.))
     ctx.move_to (out_margin * 2 + xlat + out_margin/2., out_margin / 2.)
     ctx.line_to (outsurf_w - out_margin, out_margin / 2.)
     ctx.rel_curve_to(0,0, out_margin/2., 0, out_margin/2., out_margin/2.)

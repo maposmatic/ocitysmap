@@ -327,14 +327,13 @@ class OCitySMap:
         if not cell00: return None
 
         # Parse the answer, in order to add a margin around the area
-        print "ORIG", cell00
         prev_locale = locale.getlocale(locale.LC_ALL)
         locale.setlocale(locale.LC_ALL, "C")
         try:
             matches = self._regexp_contour.match(cell00)
             ymin, xmin, xmax, ymax, inside = matches.groups()
             xmin, ymin, ymax, xmax = map(float, (xmin, ymin, ymax, xmax))
-            xmin -= 1. ; xmax += 1.
+            xmin -= 1. ; xmax += 1. # Add one degree around the area
             ymin -= 1. ; ymax += 1.
             return "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f),(%s))" \
                 % (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
@@ -440,48 +439,66 @@ class OCitySMap:
         return sl
 
 
-    def _render_one_prefix(self, title, output_prefix, format, paperwidth, paperheight):
-        format = format.lower()
+    def _render_one_prefix(self, title, output_prefix, format,
+                           paperwidth, paperheight):
+        format      = format.lower()
+        frame_width = max(paperheight / 20., 30)
+
         outfile = "%s_index.%s" % (output_prefix, format)
         l.debug("rendering " + outfile + "...")
 
         generator = IndexPageGenerator(self.streets)
         if format == 'png' or format == 'png24':
             surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
-                                         paperwidth + 400, paperheight + 400)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
-                      paperwidth, paperheight,
-                      title, surface,
-                      paperwidth + 400, paperheight + 400, 200)
+                                         paperwidth + frame_width*2,
+                                         paperheight + frame_width*2)
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
+                                                          paperheight),
+                             paperwidth, paperheight,
+                             title, surface,
+                             paperwidth + frame_width*2,
+                             paperheight + frame_width*2, frame_width)
             surface.write_to_png(outfile)
             surface.finish()
         elif format == 'svg':
-            surface = cairo.SVGSurface(outfile, paperwidth + 400, paperheight + 400)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
-                      paperwidth, paperheight,
-                      title, surface,
-                      paperwidth + 400, paperheight + 400, 200)
+            surface = cairo.SVGSurface(outfile, paperwidth + frame_width*2,
+                                       paperheight + frame_width*2)
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
+                                                          paperheight),
+                             paperwidth, paperheight,
+                             title, surface,
+                             paperwidth + frame_width*2,
+                             paperheight + frame_width*2, frame_width)
             surface.finish()
         elif format == 'pdf':
-            surface = cairo.PDFSurface(outfile, paperwidth + 400, paperheight + 400)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
-                      paperwidth, paperheight,
-                      title, surface,
-                      paperwidth + 400, paperheight + 400, 200)
+            surface = cairo.PDFSurface(outfile, paperwidth + frame_width*2,
+                                       paperheight + frame_width*2)
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
+                                                          paperheight),
+                             paperwidth, paperheight,
+                             title, surface,
+                             paperwidth + frame_width*2,
+                             paperheight + frame_width*2,
+                             frame_width)
             surface.finish()
         elif format == 'ps':
-            surface = cairo.PSSurface(outfile, paperwidth + 400, paperheight + 400)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
-                      paperwidth, paperheight,
-                      title, surface,
-                      paperwidth + 400, paperheight + 400, 200)
+            surface = cairo.PSSurface(outfile, paperwidth + frame_width*2,
+                                      paperheight + frame_width*2)
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
+                                                          paperheight),
+                             paperwidth, paperheight,
+                             title, surface,
+                             paperwidth + frame_width*2,
+                             paperheight + frame_width*2, frame_width)
             surface.finish()
         else:
             raise ValueError
 
-    def render_index(self, title, output_prefix, output_format, paperwidth, paperheight):
+    def render_index(self, title, output_prefix, output_format,
+                     paperwidth, paperheight):
         for f in output_format:
-            self._render_one_prefix(title, output_prefix, f, paperwidth, paperheight)
+            self._render_one_prefix(title, output_prefix, f,
+                                    paperwidth, paperheight)
 
     def render_into_files(self, title,
                           out_prefix, out_formats,
@@ -525,8 +542,8 @@ class OCitySMap:
         l.debug('rendering from %s to %s.%s...' % (osm_map_file,
                                                    out_prefix,
                                                    out_formats))
-        bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
-                                                self.griddesc.width_square_angle/2.)
+        bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle*.7,
+                                                self.griddesc.width_square_angle*.7)
         l.debug('bbox is: %s' % bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         l.debug('adding labels...')
@@ -536,7 +553,7 @@ class OCitySMap:
             path_contour = os.path.join(tmpdir, 'contour.shp')
             map_canvas.create_shapefile_polygon_from_wkt(path_contour,
                                                          self.contour)
-            city.add_shapefile(path_contour, str_color = 'black', alpha = .1)
+            city.add_shapefile(path_contour, str_color = 'grey', alpha = .1)
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
@@ -576,20 +593,20 @@ class OCitySMap:
             x = self.griddesc.vertical_lines[idx] \
                 + self.griddesc.width_square_angle/2.
             y = self.griddesc.horizontal_lines[0] \
-                + self.griddesc.height_square_angle/4.
+                + self.griddesc.height_square_angle*.35
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .7,
+                           alpha = .9,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
         for idx, label in enumerate(self.griddesc.horizontal_labels):
             x = self.griddesc.vertical_lines[0] \
-                - self.griddesc.width_square_angle/4.
+                - self.griddesc.width_square_angle*.35
             y = self.griddesc.horizontal_lines[idx] \
                 - self.griddesc.height_square_angle/2.
             city.add_label(x, y, label,
                            str_color = GRID_COLOR,
-                           alpha = .7,
+                           alpha = .9,
                            font_size = font_size,
                            font_family = "DejaVu Sans Bold")
 
