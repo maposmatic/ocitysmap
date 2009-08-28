@@ -303,13 +303,15 @@ class MapCanvas:
 
         # Cairo reendering
         if title is not None:
-            surface = cairo_factory(self._map.width+400,
-                                    self._map.height+400)
+            frame_width = max(self._map.height / 20., 30)
+
+            surface = cairo_factory(self._map.width + frame_width*2,
+                                    self._map.height + frame_width*2)
             enclose_in_frame(lambda ctx: mapnik.render(self._map, ctx),
                              self._map.width, self._map.height,
                              title,
-                             surface, self._map.width+400,
-                             self._map.height+400, 200)
+                             surface, self._map.width + frame_width*2,
+                             self._map.height + frame_width*2, frame_width)
         else:
             surface = cairo_factory(self._map.width, self._map.height)
             ctx = cairo.Context(surface)
