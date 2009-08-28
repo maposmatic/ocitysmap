@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 
-import os, mapnik, logging
+import os, mapnik, logging, locale
 from osgeo import ogr
 from coords import BoundingBox
 from draw_utils import enclose_in_frame
@@ -80,6 +80,27 @@ class GridFile:
 
     def __str__(self):
         return "GridFile(%s)" % self._filepath
+
+
+def create_shapefile_polygon_from_wkt(out_fname, wkt):
+    driver = ogr.GetDriverByName('ESRI Shapefile')
+    if os.path.exists(out_fname):
+        driver.DeleteDataSource(out_fname)
+    ds = driver.CreateDataSource(out_fname)
+    layer = ds.CreateLayer('poly', geom_type=ogr.wkbPolygon)
+
+    prev_locale = locale.getlocale(locale.LC_ALL)
+    locale.setlocale(locale.LC_ALL, "C")
+    try:
+        poly = ogr.CreateGeometryFromWkt(wkt)
+    finally:
+        locale.setlocale(locale.LC_ALL, prev_locale)
+
+    f = ogr.Feature(feature_def = layer.GetLayerDefn())
+    f.SetGeometryDirectly(poly)
+    layer.CreateFeature(f)
+    f.Destroy()
+    ds.Destroy()
 
 
 def _project_envelope(proj, envelope):

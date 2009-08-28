@@ -271,6 +271,7 @@ class OCitySMap:
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db, self.name)
+        self.contour = self.get_city_contour(db, self.name)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -285,6 +286,19 @@ class OCitySMap:
 
         l.info('Looking for bounding box around %s...' % name)
         raise UnsufficientDataError, "Not enough data to find city bounding box!"
+
+    def get_city_contour(self, db, city):
+        cursor = db.cursor()
+        cursor.execute("""select st_astext(st_transform(
+                                    st_difference(st_envelope(way),
+                                                  st_buildarea(way)), 4002))
+                           from planet_osm_line
+                           where boundary='administrative'
+                                 and admin_level='8' and name='%s';""" % city)
+        sl = cursor.fetchall()
+        cell00 = sl[0][0].strip()
+        if not cell00: return None
+        return cell00
 
     def get_streets(self, db, city):
 
@@ -463,6 +477,13 @@ class OCitySMap:
         l.debug('bbox is: %s' % bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         l.debug('adding labels...')
+
+        # Add the greyed-out area
+        if self.contour is not None:
+            path_contour = os.path.join(tmpdir, 'contour.shp')
+            map_canvas.create_shapefile_polygon_from_wkt(path_contour,
+                                                         self.contour)
+            city.add_shapefile(path_contour, str_color = 'red', alpha = .5)
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
