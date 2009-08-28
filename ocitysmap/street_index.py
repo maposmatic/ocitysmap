@@ -245,7 +245,7 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, name, boundingbox=None, zooms=[]):
+    def __init__(self, name, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
@@ -254,11 +254,8 @@ class OCitySMap:
                 the city's bounding box. If not given, OCitySMap will try to
                 guess the bounding box from the OSM data. An UnsufficientDataError
                 exception will be raised in the bounding box can't be guessed.
-            zooms (dict): A dictionnary of zoom sections to add to the map. The
-                dictionnary maps a zoom box title to its bounding box
-                (BoundingBox objects).
         """
-        (self.name, self.boundingbox, self.zooms) = (name, boundingbox, zooms)
+        (self.name, self.boundingbox) = (name, boundingbox)
 
         l.info('OCitySMap renderer for %s.' % self.name)
                
@@ -269,10 +266,6 @@ class OCitySMap:
             raise IOError, 'Failed to load the config file'
         datasource = dict(self.parser.items('datasource'))
                                        
-        l.info('%d zoom section(s).' % len(self.zooms))
-        for name, box in self.zooms.iteritems():
-            l.debug('"%s": %s' % (name, str(box)))
-
         if not self.boundingbox:
             self.boundingbox = self.find_bounding_box(self.name)
 

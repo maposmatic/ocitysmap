@@ -29,10 +29,6 @@ def main():
     parser.add_option('--no-frame', dest='no_frame', action='store_true',
                       default=False,
                       help="Don't insert the map and index inside a frame")
-    parser.add_option('-e', '--enclosure', dest='zooms', action='append',
-                      nargs=3, metavar='NAME BBOX',
-                      help='Specify a zoomed section by its named '
-                           'bounding box.')
     parser.add_option('-z', '--zoom-factor',
                       metavar='[0-18]', help='Zoom factor for the'
                       'rendering (default=16)', type='int', default =16)
@@ -58,15 +54,6 @@ def main():
         options.output_format = ['svg']
 
     # Parse bounding box arguments
-    zooms = {}
-    if options.zooms:
-        for zoom in options.zooms:
-            try:
-                zooms[zoom[0]] = ocitysmap.BoundingBox.parse(zoom[1:])
-            except ValueError:
-                sys.stderr.write('ERROR: Invalid bounding box for zoom section %s!\n' % zoom[0])
-                return 1
-
     boundingbox = None
     try:
         boundingbox = ocitysmap.BoundingBox.parse(options.bbox)
@@ -75,8 +62,7 @@ def main():
         return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(args[0],
-                                       boundingbox, zooms)
+        renderer = ocitysmap.OCitySMap(args[0], boundingbox)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
