@@ -487,7 +487,7 @@ class OCitySMap:
             path_contour = os.path.join(tmpdir, 'contour.shp')
             map_canvas.create_shapefile_polygon_from_wkt(path_contour,
                                                          self.contour)
-            city.add_shapefile(path_contour, str_color = 'red', alpha = .5)
+            city.add_shapefile(path_contour, str_color = 'black', alpha = .1)
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
