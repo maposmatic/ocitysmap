@@ -11,8 +11,6 @@ from draw_utils import enclose_in_frame
 
 l = logging.getLogger('ocitysmap')
 
-locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
-
 APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
                  u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", u"Degré",
                  u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
@@ -281,6 +279,7 @@ class OCitySMap:
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db, self.city_name)
+        self.contour = self.get_city_contour(db, self.city_name)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -312,6 +311,36 @@ class OCitySMap:
                            coords[3][1], coords[3][0])
         l.debug('found bbox %s' % bbox)
         return bbox
+
+    _regexp_contour = re.compile('^POLYGON\(\((\S*) (\S*),\S* (\S*),(\S*) \S*,\S* \S*,\S* \S*\),\(([^)]*)\)\)$')
+
+    def get_city_contour(self, db, city):
+        cursor = db.cursor()
+        cursor.execute("""select st_astext(st_transform(
+                                    st_difference(st_envelope(way),
+                                                  st_buildarea(way)), 4002))
+                           from planet_osm_line
+                           where boundary='administrative'
+                                 and admin_level='8' and name='%s';""" % city)
+        sl = cursor.fetchall()
+        cell00 = sl[0][0].strip()
+        if not cell00: return None
+
+        # Parse the answer, in order to add a margin around the area
+        print "ORIG", cell00
+        prev_locale = locale.getlocale(locale.LC_ALL)
+        locale.setlocale(locale.LC_ALL, "C")
+        try:
+            matches = self._regexp_contour.match(cell00)
+            ymin, xmin, xmax, ymax, inside = matches.groups()
+            xmin, ymin, ymax, xmax = map(float, (xmin, ymin, ymax, xmax))
+            xmin -= 1. ; xmax += 1.
+            ymin -= 1. ; ymax += 1.
+            return "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f),(%s))" \
+                % (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
+                   inside)
+        finally:
+            locale.setlocale(locale.LC_ALL, prev_locale)
 
     def get_streets(self, db, city):
 
@@ -400,8 +429,14 @@ class OCitySMap:
         # Street prefixes are postfixed, a human readable label is
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
-        sl = sorted(map(_humanize_street_label, sl),
-                          lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        prev_locale = locale.getlocale(locale.LC_COLLATE)
+        locale.setlocale(locale.LC_COLLATE, "fr_FR.UTF-8")
+        try:
+            sl = sorted(map(_humanize_street_label, sl),
+                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        finally:
+            locale.setlocale(locale.LC_COLLATE, prev_locale)
+
         return sl
 
 
@@ -496,32 +531,39 @@ class OCitySMap:
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
         l.debug('adding labels...')
 
+        # Add the greyed-out area
+        if self.contour is not None:
+            path_contour = os.path.join(tmpdir, 'contour.shp')
+            map_canvas.create_shapefile_polygon_from_wkt(path_contour,
+                                                         self.contour)
+            city.add_shapefile(path_contour, str_color = 'black', alpha = .1)
+
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
         l.debug('500m = %f pixels' % half_km_in_pixels)
         if half_km_in_pixels < 10:
-            font_size  = 8
+            font_size  = 6
             line_width = 1
         elif half_km_in_pixels < 25:
-            font_size = 12
+            font_size = 10
             line_width = 1
         elif half_km_in_pixels < 50:
-            font_size = 25
+            font_size = 20
             line_width = 2
         elif half_km_in_pixels < 100:
-            font_size = 50
+            font_size = 40
             line_width = 3
         elif half_km_in_pixels < 150:
-            font_size = 75
+            font_size = 65
             line_width = 4
         elif half_km_in_pixels < 200:
-            font_size = 100
+            font_size = 80
             line_width = 5
         elif half_km_in_pixels < 400:
-            font_size = 150
+            font_size = 120
             line_width = 6
         else:
-            font_size = 250
+            font_size = 200
             line_width = 7
 
         # Add the grid
