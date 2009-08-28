@@ -6,22 +6,28 @@ and the MapNik map renderer. The generated maps are vector graphics images,
 including a street index and city grid.
 
 For example, for a simple Sanguinet rendering, run:
- ./render.py -x /path/to/osm.xml -f png Sanguinet 44.4883,-1.0901 44.4778,-1.0637
+ ./ocitysmap-render -f png Sanguinet 44.4883,-1.0901 44.4778,-1.0637
 
 And to render Colomiers, run
- ./render.py -x /path/to/osm.xml -f png Colomiers 43.6395,1.2821 43.5852,1.369
+ ./ocitysmap-render -f png Colomiers 43.6395,1.2821 43.5852,1.369
 
 To render Toulouse, run
- ./render.py -x /path/to/osm.xml -f png Toulouse 43.5326515845001,1.35039553881146 43.6687092781784,1.5153795624458
+ ./ocitysmap-render -f png Toulouse 43.5326515845001,1.35039553881146 43.6687092781784,1.5153795624458
 
 To render Arles, run
- ./render.py -x /path/to/osm.xml -f png Arles 43.3269328732288,4.42607913033835 43.7604091424137,4.87635236769157
+ ./ocitysmap-render -f png Arles 43.3269328732288,4.42607913033835 43.7604091424137,4.87635236769157
 
 To render Paris, run
- ./render.py -x /path/to/osm.xml -f png Paris 48.8155243047565,2.22405964791711 48.9021584078545,2.46979772401737
+ ./ocitysmap-render -f png Paris 48.8155243047565,2.22405964791711 48.9021584078545,2.46979772401737
+
+You should first create /etc/ocitysmap.conf and/or ~/.ocitysmap from the
+template ocitysmap.conf.
 
 Dependencies
  - python-pygresql
+ - python-mapnik
+ - python-gdal
  - a PostGIS database filled with OpenStreetMap data
+ - Mapnik data for OSM rendering and configured osm.xml file
 
 By dave, d2, kos_tom, gael, fred and sam.

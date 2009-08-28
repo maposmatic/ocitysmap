@@ -36,22 +36,11 @@ def main():
     parser.add_option('-z', '--zoom-factor',
                       metavar='[0-18]', help='Zoom factor for the'
                       'rendering (default=16)', type='int', default =16)
-    parser.add_option('-x', '--osm-xml', dest='osm_xml', metavar='PATH',
-                      help='Path to the osm.xml file')
 
     (options, args) = parser.parse_args()
     if len(args) != 1 and len(args) != 3:
         parser.print_help()
         return 1
-
-    if not options.osm_xml:
-        try:
-            options.osm_xml = os.environ['OSM_XML']
-        except KeyError:
-            parser.error("Invalid -m option and no OSM_XML env var")
-    if not os.path.exists(options.osm_xml):
-        parser.error("Invalid path to the osm.xml file (%s)"
-                     % options.osm_xml)
 
     try:
         options.zoom_factor = int(options.zoom_factor)
@@ -84,15 +73,15 @@ def main():
         return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(args[0], boundingbox, zooms)
+        renderer = ocitysmap.OCitySMap(args[0],
+                                       boundingbox, zooms)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(options.osm_xml,
-                                      options.output_title,
+    _map = renderer.render_into_files(options.output_title,
                                       options.output_prefix,
                                       options.output_format,
                                       "zoom:%d" % options.zoom_factor)
