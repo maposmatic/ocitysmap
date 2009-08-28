@@ -4,7 +4,7 @@
 import os, mapnik, logging
 from osgeo import ogr
 from coords import BoundingBox
-from draw_utils import borderize
+from draw_utils import enclose_in_frame
 
 try:
     import cairo
@@ -284,11 +284,11 @@ class MapCanvas:
         if title is not None:
             surface = cairo_factory(self._map.width+400,
                                     self._map.height+400)
-            borderize(lambda ctx: mapnik.render(self._map, ctx),
-                      self._map.width, self._map.height,
-                      title,
-                      surface, self._map.width+400,
-                      self._map.height+400, 200)
+            enclose_in_frame(lambda ctx: mapnik.render(self._map, ctx),
+                             self._map.width, self._map.height,
+                             title,
+                             surface, self._map.width+400,
+                             self._map.height+400, 200)
         else:
             surface = cairo_factory(self._map.width, self._map.height)
             ctx = cairo.Context(surface)

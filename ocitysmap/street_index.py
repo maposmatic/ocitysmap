@@ -5,7 +5,7 @@ import sys, os, tempfile, pgdb, re, math, cairo, locale
 
 import map_canvas, grid, utils
 
-from draw_utils import borderize
+from draw_utils import enclose_in_frame
 
 l = logging.getLogger('ocitysmap')
 
@@ -386,7 +386,7 @@ class OCitySMap:
         if format == 'png' or format == 'png24':
             surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
                                          paperwidth + 400, paperheight + 400)
-            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
                       paperwidth, paperheight,
                       title, surface,
                       paperwidth + 400, paperheight + 400, 200)
@@ -394,21 +394,21 @@ class OCitySMap:
             surface.finish()
         elif format == 'svg':
             surface = cairo.SVGSurface(outfile, paperwidth + 400, paperheight + 400)
-            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
                       paperwidth, paperheight,
                       title, surface,
                       paperwidth + 400, paperheight + 400, 200)
             surface.finish()
         elif format == 'pdf':
             surface = cairo.PDFSurface(outfile, paperwidth + 400, paperheight + 400)
-            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
                       paperwidth, paperheight,
                       title, surface,
                       paperwidth + 400, paperheight + 400, 200)
             surface.finish()
         elif format == 'ps':
             surface = cairo.PSSurface(outfile, paperwidth + 400, paperheight + 400)
-            borderize(lambda ctx: generator.render(ctx, paperwidth, paperheight),
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth, paperheight),
                       paperwidth, paperheight,
                       title, surface,
                       paperwidth + 400, paperheight + 400, 200)

@@ -1,9 +1,9 @@
 
 import cairo
 
-def borderize(renderer, insurf_w, insurf_h,
-              title,
-              outsurf, outsurf_w, outsurf_h, out_margin):
+def enclose_in_frame(renderer, insurf_w, insurf_h,
+                     title,
+                     outsurf, outsurf_w, outsurf_h, out_margin):
     """
     Fill the given surface with the contents of another one and a
     frame around it
