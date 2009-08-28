@@ -305,7 +305,7 @@ class OCitySMap:
                           from planet_osm_line
                           where boundary='administrative' and
                                 admin_level='8' and
-                                name='%s';""" % name)
+                                name='%s';""" % pgdb.escape_string(name))
         records = cursor.fetchall()
         if not records:
             raise UnsufficientDataError, "Wrong city name or missing administrative boundary in database!"
@@ -321,7 +321,7 @@ class OCitySMap:
                                                   st_buildarea(way)), 4002))
                            from planet_osm_line
                            where boundary='administrative'
-                                 and admin_level='8' and name='%s';""" % city)
+                                 and admin_level='8' and name='%s';""" % pgdb.escape_string(city))
         sl = cursor.fetchall()
         cell00 = sl[0][0].strip()
         if not cell00: return None
@@ -416,7 +416,7 @@ class OCitySMap:
                                 end)
                           as foo
                           group by name
-                          order by name;""" % city)
+                          order by name;""" % pgdb.escape_string(city))
 
         sl = cursor.fetchall()
 
