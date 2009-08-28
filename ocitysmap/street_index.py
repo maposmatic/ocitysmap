@@ -327,7 +327,6 @@ class OCitySMap:
         if not cell00: return None
 
         # Parse the answer, in order to add a margin around the area
-        print "ORIG", cell00
         prev_locale = locale.getlocale(locale.LC_ALL)
         locale.setlocale(locale.LC_ALL, "C")
         try:
