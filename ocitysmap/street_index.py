@@ -426,7 +426,7 @@ class OCitySMap:
     def _render_one_prefix(self, title, output_prefix, format,
                            paperwidth, paperheight):
         format      = format.lower()
-        frame_width = max(paperheight / 20., 30)
+        frame_width = int(max(paperheight / 20., 30))
 
         outfile = "%s_index.%s" % (output_prefix, format)
         l.debug("rendering " + outfile + "...")

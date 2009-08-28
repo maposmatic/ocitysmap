@@ -303,7 +303,7 @@ class MapCanvas:
 
         # Cairo reendering
         if title is not None:
-            frame_width = max(self._map.height / 20., 30)
+            frame_width = int(max(self._map.height / 20., 30))
 
             surface = cairo_factory(self._map.width + frame_width*2,
                                     self._map.height + frame_width*2)
