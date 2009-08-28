@@ -468,28 +468,28 @@ class OCitySMap:
         half_km_in_pixels = city.one_meter_in_pixels * 500.
         l.debug('500m = %f pixels' % half_km_in_pixels)
         if half_km_in_pixels < 10:
-            font_size  = 8
+            font_size  = 6
             line_width = 1
         elif half_km_in_pixels < 25:
-            font_size = 12
+            font_size = 10
             line_width = 1
         elif half_km_in_pixels < 50:
-            font_size = 25
+            font_size = 20
             line_width = 2
         elif half_km_in_pixels < 100:
-            font_size = 50
+            font_size = 40
             line_width = 3
         elif half_km_in_pixels < 150:
-            font_size = 75
+            font_size = 65
             line_width = 4
         elif half_km_in_pixels < 200:
-            font_size = 100
+            font_size = 80
             line_width = 5
         elif half_km_in_pixels < 400:
-            font_size = 150
+            font_size = 120
             line_width = 6
         else:
-            font_size = 250
+            font_size = 200
             line_width = 7
 
         # Add the grid
