@@ -36,9 +36,11 @@ def main():
     parser.add_option('-z', '--zoom-factor',
                       metavar='[0-18]', help='Zoom factor for the'
                       'rendering (default=16)', type='int', default =16)
+    parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
+                      metavar='LAT1,LON1 LAT2,LON2', help='Bounding box')
 
     (options, args) = parser.parse_args()
-    if len(args) != 1 and len(args) != 3:
+    if len(args) != 1:
         parser.print_help()
         return 1
 
@@ -67,7 +69,7 @@ def main():
 
     boundingbox = None
     try:
-        boundingbox = ocitysmap.BoundingBox.parse(args[1:])
+        boundingbox = ocitysmap.BoundingBox.parse(options.bbox)
     except ValueError:
         sys.stderr.write('ERROR: Invalid city bounding box!\n')
         return 1
