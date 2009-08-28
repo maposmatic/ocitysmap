@@ -71,9 +71,9 @@ class GridDescriptor:
                 / 5.
 
         bbox = coords.BoundingBox(line_lat + height_lat,
-                                  self.vertical_lines[0],
+                                  self.vertical_lines[0]-1.e-5,
                                   line_lat - height_lat,
-                                  self.vertical_lines[1])
+                                  self.vertical_lines[1]+1.e-5)
 
         g = map_canvas.GridFile(bbox, filename) # bbox, filename)
         g.add_horiz_line(line_lat)
