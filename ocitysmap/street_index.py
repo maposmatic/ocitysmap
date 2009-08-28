@@ -9,8 +9,6 @@ from draw_utils import enclose_in_frame
 
 l = logging.getLogger('ocitysmap')
 
-locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
-
 APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
                  u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", u"Degré",
                  u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
@@ -386,8 +384,14 @@ class OCitySMap:
         # Street prefixes are postfixed, a human readable label is
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
-        sl = sorted(map(_humanize_street_label, sl),
-                          lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        prev_locale = locale.getlocale(locale.LC_COLLATE)
+        locale.setlocale(locale.LC_COLLATE, "fr_FR.UTF-8")
+        try:
+            sl = sorted(map(_humanize_street_label, sl),
+                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        finally:
+            locale.setlocale(locale.LC_COLLATE, prev_locale)
+
         return sl
 
 
