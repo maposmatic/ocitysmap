@@ -57,11 +57,15 @@ class GridDescriptor:
         if len(self.horizontal_lines) < 2 or len(self.vertical_lines) < 2:
             return None
 
-        height_lat = (self.horizontal_lines[-2] - self.horizontal_lines[-1])/20
+        height_lat = (self.horizontal_lines[-2] - self.horizontal_lines[-1])/30
 
-        if base_lat < self.horizontal_lines[-1]:
+        # Make sure there is enough room between the last horiz line
+        # and the bottom:
+        if base_lat + (self.horizontal_lines[-1] - base_lat) / 3. \
+                + 2*height_lat < self.horizontal_lines[-1]:
             line_lat = base_lat + (self.horizontal_lines[-1] - base_lat) / 3.
         else:
+            # Nope...
             line_lat = self.horizontal_lines[-1] \
                 + (self.horizontal_lines[-2] - self.horizontal_lines[-1]) \
                 / 5.
