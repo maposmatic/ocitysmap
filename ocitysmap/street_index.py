@@ -307,16 +307,11 @@ class OCitySMap:
                           where boundary='administrative' and
                                 admin_level='8' and
                                 name='%s';""" % name)
-        bbox_str = cursor.fetchall()
-        if not bbox_str:
-            raise UnsufficientDataError, "Not enough data to find city bounding box!"
+        records = cursor.fetchall()
+        if not records:
+            raise UnsufficientDataError, "Wrong city name or missing administrative boundary in database!"
         
-        coords = [p.split(' ') for p in bbox_str[0][0][9:].split(',')]
-        
-        bbox = BoundingBox(coords[1][1], coords[1][0],
-                           coords[3][1], coords[3][0])
-        l.debug('found bbox %s' % bbox)
-        return bbox
+        return BoundingBox.parse_wkt(records[0][0])
 
     def get_streets(self, db, city):
 
