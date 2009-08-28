@@ -2,6 +2,7 @@
 
 import logging, traceback
 import sys, os, tempfile, pgdb, re, math, cairo, locale
+import ConfigParser
 
 import map_canvas, grid, utils
 
@@ -244,12 +245,11 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, name, datasource, boundingbox=None, zooms=[]):
+    def __init__(self, name, boundingbox=None, zooms=[]):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
             name (string): The name of the city we're created the map of.
-            datasource (dict): Database parameters (host, user, password, dbname)
             boundingbox (BoundingBox): An optional BoundingBox object defining
                 the city's bounding box. If not given, OCitySMap will try to
                 guess the bounding box from the OSM data. An UnsufficientDataError
@@ -261,6 +261,14 @@ class OCitySMap:
         (self.name, self.boundingbox, self.zooms) = (name, boundingbox, zooms)
 
         l.info('OCitySMap renderer for %s.' % self.name)
+               
+        l.info('Reading config file.')
+        self.parser = ConfigParser.RawConfigParser()
+        if not self.parser.read(['/etc/ocitysmap.conf',
+                                      os.getenv('HOME') + '/.ocitysmap.conf']):
+            raise IOError, 'Failed to load the config file'
+        datasource = dict(self.parser.items('datasource'))
+                                       
         l.info('%d zoom section(s).' % len(self.zooms))
         for name, box in self.zooms.iteritems():
             l.debug('"%s": %s' % (name, str(box)))
@@ -423,12 +431,11 @@ class OCitySMap:
         for f in output_format:
             self._render_one_prefix(title, output_prefix, f, paperwidth, paperheight)
 
-    def render_into_files(self, osm_map_file, title,
+    def render_into_files(self, title,
                           out_prefix, out_formats,
                           zoom_factor):
         """
         Render the current boundingbox into the destination files.
-        @param osm_map_file (string) path to the osm.xml file
         @param title (string/None) title of the map, or None: no frame
         @param out_prefix (string) prefix to use for generated files
         @param out_formats (iterable of strings) format of image files
@@ -438,6 +445,11 @@ class OCitySMap:
         returns the MApnik map object used to render the map
         """
         # Create a temporary dir for the shapefiles and call _render_into_files
+
+        osm_map_file = self.parser.get('mapnik', 'map')
+        if not os.path.exists(osm_map_file):
+            raise IOError, 'Invalid path to the osm.xml file (%s)' % osm_map_file
+
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('rendering tmp dir: %s' % tmpdir)
         try:

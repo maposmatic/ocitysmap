@@ -6,18 +6,11 @@ __version__ = '0.1'
 import logging
 import optparse
 import sys, os
-import ConfigParser
 
 import ocitysmap
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-
-    configparser = ConfigParser.RawConfigParser()
-    if not configparser.read(['/etc/ocitysmap.conf',
-                             os.getenv('HOME') + '/.ocitysmap.conf']):
-        sys.stderr.write('ERROR: Failed to load config file!\n')
-        return 1
 
     usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
     parser = optparse.OptionParser(usage=usage,
@@ -48,11 +41,6 @@ def main():
     if len(args) != 1 and len(args) != 3:
         parser.print_help()
         return 1
-
-    osm_xml = configparser.get('mapnik', 'map')
-    if not os.path.exists(osm_xml):
-        parser.error("Invalid path to the osm.xml file (%s)"
-                     % osm_xml)
 
     try:
         options.zoom_factor = int(options.zoom_factor)
@@ -86,7 +74,6 @@ def main():
 
     try:
         renderer = ocitysmap.OCitySMap(args[0],
-                                       dict(configparser.items('datasource')),
                                        boundingbox, zooms)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
@@ -94,8 +81,7 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(osm_xml,
-                                      options.output_title,
+    _map = renderer.render_into_files(options.output_title,
                                       options.output_prefix,
                                       options.output_format,
                                       "zoom:%d" % options.zoom_factor)
