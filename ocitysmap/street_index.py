@@ -246,10 +246,11 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, city_name=None, boundingbox=None):
+    def __init__(self, config_file, city_name=None, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
+            config_file: location of the config file
             city_name (string): The name of the city we're created the map of.
             boundingbox (BoundingBox): An optional BoundingBox object defining
                 the city's bounding box. If not given, OCitySMap will try to
@@ -266,8 +267,12 @@ class OCitySMap:
                
         l.info('Reading config file.')
         self.parser = ConfigParser.RawConfigParser()
-        if not self.parser.read(['/etc/ocitysmap.conf',
-                                      os.getenv('HOME') + '/.ocitysmap.conf']):
+        if config_file:
+            config_files = [config_file]
+        else:
+            config_files = ['/etc/ocitysmap.conf',
+                            os.getenv('HOME') + '/.ocitysmap.conf']
+        if not self.parser.read(config_files):
             raise IOError, 'Failed to load the config file'
         datasource = dict(self.parser.items('datasource'))
 
