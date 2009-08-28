@@ -3,6 +3,7 @@
 import logging, traceback
 import sys, os, tempfile, pgdb, re, math, cairo, locale
 import ConfigParser
+from coords import BoundingBox
 
 import map_canvas, grid, utils
 
@@ -245,7 +246,7 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, city_name, boundingbox=None):
+    def __init__(self, city_name=None, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
@@ -255,9 +256,13 @@ class OCitySMap:
                 guess the bounding box from the OSM data. An UnsufficientDataError
                 exception will be raised in the bounding box can't be guessed.
         """
+        assert bool(city_name) ^ bool(boundingbox)
         (self.city_name, self.boundingbox) = (city_name, boundingbox)
 
-        l.info('OCitySMap renderer for %s.' % self.city_name)
+        if self.city_name:
+            l.info('OCitySMap renderer for %s.' % self.city_name)
+        else:
+            l.info('OCitySMap renderer for %s.' % self.boundingbox)
                
         l.info('Reading config file.')
         self.parser = ConfigParser.RawConfigParser()
@@ -265,34 +270,53 @@ class OCitySMap:
                                       os.getenv('HOME') + '/.ocitysmap.conf']):
             raise IOError, 'Failed to load the config file'
         datasource = dict(self.parser.items('datasource'))
-                                       
-        if not self.boundingbox:
-            self.boundingbox = self.find_bounding_box(self.city_name)
 
         db = pgdb.connect('Notre Base', datasource['user'],
                           datasource['password'], datasource['host'],
                           datasource['dbname'])
+                                                                 
+        if not self.boundingbox:
+            self.boundingbox = self.find_bounding_box(db, self.city_name)
+
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
         self.streets = self.get_streets(db, self.city_name)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 
-    def find_bounding_box(self, name):
+    def find_bounding_box(self, db, name):
         """Find the bounding box of a city from its name.
 
         Args:
+            db: connection to the database
             name (string): The city name.
-        Returns a 4-uple of GPS coordinates describing the bounding box around
-        the given city (top-left, top-right, bottom-right, bottom-left).
+        Returns a BoundingBox object describing the bounding box around
+        the given city.
         """
 
         l.info('Looking for bounding box around %s...' % name)
-        raise UnsufficientDataError, "Not enough data to find city bounding box!"
+
+        cursor = db.cursor()
+        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
+                          from planet_osm_line
+                          where boundary='administrative' and
+                                admin_level='8' and
+                                name='%s';""" % name)
+        bbox_str = cursor.fetchall()
+        if not bbox_str:
+            raise UnsufficientDataError, "Not enough data to find city bounding box!"
+        
+        coords = [p.split(' ') for p in bbox_str[0][0][9:].split(',')]
+        
+        bbox = BoundingBox(coords[1][1], coords[1][0],
+                           coords[3][1], coords[3][0])
+        l.debug('found bbox %s' % bbox)
+        return bbox
 
     def get_streets(self, db, city):
 
-        """Get the list of streets in the bounding box, and for each
+        """Get the list of streets in the administrative area if city is
+        defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
 
         Returns a list of the form [(street_name, [[0, 1], [1, 1]]),

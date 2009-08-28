@@ -55,13 +55,20 @@ def main():
     if not options.output_format:
         options.output_format = ['svg']
 
+    if not options.city_name and not options.bbox:
+      parser.error("One of --city or --bounding-box is mandatory")
+
+    if options.city_name and options.bbox:
+      parser.error("--city or --bounding-box are exclusive")
+
     # Parse bounding box arguments
     boundingbox = None
-    try:
-        boundingbox = ocitysmap.BoundingBox.parse(options.bbox)
-    except ValueError:
-        sys.stderr.write('ERROR: Invalid city bounding box!\n')
-        return 1
+    if options.bbox:
+        try:
+            boundingbox = ocitysmap.BoundingBox.parse(options.bbox)
+        except ValueError:
+            sys.stderr.write('ERROR: Invalid city bounding box!\n')
+            return 1
 
     try:
         renderer = ocitysmap.OCitySMap(options.city_name, boundingbox)
