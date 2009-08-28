@@ -1,6 +1,6 @@
 # -*- coding: utf-8; mode: Python -*-
 
-import logging
+import logging, traceback
 import sys, os, tempfile, pgdb, re, math, cairo, locale
 
 import map_canvas, grid, utils
@@ -420,12 +420,16 @@ class OCitySMap:
         for f in output_format:
             self._render_one_prefix(title, output_prefix, f, paperwidth, paperheight)
 
-    def render_into_files(self, osm_map_file, out_prefix, out_format, zoom_factor):
+    def render_into_files(self, osm_map_file, title,
+                          out_prefix, out_formats,
+                          zoom_factor):
         """
         Render the current boundingbox into the destination files.
         @param osm_map_file (string) path to the osm.xml file
+        @param title (string/None) title of the map, or None: no frame
         @param out_prefix (string) prefix to use for generated files
-        @param out_format (iterable of strings) format of image files to generate
+        @param out_formats (iterable of strings) format of image files
+        to generate
         @param zoom_factor None, a tuple (pixels_x, pixel_y) or
         'zoom:X' with X an integer [1..18]
         returns the MApnik map object used to render the map
@@ -435,7 +439,9 @@ class OCitySMap:
         l.debug('rendering tmp dir: %s' % tmpdir)
         try:
             return self._render_into_files(tmpdir, osm_map_file,
-                                           ["%s.%s" % (out_prefix, f) for f in out_format], zoom_factor)
+                                           title,
+                                           out_prefix, out_formats,
+                                           zoom_factor)
         finally:
             for root, dirs, files in os.walk(tmpdir, topdown=False):
                 for name in files:
@@ -445,10 +451,13 @@ class OCitySMap:
             os.rmdir(tmpdir)
 
     def _render_into_files(self, tmpdir,
-                           osm_map_file, out_filenames, zoom_factor):
+                           osm_map_file, title, out_prefix, out_formats,
+                           zoom_factor):
         # Does the real job of rendering the map
         GRID_COLOR = '#8BB381'
-        l.debug('rendering from %s to %s...' % (osm_map_file, out_filenames))
+        l.debug('rendering from %s to %s.%s...' % (osm_map_file,
+                                                   out_prefix,
+                                                   out_formats))
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle/2.,
                                                 self.griddesc.width_square_angle/2.)
         l.debug('bbox is: %s' % bbox)
@@ -522,15 +531,16 @@ class OCitySMap:
         # Rendering...
         l.debug('rendering map...')
         _map = city.render_map()
-        for fname in out_filenames:
-            l.debug('saving as %s...' % fname)
+        for fmt in out_formats:
+            l.debug('saving %s...' % fmt)
             try:
-                city.save_map(fname)
-            except Exception, ex:
-                print >>sys.stderr, \
-                    "Error while rendering to %s: %s" % (fname, ex)
+                city.save_map("%s.%s" % (out_prefix, fmt),
+                              title,
+                              file_type = fmt)
             except:
                 print >>sys.stderr, \
-                    "Error while rendering to %s." % (fname)
+                    "Error while rendering %s:" % (fmt)
+                traceback.print_exc()
+                # Not fatal !
 
         return _map

@@ -18,9 +18,15 @@ def borderize(renderer, insurf_w, insurf_h,
 
     ctx = cairo.Context(outsurf)
 
-    # ctx.set_source_rgb (.1, 1, .1)
-    # ctx.set_operator (cairo.OPERATOR_OVER)
-    # ctx.paint()
+    ctx.save()
+
+    # Reset background
+    ctx.set_source_rgb (1, 1, 1)
+    ctx.set_operator (cairo.OPERATOR_OVER)
+    ctx.paint()
+
+    # Default pen color
+    ctx.set_source_rgb (0, 0, 0)
 
     # Draw the surface with a margin around it
     ctx.save()
@@ -60,4 +66,5 @@ def borderize(renderer, insurf_w, insurf_h,
     ctx.stroke()
     ctx.restore()
 
+    ctx.restore()
     return outsurf

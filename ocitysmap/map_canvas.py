@@ -242,7 +242,7 @@ class MapCanvas:
         from the filename (its extension). It can be forced with the
         'file_type' parameter.
         @param output_filename (string) file to generate
-        @param file_type (string) None, or 'xml', 'png', 'jpg', 'ps',
+        @param file_type (string) None, or 'xml', 'png', 'ps',
         'pdf', 'svg'
         @param force (bool) fore render_map() to be called, even if it
         does not appear to have changed since last render_map()
@@ -254,46 +254,57 @@ class MapCanvas:
             file_type = output_filename.split('.')[-1]
         
         file_type = file_type.lower()
+        cairo_factory = None
+
         if file_type == 'xml':
             mapnik.save_map(self._map, output_filename)
-        elif file_type == 'png8': # 8-bits
-            mapnik.render_to_file(self._map, output_filename, 'png256')
-        elif file_type == 'png': # 24-bits by default
-            mapnik.render_to_file(self._map, output_filename, 'png')
-        elif file_type in ('jpg', 'jpeg'):
-            mapnik.render_to_file(self._map, output_filename, 'jpeg')
+            return
+
+        elif file_type in ('png', 'png24'): # 24-bits, the default
+            if (title is None) or (cairo is None):
+                mapnik.render_to_file(self._map, output_filename, 'png')
+                return
+            else:
+                cairo_factory = \
+                    lambda w,h: cairo.ImageSurface(cairo.FORMAT_RGB24, w, h)
+
         elif file_type == 'svg' and cairo is not None:
-            surface = cairo.SVGSurface(output_filename,
-                                       self._map.width+400,
-                                       self._map.height+400)
-            borderize(lambda ctx: mapnik.render(self._map, ctx),
-                      self._map.width, self._map.height,
-                      title,
-                      surface, self._map.width+400,
-                      self._map.height+400, 200)
-            
+            cairo_factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
+
         elif file_type == 'pdf' and cairo is not None:
-            surface = cairo.PDFSurface(output_filename,
-                                       self._map.width+400,
-                                       self._map.height+400)
-            borderize(lambda ctx: mapnik.render(self._map, ctx),
-                      self._map.width, self._map.height,
-                      title,
-                      surface, self._map.width+400,
-                      self._map.height+400, 200)
+            cairo_factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
 
         elif file_type == 'ps' and cairo is not None:
-            surface = cairo.PSSurface(output_filename,
-                                      self._map.width+400,
-                                      self._map.height+400)
-            borderize(lambda ctx: mapnik.render(self._map, ctx),
-                      self._map.width, self._map.height,
-                      title,
-                      surface, self._map.width+400,
-                      self._map.height+400, 200)
+            cairo_factory = lambda w,h: cairo.PSSurface(output_filename, w, h)
 
         else:
             raise ValueError('Unsupported output format: %s' % file_type)
+
+        # Cairo reendering
+        if title is not None:
+            surface = cairo_factory(self._map.width+400,
+                                    self._map.height+400)
+            borderize(lambda ctx: mapnik.render(self._map, ctx),
+                      self._map.width, self._map.height,
+                      title,
+                      surface, self._map.width+400,
+                      self._map.height+400, 200)
+        else:
+            surface = cairo_factory(self._map.width, self._map.height)
+            ctx = cairo.Context(surface)
+            mapnik.render(self._map, ctx)
+
+        surface.flush()
+
+        # png rendering with cairo...
+        if file_type in ('png', 'png24', 'png8'):
+            out_file = open(output_filename, 'wb')
+            try:
+                surface.write_to_png(out_file)
+            finally:
+                out_file.close()
+
+        surface.finish()
 
 
 if __name__ == "__main__":

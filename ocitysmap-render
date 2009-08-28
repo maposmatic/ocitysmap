@@ -16,13 +16,19 @@ def main():
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
-                      help='Specify the prefix of generated files.'
+                      help='Specify the prefix of generated files. '
                            'Defaults to "citymap"',
                       default='citymap')
     parser.add_option('-f', '--format', dest='output_format', metavar='FMT',
-                      help='Specify the output formats. Defaults to'
+                      help='Specify the output formats. Defaults to '
                            'SVG. May be specified multiple times.',
                       action='append')
+    parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
+                      help='Specify the title displayed in the output files',
+                      default="City's Map")
+    parser.add_option('--no-frame', dest='no_frame', action='store_true',
+                      default=False,
+                      help="Don't insert the map and index inside a frame")
     parser.add_option('-e', '--enclosure', dest='zooms', action='append',
                       nargs=3, metavar='NAME BBOX',
                       help='Specify a zoomed section by its named '
@@ -54,6 +60,9 @@ def main():
     if options.zoom_factor < 0 or options.zoom_factor > 18:
         parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
+    if options.no_frame:
+        options.output_title = None
+
     if not options.output_format:
         options.output_format = ['svg']
 
@@ -82,11 +91,14 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(options.osm_xml, options.output_prefix,
+    _map = renderer.render_into_files(options.osm_xml,
+                                      options.output_title,
+                                      options.output_prefix,
                                       options.output_format,
                                       "zoom:%d" % options.zoom_factor)
 
-    renderer.render_index("City's Map", options.output_prefix, options.output_format,
+    renderer.render_index("City's Map", options.output_prefix,
+                          options.output_format,
                           _map.width, _map.height)
 
     return 0
