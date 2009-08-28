@@ -245,19 +245,19 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, name, boundingbox=None):
+    def __init__(self, city_name, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
-            name (string): The name of the city we're created the map of.
+            city_name (string): The name of the city we're created the map of.
             boundingbox (BoundingBox): An optional BoundingBox object defining
                 the city's bounding box. If not given, OCitySMap will try to
                 guess the bounding box from the OSM data. An UnsufficientDataError
                 exception will be raised in the bounding box can't be guessed.
         """
-        (self.name, self.boundingbox) = (name, boundingbox)
+        (self.city_name, self.boundingbox) = (city_name, boundingbox)
 
-        l.info('OCitySMap renderer for %s.' % self.name)
+        l.info('OCitySMap renderer for %s.' % self.city_name)
                
         l.info('Reading config file.')
         self.parser = ConfigParser.RawConfigParser()
@@ -267,14 +267,14 @@ class OCitySMap:
         datasource = dict(self.parser.items('datasource'))
                                        
         if not self.boundingbox:
-            self.boundingbox = self.find_bounding_box(self.name)
+            self.boundingbox = self.find_bounding_box(self.city_name)
 
         db = pgdb.connect('Notre Base', datasource['user'],
                           datasource['password'], datasource['host'],
                           datasource['dbname'])
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
-        self.streets = self.get_streets(db, self.name)
+        self.streets = self.get_streets(db, self.city_name)
 
         l.info('City bounding box is %s.' % str(self.boundingbox))
 

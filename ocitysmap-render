@@ -26,6 +26,8 @@ def main():
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
                       help='Specify the title displayed in the output files',
                       default="City's Map")
+    parser.add_option('-c', '--city', dest='city_name', metavar='CITY_NAME',
+                      help='Specify the name of te city to map')
     parser.add_option('--no-frame', dest='no_frame', action='store_true',
                       default=False,
                       help="Don't insert the map and index inside a frame")
@@ -36,7 +38,7 @@ def main():
                       metavar='LAT1,LON1 LAT2,LON2', help='Bounding box')
 
     (options, args) = parser.parse_args()
-    if len(args) != 1:
+    if len(args):
         parser.print_help()
         return 1
 
@@ -62,7 +64,7 @@ def main():
         return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(args[0], boundingbox)
+        renderer = ocitysmap.OCitySMap(options.city_name, boundingbox)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
