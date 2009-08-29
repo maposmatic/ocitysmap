@@ -12,7 +12,7 @@ import ocitysmap
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
+    usage = '%prog [options] [-c <cityname>|-b <lat1,long1 lat2,long2>]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
@@ -28,6 +28,8 @@ def main():
                       default="City's Map")
     parser.add_option('-c', '--city', dest='city_name', metavar='CITY_NAME',
                       help='Specify the name of te city to map')
+    parser.add_option('-C', '--config', dest='config_file', metavar='FILE',
+                      help='Specify the location of the config file')
     parser.add_option('--no-frame', dest='no_frame', action='store_true',
                       default=False,
                       help="Don't insert the map and index inside a frame")
@@ -71,7 +73,9 @@ def main():
             return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(options.city_name, boundingbox)
+        renderer = ocitysmap.OCitySMap(options.config_file,
+                                       options.city_name,
+                                       boundingbox)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1

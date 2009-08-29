@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import math
 
@@ -15,6 +16,12 @@ class BoundingBox:
             self._lat1, self._lat2 = self._lat2, self._lat1
         if (self._long1 > self._long2):
             self._long1, self._long2 = self._long2, self._long1
+
+    @staticmethod
+    def parse_wkt(wkt):
+        coords = [p.split(' ') for p in wkt[9:].split(',')]
+        return BoundingBox(coords[1][1], coords[1][0],
+                           coords[3][1], coords[3][0])
 
     @staticmethod
     def parse(points):

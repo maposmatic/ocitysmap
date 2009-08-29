@@ -244,10 +244,11 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, city_name=None, boundingbox=None):
+    def __init__(self, config_file, city_name=None, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
+            config_file: location of the config file
             city_name (string): The name of the city we're created the map of.
             boundingbox (BoundingBox): An optional BoundingBox object defining
                 the city's bounding box. If not given, OCitySMap will try to
@@ -264,8 +265,12 @@ class OCitySMap:
                
         l.info('Reading config file.')
         self.parser = ConfigParser.RawConfigParser()
-        if not self.parser.read(['/etc/ocitysmap.conf',
-                                      os.getenv('HOME') + '/.ocitysmap.conf']):
+        if config_file:
+            config_files = [config_file]
+        else:
+            config_files = ['/etc/ocitysmap.conf',
+                            os.getenv('HOME') + '/.ocitysmap.conf']
+        if not self.parser.read(config_files):
             raise IOError, 'Failed to load the config file'
         datasource = dict(self.parser.items('datasource'))
 
@@ -300,17 +305,12 @@ class OCitySMap:
                           from planet_osm_line
                           where boundary='administrative' and
                                 admin_level='8' and
-                                name='%s';""" % name)
-        bbox_str = cursor.fetchall()
-        if not bbox_str:
-            raise UnsufficientDataError, "Not enough data to find city bounding box!"
+                                name='%s';""" % pgdb.escape_string(name))
+        records = cursor.fetchall()
+        if not records:
+            raise UnsufficientDataError, "Wrong city name or missing administrative boundary in database!"
         
-        coords = [p.split(' ') for p in bbox_str[0][0][9:].split(',')]
-        
-        bbox = BoundingBox(coords[1][1], coords[1][0],
-                           coords[3][1], coords[3][0])
-        l.debug('found bbox %s' % bbox)
-        return bbox
+        return BoundingBox.parse_wkt(records[0][0])
 
     _regexp_contour = re.compile('^POLYGON\(\((\S*) (\S*),\S* (\S*),(\S*) \S*,\S* \S*,\S* \S*\),\(([^)]*)\)\)$')
 
@@ -321,7 +321,7 @@ class OCitySMap:
                                                   st_buildarea(way)), 4002))
                            from planet_osm_line
                            where boundary='administrative'
-                                 and admin_level='8' and name='%s';""" % city)
+                                 and admin_level='8' and name='%s';""" % pgdb.escape_string(city))
         sl = cursor.fetchall()
         cell00 = sl[0][0].strip()
         if not cell00: return None
@@ -415,7 +415,7 @@ class OCitySMap:
                                 end)
                           as foo
                           group by name
-                          order by name;""" % city)
+                          order by name;""" % pgdb.escape_string(city))
 
         sl = cursor.fetchall()
 
