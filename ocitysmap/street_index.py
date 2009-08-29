@@ -538,17 +538,26 @@ class OCitySMap:
 
     def render_index(self, title, output_prefix, output_format,
                      paperwidth, paperheight):
+
         if not self.streets:
             l.warning('No street to write to index')
             return
 
-        for f in output_format:
-            self._render_one_prefix(title, output_prefix, f,
-                                    paperwidth, paperheight)
+        for fmt in output_format:
+            l.debug('saving %s.%s...' % (output_prefix, fmt))
+            try:
+                self._render_one_prefix(title, output_prefix, fmt,
+                                        paperwidth, paperheight)
+            except:
+                print >>sys.stderr, \
+                    "Error while rendering %s:" % (fmt)
+                traceback.print_exc()
+                # Not fatal !
 
-    def render_into_files(self, title,
-                          out_prefix, out_formats,
-                          zoom_factor):
+
+    def render_map_into_files(self, title,
+                              out_prefix, out_formats,
+                              zoom_factor):
         """
         Render the current boundingbox into the destination files.
         @param title (string/None) title of the map, or None: no frame
@@ -568,10 +577,10 @@ class OCitySMap:
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('rendering tmp dir: %s' % tmpdir)
         try:
-            return self._render_into_files(tmpdir, osm_map_file,
-                                           title,
-                                           out_prefix, out_formats,
-                                           zoom_factor)
+            return self._render_map_into_files(tmpdir, osm_map_file,
+                                               title,
+                                               out_prefix, out_formats,
+                                               zoom_factor)
         finally:
             for root, dirs, files in os.walk(tmpdir, topdown=False):
                 for name in files:
@@ -580,9 +589,9 @@ class OCitySMap:
                     os.rmdir(os.path.join(root, name))
             os.rmdir(tmpdir)
 
-    def _render_into_files(self, tmpdir,
-                           osm_map_file, title, out_prefix, out_formats,
-                           zoom_factor):
+    def _render_map_into_files(self, tmpdir,
+                               osm_map_file, title, out_prefix, out_formats,
+                               zoom_factor):
         # Does the real job of rendering the map
         GRID_COLOR = '#8BB381'
         l.debug('rendering from %s to %s.%s...' % (osm_map_file,

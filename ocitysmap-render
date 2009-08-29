@@ -99,10 +99,10 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(title,
-                                      options.output_prefix,
-                                      options.output_format,
-                                      "zoom:%d" % options.zoom_factor)
+    _map = renderer.render_map_into_files(title,
+                                          options.output_prefix,
+                                          options.output_format,
+                                          "zoom:%d" % options.zoom_factor)
 
     renderer.render_index(title, options.output_prefix,
                           options.output_format,
