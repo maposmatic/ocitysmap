@@ -480,7 +480,12 @@ class OCitySMap:
                 l.warning('error while opening destination file %s: %s'
                           % (output_filename, ex))
             else:
-                writer.writerow(['#', 'MapOSMatic', 'ISO-8859-1'])
+                if title is not None:
+                    writer.writerow(['#', title.encode('latin1',  'replace'),
+                                     'ISO-8859-1'])
+                else:
+                    writer.writerow(['#', 'MapOSMatic', 'ISO-8859-1'])
+
                 for street in self.streets:
                     s = [e.encode('latin1', 'replace') for e in street]
                     writer.writerow(s)
