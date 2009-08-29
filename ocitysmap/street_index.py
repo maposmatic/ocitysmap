@@ -623,6 +623,12 @@ class OCitySMap:
             city.add_shapefile(s.get_filepath(), 'black', .9, 1)
             city.add_label(lg, lat, "500m", font_size = 16, str_color = 'black')
 
+        # Determine parameters
+        try:
+            copyright_logo = self.parser.get('maposmatic', 'copyright_logo')
+        except Exception:
+            copyright_logo = None
+
         # Rendering...
         l.debug('rendering map...')
         _map = city.render_map()
@@ -631,7 +637,8 @@ class OCitySMap:
             try:
                 city.save_map("%s.%s" % (out_prefix, fmt),
                               title,
-                              file_type = fmt)
+                              file_type = fmt,
+                              copyright_logo_png = copyright_logo)
             except:
                 print >>sys.stderr, \
                     "Error while rendering %s:" % (fmt)

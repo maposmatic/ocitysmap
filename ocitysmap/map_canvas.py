@@ -257,6 +257,7 @@ class MapCanvas:
     def save_map(self, output_filename,
                  title = "City's map",
                  file_type = None,
+                 copyright_logo_png = None,
                  force = False):
         """
         Save the map as an image. By default, the format is inferred
@@ -313,7 +314,7 @@ class MapCanvas:
                               ctx)
                 draw_utils.add_logo(ctx, self._map.width,
                                     self._map.height,
-                                    "Openstreetmap_logo.png")
+                                    copyright_logo_png)
 
             draw_utils.enclose_in_frame(my_render,
                                         self._map.width, self._map.height,
