@@ -26,19 +26,19 @@ def main():
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
                       help='Specify the title displayed in the output files',
                       default="City's Map")
+    parser.add_option('-c', '--city', dest='city_name', metavar='CITY_NAME',
+                      help='Specify the name of te city to map')
     parser.add_option('--no-frame', dest='no_frame', action='store_true',
                       default=False,
                       help="Don't insert the map and index inside a frame")
-    parser.add_option('-e', '--enclosure', dest='zooms', action='append',
-                      nargs=3, metavar='NAME BBOX',
-                      help='Specify a zoomed section by its named '
-                           'bounding box.')
     parser.add_option('-z', '--zoom-factor',
                       metavar='[0-18]', help='Zoom factor for the'
                       'rendering (default=16)', type='int', default =16)
+    parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
+                      metavar='LAT1,LON1 LAT2,LON2', help='Bounding box')
 
     (options, args) = parser.parse_args()
-    if len(args) != 1 and len(args) != 3:
+    if len(args):
         parser.print_help()
         return 1
 
@@ -55,26 +55,23 @@ def main():
     if not options.output_format:
         options.output_format = ['svg']
 
+    if not options.city_name and not options.bbox:
+      parser.error("One of --city or --bounding-box is mandatory")
+
+    if options.city_name and options.bbox:
+      parser.error("--city or --bounding-box are exclusive")
+
     # Parse bounding box arguments
-    zooms = {}
-    if options.zooms:
-        for zoom in options.zooms:
-            try:
-                zooms[zoom[0]] = ocitysmap.BoundingBox.parse(zoom[1:])
-            except ValueError:
-                sys.stderr.write('ERROR: Invalid bounding box for zoom section %s!\n' % zoom[0])
-                return 1
-
     boundingbox = None
-    try:
-        boundingbox = ocitysmap.BoundingBox.parse(args[1:])
-    except ValueError:
-        sys.stderr.write('ERROR: Invalid city bounding box!\n')
-        return 1
+    if options.bbox:
+        try:
+            boundingbox = ocitysmap.BoundingBox.parse(options.bbox)
+        except ValueError:
+            sys.stderr.write('ERROR: Invalid city bounding box!\n')
+            return 1
 
     try:
-        renderer = ocitysmap.OCitySMap(args[0],
-                                       boundingbox, zooms)
+        renderer = ocitysmap.OCitySMap(options.city_name, boundingbox)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
