@@ -633,7 +633,7 @@ class OCitySMap:
         l.debug('rendering map...')
         _map = city.render_map()
         for fmt in out_formats:
-            l.debug('saving %s...' % fmt)
+            l.debug('saving %s.%s...' % (out_prefix, fmt))
             try:
                 city.save_map("%s.%s" % (out_prefix, fmt),
                               title,
