@@ -20,8 +20,10 @@ def main():
                            'Defaults to "citymap"',
                       default='citymap')
     parser.add_option('-f', '--format', dest='output_format', metavar='FMT',
-                      help='Specify the output formats. Defaults to '
-                           'SVG. May be specified multiple times.',
+                      help='Specify the output formats. Supported file '
+                           'formats: svg, svgz, pdf, ps, png, and csv for '
+                           'the index, xml for the map. Defaults to '
+                           'SVGZ. May be specified multiple times.',
                       action='append')
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
                       help='Specify the title displayed in the output files',
@@ -71,7 +73,8 @@ def main():
         parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
     if not options.output_format:
-        options.output_format = ['svg']
+        options.output_format = ['svgz']
+    options.output_format = set(options.output_format)
 
     # Parse bounding box arguments
     boundingbox = None
