@@ -25,7 +25,7 @@ def main():
                       action='append')
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
                       help='Specify the title displayed in the output files',
-                      default="City's Map")
+                      default=None)
     parser.add_option('-c', '--city', dest='city_name', metavar='CITY_NAME',
                       help='Specify the name of te city to map')
     parser.add_option('-C', '--config', dest='config_file', metavar='FILE',
@@ -44,6 +44,24 @@ def main():
         parser.print_help()
         return 1
 
+    # Make sure either -b or -c is given
+    if not options.city_name and not options.bbox:
+      parser.error("One of --city or --bounding-box is mandatory")
+
+    if options.city_name and options.bbox:
+      parser.error("--city or --bounding-box are exclusive")
+
+    # Determine title
+    if options.no_frame:
+        title = None
+    elif options.output_title is not None:
+        title = options.output_title
+    elif options.city_name is not None:
+        title = options.city_name
+    else:
+        title = "City's Map"
+
+    # Parse zoom factor
     try:
         options.zoom_factor = int(options.zoom_factor)
     except ValueError:
@@ -51,17 +69,8 @@ def main():
     if options.zoom_factor < 0 or options.zoom_factor > 18:
         parser.error("Invalid zoom factor: %s" % options.zoom_factor)
 
-    if options.no_frame:
-        options.output_title = None
-
     if not options.output_format:
         options.output_format = ['svg']
-
-    if not options.city_name and not options.bbox:
-      parser.error("One of --city or --bounding-box is mandatory")
-
-    if options.city_name and options.bbox:
-      parser.error("--city or --bounding-box are exclusive")
 
     # Parse bounding box arguments
     boundingbox = None
@@ -82,12 +91,12 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write(' Aborting.\n')
 
-    _map = renderer.render_into_files(options.output_title,
+    _map = renderer.render_into_files(title,
                                       options.output_prefix,
                                       options.output_format,
                                       "zoom:%d" % options.zoom_factor)
 
-    renderer.render_index("City's Map", options.output_prefix,
+    renderer.render_index(title, options.output_prefix,
                           options.output_format,
                           _map.width, _map.height)
 

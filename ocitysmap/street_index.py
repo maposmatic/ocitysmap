@@ -446,60 +446,52 @@ class OCitySMap:
         return sl
 
 
-    def _render_one_prefix(self, title, output_prefix, format,
+    def _render_one_prefix(self, title, output_prefix, file_type,
                            paperwidth, paperheight):
-        format      = format.lower()
+        file_type   = file_type.lower()
         frame_width = int(max(paperheight / 20., 30))
 
-        outfile = "%s_index.%s" % (output_prefix, format)
-        l.debug("rendering " + outfile + "...")
+        output_filename = "%s_index.%s" % (output_prefix, file_type)
+        l.debug("rendering " + output_filename + "...")
 
         generator = IndexPageGenerator(self.streets)
-        if format == 'png' or format == 'png24':
-            surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
-                                         paperwidth + frame_width*2,
-                                         paperheight + frame_width*2)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
-                                                          paperheight),
-                             paperwidth, paperheight,
-                             title, surface,
-                             paperwidth + frame_width*2,
-                             paperheight + frame_width*2, frame_width)
-            surface.write_to_png(outfile)
-            surface.finish()
-        elif format == 'svg':
-            surface = cairo.SVGSurface(outfile, paperwidth + frame_width*2,
-                                       paperheight + frame_width*2)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
-                                                          paperheight),
-                             paperwidth, paperheight,
-                             title, surface,
-                             paperwidth + frame_width*2,
-                             paperheight + frame_width*2, frame_width)
-            surface.finish()
-        elif format == 'pdf':
-            surface = cairo.PDFSurface(outfile, paperwidth + frame_width*2,
-                                       paperheight + frame_width*2)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
-                                                          paperheight),
-                             paperwidth, paperheight,
-                             title, surface,
-                             paperwidth + frame_width*2,
-                             paperheight + frame_width*2,
-                             frame_width)
-            surface.finish()
-        elif format == 'ps':
-            surface = cairo.PSSurface(outfile, paperwidth + frame_width*2,
-                                      paperheight + frame_width*2)
-            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
-                                                          paperheight),
-                             paperwidth, paperheight,
-                             title, surface,
-                             paperwidth + frame_width*2,
-                             paperheight + frame_width*2, frame_width)
-            surface.finish()
+
+        if file_type in ('png', 'png24'):
+            cairo_factory = \
+                lambda w,h: cairo.ImageSurface(cairo.FORMAT_RGB24, w, h)
+
+        elif file_type == 'svg':
+            cairo_factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
+
+        elif file_type == 'pdf':
+            cairo_factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
+
+        elif file_type == 'ps':
+            cairo_factory = lambda w,h: cairo.PSSurface(output_filename, w, h)
+
         else:
-            raise ValueError
+            raise ValueError('Unsupported output format: %s' % file_type)
+
+        if title is not None:
+            surface = cairo_factory(paperwidth + frame_width*2,
+                                    paperheight + frame_width*2)
+            enclose_in_frame(lambda ctx: generator.render(ctx, paperwidth,
+                                                          paperheight),
+                             paperwidth, paperheight,
+                             title, surface,
+                             paperwidth + frame_width*2,
+                             paperheight + frame_width*2, frame_width)
+        else:
+            surface = cairo_factory(paperwidth, paperheight)
+            ctx = cairo.Context(surface)
+            generator.render(ctx, paperwidth, paperheight)
+
+        surface.flush()
+
+        if file_type in ('png', 'png24'):
+            surface.write_to_png(output_filename)
+
+        surface.finish()
 
     def render_index(self, title, output_prefix, output_format,
                      paperwidth, paperheight):
@@ -632,7 +624,7 @@ class OCitySMap:
 
         # Determine parameters
         try:
-            copyright_logo = self.parser.get('maposmatic', 'copyright_logo')
+            copyright_logo = self.parser.get('ocitysmap', 'copyright_logo')
         except Exception:
             copyright_logo = None
 

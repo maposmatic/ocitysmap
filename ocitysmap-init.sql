@@ -5,7 +5,7 @@
 
 create or replace view cities_area
    as select name as city, st_buildarea(way) as area
-   from planet_osm_line where boundary='administrative' and admin_level='8';""");
+   from planet_osm_line where boundary='administrative' and admin_level='8';
 
 -- Create an aggregate used to build the list of squares that each
 -- street intersects

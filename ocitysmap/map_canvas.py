@@ -330,12 +330,8 @@ class MapCanvas:
         surface.flush()
 
         # png rendering with cairo...
-        if file_type in ('png', 'png24', 'png8'):
-            out_file = open(output_filename, 'wb')
-            try:
-                surface.write_to_png(out_file)
-            finally:
-                out_file.close()
+        if file_type in ('png', 'png24'):
+            surface.write_to_png(output_filename)
 
         surface.finish()
 

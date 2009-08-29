@@ -75,7 +75,7 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
 
 def add_logo(ctx, paperwidth, paperheight, logo_path,
-             copyright_notice = u'© 2009 MapOSMatic authors. '
+             copyright_notice = u'© 2009 MapOSMatic/ocitysmap authors. '
              u'Map data © 2009 OpenStreetMap.org '
              u'and contributors (CC-BY-SA)'):
 
@@ -83,8 +83,9 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
     png =  None
     if logo_path:
         try:
-            f = open(logo_path, 'r')
+            f = open(logo_path, 'rb')
             png = cairo.ImageSurface.create_from_png(f)
+            l.debug('Using copyright logo: %s' % logo_path)
             f.close()
         except Exception, ex:
             l.warning('Cannot open logo file: %s' % ex)
