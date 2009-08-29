@@ -244,7 +244,7 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, config_file, city_name=None, boundingbox=None):
+    def __init__(self, config_file=None, city_name=None, boundingbox=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
