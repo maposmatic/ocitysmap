@@ -83,8 +83,9 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
     png =  None
     if logo_path:
         try:
-            f = open(logo_path, 'r')
+            f = open(logo_path, 'rb')
             png = cairo.ImageSurface.create_from_png(f)
+            l.debug('Using copyright logo: %s' % logo_path)
             f.close()
         except Exception, ex:
             l.warning('Cannot open logo file: %s' % ex)
