@@ -2,7 +2,7 @@
 
 
 import os, mapnik, logging, locale
-from osgeo import ogr
+import ogr
 from coords import BoundingBox
 from draw_utils import enclose_in_frame
 
