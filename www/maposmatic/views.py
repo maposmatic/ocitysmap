@@ -8,8 +8,8 @@ from www.maposmatic.models import MapRenderingJob
 class MapRenderingJobForm(ModelForm):
     class Meta:
         model = MapRenderingJob
-        fields = ('maptitle', 'administrative_city', 'lat_upper_left', 'long_upper_left',
-                  'lat_bottom_right', 'long_bottom_right')
+        fields = ('maptitle', 'administrative_city', 'lat_upper_left', 'lon_upper_left',
+                  'lat_bottom_right', 'lon_bottom_right')
 
 def index(request):
     if request.method == 'POST':
@@ -21,9 +21,9 @@ def index(request):
             job.maptitle = form.cleaned_data['maptitle']
             job.administrative_city = form.cleaned_data['administrative_city']
             job.lat_upper_left = form.cleaned_data['lat_upper_left']
-            job.long_upper_left = form.cleaned_data['long_upper_left']
+            job.lon_upper_left = form.cleaned_data['lon_upper_left']
             job.lat_bottom_right = form.cleaned_data['lat_bottom_right']
-            job.long_bottom_right = form.cleaned_data['long_bottom_right']
+            job.lon_bottom_right = form.cleaned_data['lon_bottom_right']
             job.status = 0 # Submitted
             job.submitterip = request.META['REMOTE_ADDR']
             job.index_queue_at_submission = 0

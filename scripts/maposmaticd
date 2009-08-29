@@ -13,12 +13,14 @@ def handler(signum, frame, pipe_write):
     f.write("end")
 
 def render_job_process(job):
-    bbox = ocitysmap.coords.BoundingBox(job.lat_upper_left,
-                                        job.lon_upper_left,
-                                        job.lat_bottom_right,
-                                        job.lon_bottom_right)
-
-    renderer = ocitysmap.OCitySMap("Plop", bbox)
+    if job.administrative_city is None:
+        bbox = ocitysmap.coords.BoundingBox(job.lat_upper_left,
+                                            job.lon_upper_left,
+                                            job.lat_bottom_right,
+                                            job.lon_bottom_right)
+        renderer = ocitysmap.OCitySMap(None, bbox)
+    else:
+        renderer = ocitysmap.OCitySMap(job.administrative_city, None)
 
     outfile_prefix = os.path.join(RENDERING_RESULT_PATH, job.files_prefix())
 
@@ -33,7 +35,7 @@ def render_job_process(job):
 def render_job(job):
     print 'Rendering "%s"...' % job.maptitle
     job.status = 1
-    job.startofrendering_time = datetime.today().strftime("%Y-%m-%d %H:%M")
+    job.startofrendering_time = datetime.now()
     job.save()
     (pipe_read, pipe_write) = os.pipe()
     signal.signal(signal.SIGCHLD,
@@ -70,16 +72,16 @@ def render_job(job):
             return
 
 # hakipu (c) d.sespere
-j = MapRenderingJob()
-j.maptitle = "Carte de test"
-j.lat_upper_left = 44.4883
-j.lon_upper_left = -1.0901
-j.lat_bottom_right = 44.4778
-j.lon_bottom_right = -1.0637
-j.status = 0
-j.submitterip = "0.0.0.0"
-j.index_queue_at_submission = 42
-j.save()
+# j = MapRenderingJob()
+# j.maptitle = "Carte de test"
+# j.lat_upper_left = 44.4883
+# j.lon_upper_left = -1.0901
+# j.lat_bottom_right = 44.4778
+# j.lon_bottom_right = -1.0637
+# j.status = 0
+# j.submitterip = "0.0.0.0"
+# j.index_queue_at_submission = 42
+# j.save()
 
 if not os.path.isdir(RENDERING_RESULT_PATH):
     print "ERROR: please set RENDERING_RESULT_PATH ('%s') to an existing directory" % \
