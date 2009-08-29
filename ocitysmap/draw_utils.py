@@ -1,3 +1,4 @@
+# -*- coding: utf-8; mode: Python -*-
 
 import cairo
 
@@ -90,9 +91,9 @@ def add_logo(ctx, paperwidth, paperheight, logo_path):
     ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
                          cairo.FONT_WEIGHT_NORMAL)
     ctx.set_font_size(png.get_height() * .75)
-    ctx.show_text('Copyright the MapOSMatic team. '
-                  'Map data: copyright OpenStreetMap '
-                  'and contributors (CC-BY-SA)')
+    ctx.show_text(u'© 2009 MapOSMatic authors. '
+                  u'Map data © 2009 OpenStreetMap.org '
+                  u'and contributors (CC-BY-SA)')
 
     # Determine the size of the virtual buffer
     xlat2, ylat2 = ctx.get_current_point()
