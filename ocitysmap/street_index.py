@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging, traceback
-import sys, os, tempfile, pgdb, re, math, cairo, locale
+import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip, csv
 import ConfigParser
 from coords import BoundingBox
 
@@ -472,12 +472,39 @@ class OCitySMap:
 
         generator = IndexPageGenerator(self.streets)
 
+        if file_type == 'xml':
+            l.debug('not rendering index as xml (not supported)')
+            return
+
+        elif file_type == 'csv':
+            try:
+                writer = csv.writer(open(output_filename, 'w'))
+            except Exception,ex:
+                l.warning('error while opening destination file %s: %s'
+                          % (output_filename, ex))
+            else:
+                if title is not None:
+                    writer.writerow(['#', title.encode('latin1',  'replace'),
+                                     'ISO-8859-1'])
+                else:
+                    writer.writerow(['#', 'MapOSMatic', 'ISO-8859-1'])
+
+                for street in self.streets:
+                    s = [e.encode('latin1', 'replace') for e in street]
+                    writer.writerow(s)
+            return
+
         if file_type in ('png', 'png24'):
             cairo_factory = \
                 lambda w,h: cairo.ImageSurface(cairo.FORMAT_RGB24, w, h)
 
         elif file_type == 'svg':
             cairo_factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
+
+        elif file_type == 'svgz':
+            def cairo_factory(w,h):
+                gz = gzip.GzipFile(output_filename, 'wb')
+                return cairo.SVGSurface(gz, w, h)
 
         elif file_type == 'pdf':
             cairo_factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)

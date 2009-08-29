@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
-
-import os, mapnik, logging, locale
+import os, mapnik, logging, locale, gzip
 
 # The ogr module is now known as osgeo.ogr in recent versions of the
 # module, but we want to keep compatibility with older versions
@@ -272,7 +271,7 @@ class MapCanvas:
         'file_type' parameter.
         @param output_filename (string) file to generate
         @param file_type (string) None, or 'xml', 'png', 'ps',
-        'pdf', 'svg'
+        'pdf', 'svg' or 'svgz'
         @param force (bool) fore render_map() to be called, even if it
         does not appear to have changed since last render_map()
         """
@@ -288,6 +287,10 @@ class MapCanvas:
         if file_type == 'xml':
             mapnik.save_map(self._map, output_filename)
             return
+        
+        elif file_type == 'csv':
+            l.debug('not rendering map as csv (not supported)')
+            return
 
         elif file_type in ('png', 'png24'): # 24-bits, the default
             if (title is None) or (cairo is None):
@@ -299,6 +302,11 @@ class MapCanvas:
 
         elif file_type == 'svg' and cairo is not None:
             cairo_factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
+
+        elif file_type == 'svgz' and cairo is not None:
+            def cairo_factory(w,h):
+                gz = gzip.GzipFile(output_filename, 'wb')
+                return cairo.SVGSurface(gz, w, h)
 
         elif file_type == 'pdf' and cairo is not None:
             cairo_factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
