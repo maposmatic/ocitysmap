@@ -2,7 +2,14 @@
 
 
 import os, mapnik, logging, locale
-import ogr
+
+# The ogr module is now known as osgeo.ogr in recent versions of the
+# module, but we want to keep compatibility with older versions
+try:
+    from osgeo import ogr
+except ImportError:
+    import ogr
+
 from coords import BoundingBox
 import draw_utils
 
