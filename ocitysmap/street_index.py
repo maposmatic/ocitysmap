@@ -315,6 +315,10 @@ class OCitySMap:
     _regexp_contour = re.compile('^POLYGON\(\((\S*) (\S*),\S* (\S*),(\S*) \S*,\S* \S*,\S* \S*\),\(([^)]*)\)\)$')
 
     def get_city_contour(self, db, city):
+
+        if city is None:
+            return None
+
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(
                                     st_difference(st_envelope(way),
@@ -381,6 +385,15 @@ class OCitySMap:
                                (i, j, poly))
 
         db.commit()
+
+        # pgdb.escape_string() doesn't like None strings, and when the
+        # city is not passed, we don't want to match any existing
+        # city. So the empty string doesn't sound like a good
+        # candidate, and the "-1" string is probably better.
+        #
+        # TODO: improve the following request to remove this hack
+        if city is None:
+            city = "-1"
 
         # The inner select query creates the list of (street, square)
         # for all the squares in the temporary map_areas table. The

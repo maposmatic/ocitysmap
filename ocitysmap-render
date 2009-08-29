@@ -27,7 +27,8 @@ def main():
                       help='Specify the title displayed in the output files',
                       default=None)
     parser.add_option('-c', '--city', dest='city_name', metavar='CITY_NAME',
-                      help='Specify the name of te city to map')
+                      help='Specify the name of te city to map',
+                      default=None)
     parser.add_option('-C', '--config', dest='config_file', metavar='FILE',
                       help='Specify the location of the config file')
     parser.add_option('--no-frame', dest='no_frame', action='store_true',
