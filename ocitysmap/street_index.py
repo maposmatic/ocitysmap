@@ -380,17 +380,6 @@ class OCitySMap:
                                   values (%d, %d, st_geomfromtext('%s', 4002))""" %
                                (i, j, poly))
 
-        # Create a view that associates the name of a city with the
-        # area covering it. As of today, only parts of the french
-        # cities have these administrative boundaries available in
-        # OSM. When available, this boundary is used to filter out the
-        # streets that are not inside the selected city but still in
-        # the bounding box rendered on the map. So these streets will
-        # be shown but not listed in the street index.
-        cursor.execute("""create or replace view cities_area
-                          as select name as city, st_buildarea(way) as area
-                          from planet_osm_line
-                          where boundary='administrative' and admin_level='8';""")
         db.commit()
 
         # The inner select query creates the list of (street, square)
@@ -398,8 +387,26 @@ class OCitySMap:
         # left_join + the test on cities_area is used to filter out
         # the streets outside the city administrative boundaries. The
         # outer select builds an easy to parse list of the squares for
-        # each street. A typical result entry is:
+        # each street.
+        #
+        # A typical result entry is:
         #  [ "Rue du Moulin", "0,1;1,2;1,3" ]
+        #
+        # REMARKS:
+        #
+        #  * The cities_area view is created once for all at
+        #    installation. It associates the name of a city with the
+        #    area covering it. As of today, only parts of the french
+        #    cities have these administrative boundaries available in
+        #    OSM. When available, this boundary is used to filter out
+        #    the streets that are not inside the selected city but
+        #    still in the bounding box rendered on the map. So these
+        #    streets will be shown but not listed in the street index.
+        #
+        #  * The textcat_all() aggregate must also be installed in the
+        #    database
+        #
+        # See ocitysmap-init.sql for details
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
