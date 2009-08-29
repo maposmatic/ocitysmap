@@ -75,7 +75,7 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
 
 def add_logo(ctx, paperwidth, paperheight, logo_path,
-             copyright_notice = u'© 2009 MapOSMatic authors. '
+             copyright_notice = u'© 2009 MapOSMatic/ocitysmap authors. '
              u'Map data © 2009 OpenStreetMap.org '
              u'and contributors (CC-BY-SA)'):
 

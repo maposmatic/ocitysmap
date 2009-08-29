@@ -625,7 +625,7 @@ class OCitySMap:
 
         # Determine parameters
         try:
-            copyright_logo = self.parser.get('maposmatic', 'copyright_logo')
+            copyright_logo = self.parser.get('ocitysmap', 'copyright_logo')
         except Exception:
             copyright_logo = None
 
