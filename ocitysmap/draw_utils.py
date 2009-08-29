@@ -119,7 +119,6 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
         ylat2 = ylat1 + font_size*1.5
     grp = ctx.pop_group()
     # Virtual buffer done.
-    print xlat1, ylat1, xlat2, ylat2
 
     # Display the buffer inside the surface, taking its size into account
     ctx.translate(paperwidth - (xlat2-xlat1) - 10,
