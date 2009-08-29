@@ -442,7 +442,7 @@ class OCitySMap:
     def _render_one_prefix(self, title, output_prefix, format,
                            paperwidth, paperheight):
         format      = format.lower()
-        frame_width = max(paperheight / 20., 30)
+        frame_width = int(max(paperheight / 20., 30))
 
         outfile = "%s_index.%s" % (output_prefix, format)
         l.debug("rendering " + outfile + "...")
@@ -496,6 +496,10 @@ class OCitySMap:
 
     def render_index(self, title, output_prefix, output_format,
                      paperwidth, paperheight):
+        if not self.streets:
+            l.warning('No street to write to index')
+            return
+
         for f in output_format:
             self._render_one_prefix(title, output_prefix, f,
                                     paperwidth, paperheight)
@@ -611,13 +615,13 @@ class OCitySMap:
                            font_family = "DejaVu Sans Bold")
 
         # Add the scale
-        s, lat, lg \
-            = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
-                                                                   'scale.shp'),
-                                                      bbox.get_bottom_right()[0])
-        city.add_shapefile(s.get_filepath(), 'black', .9, 1)
-
-        city.add_label(lg, lat, "500m", font_size = 16, str_color = 'black')
+        T = self.griddesc.generate_scale_shape_file(os.path.join(tmpdir,
+                                                                 'scale.shp'),
+                                                    bbox.get_bottom_right()[0])
+        if T is not None:
+            s, lat, lg = T
+            city.add_shapefile(s.get_filepath(), 'black', .9, 1)
+            city.add_label(lg, lat, "500m", font_size = 16, str_color = 'black')
 
         # Rendering...
         l.debug('rendering map...')
