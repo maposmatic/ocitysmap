@@ -85,9 +85,13 @@ def main():
             sys.stderr.write('ERROR: Invalid city bounding box!\n')
             return 1
 
+
+
+    city_name = unicode(options.city_name.decode('utf-8'))
+
     try:
         renderer = ocitysmap.OCitySMap(options.config_file,
-                                       options.city_name,
+                                       city_name,
                                        boundingbox)
     except ocitysmap.BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
