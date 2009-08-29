@@ -4,7 +4,7 @@
 import os, mapnik, logging, locale
 from osgeo import ogr
 from coords import BoundingBox
-from draw_utils import enclose_in_frame
+import draw_utils
 
 try:
     import cairo
@@ -307,10 +307,19 @@ class MapCanvas:
 
             surface = cairo_factory(self._map.width + frame_width*2,
                                     self._map.height + frame_width*2)
-            enclose_in_frame(lambda ctx: mapnik.render(self._map, ctx),
-                             self._map.width, self._map.height,
-                             title,
-                             surface, self._map.width + frame_width*2,
+
+            def my_render(ctx):
+                mapnik.render(self._map,
+                              ctx)
+                draw_utils.add_logo(ctx, self._map.width,
+                                    self._map.height,
+                                    "Openstreetmap_logo.png")
+
+            draw_utils.enclose_in_frame(my_render,
+                                        self._map.width, self._map.height,
+                                        title,
+                                        surface,
+                                        self._map.width + frame_width*2,
                              self._map.height + frame_width*2, frame_width)
         else:
             surface = cairo_factory(self._map.width, self._map.height)

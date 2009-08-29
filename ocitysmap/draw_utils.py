@@ -68,3 +68,70 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
     ctx.restore()
     return outsurf
+
+
+def add_logo(ctx, paperwidth, paperheight, logo_path):
+    f = open(logo_path, 'r')
+    png = cairo.ImageSurface.create_from_png(f)
+    f.close()
+
+    # Create a virtual buffer containing the png and the copyright notice
+    ctx.push_group()
+    ctx.move_to(0,0)
+    xlat1, ylat1 = ctx.get_current_point()
+
+    # Draw the png in the buffer
+    ctx.set_source_surface(png)
+    ctx.paint()
+
+    # Write the notice in the buffer
+    ctx.rel_move_to(png.get_width(), png.get_height()*.85)
+    ctx.set_source_rgb (0, 0, 0)
+    ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
+                         cairo.FONT_WEIGHT_NORMAL)
+    ctx.set_font_size(png.get_height() * .75)
+    ctx.show_text('Copyright the MapOSMatic team. '
+                  'Map data: copyright OpenStreetMap '
+                  'and contributors (CC-BY-SA)')
+
+    # Determine the size of the virtual buffer
+    xlat2, ylat2 = ctx.get_current_point()
+    grp = ctx.pop_group()
+    # Virtual buffer done.
+
+    # Display the buffer inside the surface, taking its size into account
+    ctx.translate(paperwidth - (xlat2-xlat1) - 10,
+                  paperheight - (ylat2-ylat1) - 10)
+    ctx.set_source(grp)
+
+    # Make it transparent
+    ctx.paint_with_alpha(.5)
+
+
+if __name__ == "__main__":
+    inside_area = cairo.ImageSurface(cairo.FORMAT_RGB24, 800,  600)
+    ctx = cairo.Context(inside_area)
+
+    # Fill the inside with something
+    ctx.set_source_rgb (1, .1, .1)
+    ctx.set_operator (cairo.OPERATOR_OVER)
+    ctx.paint()
+
+    # Add the logo and save the result as inside.png
+    add_logo(ctx, 800, 600, "../Openstreetmap_logo.png")
+    f = open("inside.png", 'wb')
+    inside_area.write_to_png(f)
+    f.close()
+
+    # Add a frame and save the result as outside.png
+    def my_render(x):
+        x.set_source_surface(inside_area)
+        x.paint()
+
+    outside_area = cairo.ImageSurface(cairo.FORMAT_RGB24, 900,  700)
+    enclose_in_frame(my_render, 800,  600, "badidonc",
+                     outside_area, 900, 700, 50)
+
+    f = open("outside.png", 'wb')
+    outside_area.write_to_png(f)
+    f.close()
