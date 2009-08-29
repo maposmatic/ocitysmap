@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging, traceback
-import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip
+import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip, csv
 import ConfigParser
 from coords import BoundingBox
 
@@ -468,6 +468,23 @@ class OCitySMap:
         l.debug("rendering " + output_filename + "...")
 
         generator = IndexPageGenerator(self.streets)
+
+        if file_type == 'xml':
+            l.debug('not rendering index as xml (not supported)')
+            return
+
+        elif file_type == 'csv':
+            try:
+                writer = csv.writer(open(output_filename, 'w'))
+            except Exception,ex:
+                l.warning('error while opening destination file %s: %s'
+                          % (output_filename, ex))
+            else:
+                writer.writerow(['#', 'MapOSMatic', 'ISO-8859-1'])
+                for street in self.streets:
+                    s = [e.encode('latin1', 'replace') for e in street]
+                    writer.writerow(s)
+            return
 
         if file_type in ('png', 'png24'):
             cairo_factory = \

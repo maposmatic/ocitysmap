@@ -287,6 +287,10 @@ class MapCanvas:
         if file_type == 'xml':
             mapnik.save_map(self._map, output_filename)
             return
+        
+        elif file_type == 'csv':
+            l.debug('not rendering map as csv (not supported)')
+            return
 
         elif file_type in ('png', 'png24'): # 24-bits, the default
             if (title is None) or (cairo is None):
