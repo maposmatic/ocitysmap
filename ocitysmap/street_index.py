@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: Python -*-
 
 import logging, traceback
-import sys, os, tempfile, pgdb, re, math, cairo, locale
+import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip
 import ConfigParser
 from coords import BoundingBox
 
@@ -475,6 +475,11 @@ class OCitySMap:
 
         elif file_type == 'svg':
             cairo_factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
+
+        elif file_type == 'svgz':
+            def cairo_factory(w,h):
+                gz = gzip.GzipFile(output_filename, 'wb')
+                return cairo.SVGSurface(gz, w, h)
 
         elif file_type == 'pdf':
             cairo_factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
