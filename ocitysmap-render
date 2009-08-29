@@ -12,7 +12,7 @@ import ocitysmap
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    usage = '%prog [options] <cityname> [lat1,long1 lat2,long2]'
+    usage = '%prog [options] [-c <cityname>|-b <lat1,long1 lat2,long2>]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
