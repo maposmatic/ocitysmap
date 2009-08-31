@@ -26,4 +26,9 @@ Dependencies
  - a PostGIS database filled with OpenStreetMap data
  - Mapnik data for OSM rendering and configured osm.xml file
 
-By dave, d2, kos_tom, gael, fred and sam.
+This code is under AGPLv3 (GNU Affero General Public License 3.0) except
+the included OpenStreetMap logo under CC-BY-SA (Creative Common
+Attribution-Share Alike) license.
+
+Code by David Decotigny, Frédéric Lehobey, David Mentré, Maxime
+Petazzoni, Thomas Petazzoni and Gaël Utard.
