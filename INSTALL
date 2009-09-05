@@ -157,3 +157,70 @@ distributions, minor adaptations might be needed.
     work and you didn't do a system-wide installation of Mapnik, don't
     forget to set the PYTHONPATH and LD_LIBRARY_PATH environment
     variables.
+
+ 7. Install Mapnik-OSM
+
+    Mapnik-OSM is the set of files that tell Mapnik how to render
+    OpenStreetMap maps.
+
+    a. Download
+
+    svn checkout http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
+
+    b. Configuration
+
+    Adapt set-mapnik-env, and in particular the MAPNIK_MAP_FILE,
+    MAPNIK_SYMBOLS_DIR, MAPNIK_WORLD_BOUNDARIES, MAPNIK_TILE_DIR,
+    MAPNIK_DBHOST, MAPNIK_DBNAME, MAPNIK_DBUSER and MAPNIK_DBPASS
+    variables.
+
+    Then, run :
+
+    . ./set-mapnik-env
+    ./customize-mapnik-map > $MAPNIK_MAP_FILE
+
+    $MAPNIK_MAP_FILE is the file that will tell Mapnik how to do the
+    rendering (for each zoom level, how to render roads, streets,
+    parkings, etc.)
+
+    c. Installation of static data
+
+    In addition to the OpenStreetMap data, some other static data are
+    used to render the maps (world boundaries, etc.)
+
+    wget http://tile.openstreetmap.org/world_boundaries-spherical.tgz
+    cd /path/to/mapnik-osm/
+    tar xzf ~/download/world_boundaries-spherical.tgz
+
+    wget http://tile.openstreetmap.org/processed_p.zip
+    unzip -j processed_p.zip -d /path/to/mapnik-osm/world_boundaries
+
+    wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
+    tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
+
+ 8. Installation of OCitySMap
+
+    a. Grab the sources
+
+    git clone git://git.savannah.nongnu.org/maposmatic/ocitysmap.git
+
+    b. Initialize OCitySMap SQL stuff
+
+    psql -h localhost  \
+         -U maposmatic \
+         -f /path/to/ocitysmap/ocitysmap-init.sql \
+         -d maposmatic
+
+    c. Install dependencies
+
+    sudo aptitude install python-pygresql python-gdal
+
+    d. Configuration file
+
+    Create a ~/.ocitysmap.conf configuration file, modeled after the
+    provided ocitysmap.conf file.
+
+ 9. Run OCitySMap
+
+ ./ocitysmap-render -f png -c Sanguinet
+
