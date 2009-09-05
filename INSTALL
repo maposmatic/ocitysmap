@@ -1,0 +1,159 @@
+OCitySmap installation instructions
+===================================
+
+These instructions refer to Debian/Ubuntu packages. For other
+distributions, minor adaptations might be needed.
+
+ 1. Installation of PostgreSQL and PostGIS
+
+    sudo aptitude install postgresql-8.3-postgis
+
+ 2. Creation of a new PostgreSQL user
+
+    sudo -u postgres createuser -P maposmatic
+
+    Enter the password twice, and say no to "superuser", "be allowed
+    to create databases", "be allowed to create more new roles".
+
+ 3. Creation of the database
+
+    sudo -u postgres createdb -E UTF8 -O maposmatic maposmatic
+
+    (see http://wiki.openstreetmap.org/wiki/Mapnik/PostGIS)
+
+    You can now try to connect to the database, using:
+
+    psql -h localhost -U maposmatic maposmatic
+
+    If it doesn't work, fix your configuration
+
+ 4. Enable PostGIS on the database
+
+    PostGIS is in fact a set of functions and datatypes for
+    PostgreSQL, and every PostgreSQL database needing these features
+    must be initialized as follows. We do this initialization of the
+    database with superuser privileges, and then later fix the table
+    owners so that our normal user can use the database.
+
+    a. Enable the plpgsql language on the maposmatic database
+
+    sudo -u postgres createlang plpgsql maposmatic
+
+    b. Add the low-level PostGIS infrastructure
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql-8.3-postgis/lwpostgis.sql \
+              -d maposmatic
+
+    c. Add the list of spatial referential systems
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql-8.3-postgis/spatial_ref_sys.sql \
+              -d maposmatic
+
+    d. Change the owner of the new tables to maposmatic
+
+    echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
+          ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
+    sudo -u postgres psql -d maposmatic
+
+ 5. Installation of osm2pgsql
+
+    osm2pgsql is the tool that takes OSM data as input, and creates a
+    PostGIS database from it. At the time of the writing of this
+    document, the osm2pgsql packaged in Debian/Ubuntu is not recent
+    enough, so we grab a fresh version from SVN (we used revision
+    17318).
+
+    a. Grab osm2pgsql code
+
+    svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
+
+    b. Install the build dependencies
+
+    sudo aptitude install build-essential libxml2-dev libgeos-dev \
+                          libpq-dev libbz2-dev proj libbz2-dev
+
+    c. Compile
+
+    cd osm2pgsql
+    make
+
+    d. Install
+
+    Just copy the osm2pgsql binary somewhere in your PATH
+
+ 6. Import the Google spatial referential system
+
+    The osm2pgsql tool creates data in the PostGIS database relative
+    to the 900913 (Google in leet language) spatial referential
+    system. As this system is not included in the default PostGIS
+    installation, we must add it manually. It is available in
+    osm2pgsql source code.
+
+    psql -h localhost \
+         -U maposmatic \
+         -f /path/to/osm2pgsql/900913.sql \
+         -d maposmatic
+
+ 7. Download the OSM data
+
+    For the moment OCitySMap only supports France (contributors are
+    welcome to adapt the few parts of OCitySMap that are
+    country-specific).
+
+    wget http://download.geofabrik.de/osm/europe/france.osm.bz2
+
+ 8. Import the OSM data
+
+    osm2pgsql -S '/path/to/osm2pgsql/default.style' \
+              -s -c -d maposmatic -m -U maposmatic -W \
+              -H localhost france.osm.bz2
+
+    If you have a lot of RAM, remove '-s', it will make the import
+    faster.
+
+ 9. Install Mapnik
+
+    We used Mapnik 0.6.1, which is not yet available in Debian/Ubuntu,
+    so we compiled it from source.
+
+    a. Install the dependencies
+
+    sudo aptitude install
+        libboost-dev libicu-dev libstdc++6-dev python-dev
+        libfreetype6-dev libjpeg62-dev libltdl3-dev libpng12-dev
+        libtiff4-dev libtiffxx0c2 python-imaging proj libcairo2-dev
+        python-cairo-dev libcairomm-1.0-dev libpixman-1-dev
+        libpthread-stubs0-dev ttf-dejavu ttf-dejavu-core
+        ttf-dejavu-extra libgdal-dev python-gdal
+        postgresql-server-dev-8.3 postgresql-contrib-8.3 libxslt1-dev
+        libxml2-dev
+
+    b. Download Mapnik
+
+    wget http://download.berlios.de/mapnik/mapnik-0.6.1.tar.bz2
+
+    c. Compile and install Mapnik
+
+    tar xvjf mapnik-0.6.1.tar.bz2
+    cd mapnik-0.6.1
+
+    python scons/scons.py configure INPUT_PLUGINS=all \
+      OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/truetype/ttf-dejavu/
+
+    (You can also path PREFIX=... and PYTHONPREFIX=.... if you don't
+    want a system-wide installation)
+
+    python scons/scons.py
+
+    python scons/scons.py install
+
+    d. Check the installation
+
+    Run a Python interpreter, and run "import mapnik". If it doesn't
+    work and you didn't do a system-wide installation of Mapnik, don't
+    forget to set the PYTHONPATH and LD_LIBRARY_PATH environment
+    variables.
