@@ -16,15 +16,7 @@ Alternately you may specify a bounding box rather than a City:
 This is useful when OpenStreetMap does not contain the administrative boundary
 of the city.
 
-You should first create /etc/ocitysmap.conf and/or ~/.ocitysmap from the
-template ocitysmap.conf.
-
-Dependencies
- - python-pygresql
- - python-mapnik
- - python-gdal
- - a PostGIS database filled with OpenStreetMap data
- - Mapnik data for OSM rendering and configured osm.xml file
+See INSTALL for installation instructions.
 
 This code is under AGPLv3 (GNU Affero General Public License 3.0) except
 the included OpenStreetMap logo under CC-BY-SA (Creative Common
