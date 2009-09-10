@@ -334,7 +334,8 @@ class OCitySMap:
         
         return BoundingBox.parse_wkt(records[0][0])
 
-    _regexp_contour = re.compile('^POLYGON\(\((\S*) (\S*),\S* (\S*),(\S*) \S*,\S* \S*,\S* \S*\),\(([^)]*)\)\)$')
+    _regexp_contour = re.compile('^POLYGON\(\(([^)]*)\),\(([^)]*)\)\)$')
+    _regexp_coords  = re.compile('^(\S*)\s+(\S*)$')
 
     def get_city_contour(self, db, city):
 
@@ -350,21 +351,49 @@ class OCitySMap:
                                  and admin_level='8' and name='%s';""" % \
                            pgdb.escape_string(city.encode('utf-8')))
         sl = cursor.fetchall()
-        cell00 = sl[0][0].strip()
-        if not cell00: return None
+        try:
+            cell00 = sl[0][0].strip()
+        except (KeyError,AttributeError):
+            l.error("Invalid DB contour structure")
+            return None
+
+        # Got nothing usable
+        if not cell00:
+            return None
 
         # Parse the answer, in order to add a margin around the area
         prev_locale = locale.getlocale(locale.LC_ALL)
         locale.setlocale(locale.LC_ALL, "C")
         try:
             matches = self._regexp_contour.match(cell00)
-            ymin, xmin, xmax, ymax, inside = matches.groups()
-            xmin, ymin, ymax, xmax = map(float, (xmin, ymin, ymax, xmax))
-            xmin -= 1. ; xmax += 1. # Add one degree around the area
+            if not matches:
+                l.error("Area not conformant")
+                return None
+            scoords, inside = matches.groups()
+
+            # Determine bbox envelope
+            xmin, ymin, ymax, xmax = (None,)*4
+            lcoords = scoords.split(',')
+            if len(lcoords) != 5:
+                l.warning("Coords look atypical: %s", lcoords)
+            for scoord in lcoords:
+                matches = self._regexp_coords.match(scoord)
+                y,x = map(float,matches.groups())
+                if (xmax is None) or xmax < x: xmax = x
+                if (xmin is None) or xmin > x: xmin = x
+                if (ymax is None) or ymax < y: ymax = y
+                if (ymin is None) or ymin > y: ymin = y
+
+            # Add one degree around the area
+            xmin -= 1. ; xmax += 1.
             ymin -= 1. ; ymax += 1.
             return "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f),(%s))" \
                 % (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
                    inside)
+        except:
+            # Regexp error: area is not a "simple" polygon
+            l.exception("Unexpected exception")
+            return None
         finally:
             locale.setlocale(locale.LC_ALL, prev_locale)
 
