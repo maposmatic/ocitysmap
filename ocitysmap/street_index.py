@@ -533,15 +533,16 @@ class OCitySMap:
                 l.warning('error while opening destination file %s: %s'
                           % (output_filename, ex))
             else:
+                copyright_notice = (u'© 2009 MapOSMatic/ocitysmap authors. '
+                                    u'Map data © 2009 OpenStreetMap.org '
+                                    u'and contributors (CC-BY-SA)').encode('UTF-8')
                 if title is not None:
-                    writer.writerow(['#', title.encode('latin1',  'replace'),
-                                     'ISO-8859-1'])
+                    writer.writerow(['# (UTF-8)', title.encode('UTF-8'), copyright_notice])
                 else:
-                    writer.writerow(['#', 'MapOSMatic', 'ISO-8859-1'])
+                    writer.writerow(['# (UTF-8)', '', copyright_notice])
 
                 for street in self.streets:
-                    s = [e.encode('latin1', 'replace') for e in street]
-                    writer.writerow(s)
+                    writer.writerow([e.encode('UTF-8') for e in street])
             return
 
         if file_type in ('png', 'png24'):
