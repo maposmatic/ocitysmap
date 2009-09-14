@@ -53,7 +53,14 @@ distributions, minor adaptations might be needed.
               -f /usr/share/postgresql-8.3-postgis/spatial_ref_sys.sql \
               -d maposmatic
 
-    d. Change the owner of the new tables to maposmatic
+    d. Add the intarray extension for diff files support (osc)
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.3/contrib/_int.sql \
+              -d maposmatic
+
+    e. Change the owner of the new tables to maposmatic
 
     echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
           ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
