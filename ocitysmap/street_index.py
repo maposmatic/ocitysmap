@@ -37,8 +37,8 @@ APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
                  u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
                  u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", u"Quai",
                  u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", u"Ruelle",
-                 u"Square", u"Traboule", u"Traverse", u"Venelle", u"Voie",
-                 u"Rond-point" ]
+                 u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
+                 u"Voie", u"Rond-point" ]
 DETERMINANTS = [ u" des", u" du", u" de la", u" de l'", u" de", u" d'", u"" ]
 
 SPACE_REDUCE = re.compile(r"\s+")
