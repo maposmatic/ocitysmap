@@ -110,7 +110,10 @@ def main():
 
 
 
-    city_name = unicode(options.city_name.decode('utf-8'))
+    if options.city_name:
+        city_name = unicode(options.city_name.decode('utf-8'))
+    else:
+        city_name = None
 
     try:
         renderer = OCitySMap(options.config_file, city_name, boundingbox)
