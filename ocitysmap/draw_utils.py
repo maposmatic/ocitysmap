@@ -23,6 +23,7 @@
 
 
 import cairo, logging
+import datetime
 
 l = logging.getLogger('ocitysmap')
 
@@ -125,33 +126,51 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
     ctx.move_to(0,0)
     xlat1, ylat1 = ctx.get_current_point()
 
+    ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
+                         cairo.FONT_WEIGHT_NORMAL)
+    ctx.set_font_size(14)
+
+    fontheight = ctx.font_extents()[2]
+
     # Draw the png in the buffer
     if png:
         ctx.set_source_surface(png)
         ctx.paint()
-        font_size = png.get_height() * .25
-        ctx.rel_move_to(png.get_width(), png.get_height()*.85)
+        ctx.rel_move_to(png.get_width(), fontheight)
     else:
-        font_size = 12
         ctx.rel_move_to(0, font_size*1.5)
 
     # Write the notice in the buffer
+    textwidth = ctx.text_extents(copyright_notice)[2]
     ctx.set_source_rgb (0, 0, 0)
-    ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
-                         cairo.FONT_WEIGHT_NORMAL)
-    ctx.set_font_size(font_size)
     ctx.show_text(copyright_notice)
 
+    ctx.move_to(png.get_width(), png.get_height() * 0.33 + fontheight)
+    today = datetime.date.today()
+    gendatetext = "This map has been rendered on %s and may not be complete or accurate." % today.strftime("%m %b %Y")
+    textwidth = max(textwidth, ctx.text_extents(gendatetext)[2])
+    ctx.show_text(gendatetext)
+
+    ctx.move_to(png.get_width(), png.get_height() * 0.66 + fontheight)
+    contribute_text = "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+    textwidth = max(textwidth, ctx.text_extents(contribute_text)[2])
+    ctx.show_text(contribute_text)
+
     # Determine the size of the virtual buffer
-    xlat2, ylat2 = ctx.get_current_point()
-    if not png: # Without png, simulate a height of 50pix
-        ylat2 = ylat1 + font_size*1.5
+    if png:
+        vbufheight = png.get_height()
+    else:
+        vbufheight = font_size * 2.5
+
+    vbufwidth = png.get_width() + max(ctx.text_extents(copyright_notice)[2],
+                                      ctx.text_extents(gendatetext)[2])
+
     grp = ctx.pop_group()
     # Virtual buffer done.
 
     # Display the buffer inside the surface, taking its size into account
-    ctx.translate(paperwidth - (xlat2-xlat1) - 10,
-                  paperheight - (ylat2-ylat1) - 10)
+    ctx.translate(paperwidth - vbufwidth - 10,
+                  paperheight - vbufheight - 10)
     ctx.set_source(grp)
 
     # Make it transparent
