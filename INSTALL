@@ -174,23 +174,7 @@ distributions, minor adaptations might be needed.
 
     svn checkout http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
 
-    b. Configuration
-
-    Adapt set-mapnik-env, and in particular the MAPNIK_MAP_FILE,
-    MAPNIK_SYMBOLS_DIR, MAPNIK_WORLD_BOUNDARIES, MAPNIK_TILE_DIR,
-    MAPNIK_DBHOST, MAPNIK_DBNAME, MAPNIK_DBUSER and MAPNIK_DBPASS
-    variables.
-
-    Then, run :
-
-    . ./set-mapnik-env
-    ./customize-mapnik-map > $MAPNIK_MAP_FILE
-
-    $MAPNIK_MAP_FILE is the file that will tell Mapnik how to do the
-    rendering (for each zoom level, how to render roads, streets,
-    parkings, etc.)
-
-    c. Installation of static data
+    b. Installation of static data
 
     In addition to the OpenStreetMap data, some other static data are
     used to render the maps (world boundaries, etc.)
@@ -204,6 +188,18 @@ distributions, minor adaptations might be needed.
 
     wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
     tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
+
+    b. Configuration
+
+
+    python ./generate_xml.py --dbname maposmatic --host 'localhost' \
+                             --user maposmatic --port 5432 \
+                             --password 'waeleephoo3Aew3u' \
+                             --world_boundaries=/path/to/mapnik-osm/world_boundaries \
+                             osm.xml osm-maposmatic.xml
+
+    The osm-maposmatic.xml file is the one you will have to use in
+    ocitysmap (step 8d below).
 
  8. Installation of OCitySMap
 
