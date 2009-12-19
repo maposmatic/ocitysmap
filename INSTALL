@@ -6,7 +6,7 @@ distributions, minor adaptations might be needed.
 
  1. Installation of PostgreSQL and PostGIS
 
-    sudo aptitude install postgresql-8.3-postgis
+    sudo aptitude install postgresql-8.3-postgis postgresql-contrib-8.3
 
  2. Creation of a new PostgreSQL user
 
