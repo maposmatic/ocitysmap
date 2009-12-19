@@ -10,10 +10,9 @@ distributions, minor adaptations might be needed.
 
  2. Creation of a new PostgreSQL user
 
-    sudo -u postgres createuser -P maposmatic
+    sudo -u postgres createuser -P -S -D -R maposmatic
 
-    Enter the password twice, and say no to "superuser", "be allowed
-    to create databases", "be allowed to create more new roles".
+    Enter the password twice.
 
  3. Creation of the database
 
