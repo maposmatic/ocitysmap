@@ -39,9 +39,9 @@ class BaseOCitySMapError(Exception):
 class UnsufficientDataError(BaseOCitySMapError):
     """Not enough data in the OSM database to proceed."""
 
-def _humanize_street_label(street):
+def _user_readable_label(street):
     """Creates a street label usable in the street list adjacent to the map
-    (like 'Bréhat (Allée des)' from the street definition tuple."""
+       from the street definition tuple."""
 
     def couple_compare(x,y):
         a = y[0] - x[0]
@@ -52,7 +52,6 @@ def _humanize_street_label(street):
     def distance(a,b):
         return (b[0]-a[0])**2 + (b[1]-a[1])**2
 
-    name = i18n.user_readable_street(street[0])
     squares = street[1]
     minx = min([x[0] for x in squares])
     maxx = max([x[0] for x in squares])
@@ -89,11 +88,12 @@ def _humanize_street_label(street):
                                  utils.gen_horizontal_square_label(first[1]),
                                  utils.gen_vertical_square_label(last[0]),
                                  utils.gen_horizontal_square_label(last[1]))
-    return (name, label)
+    return label
 
 class IndexPageGenerator:
-    def __init__(self, streets):
+    def __init__(self, streets, i18n):
         self.streets = streets
+        self.i18n = i18n
 
     def _get_font_parameters(self, cr, fontsize):
         cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
@@ -124,7 +124,7 @@ class IndexPageGenerator:
         prevletter = u''
         heading_letter_count = 0
         for street in self.streets:
-            if not i18n.first_letter_equal(street[0][0], prevletter):
+            if not self.i18n.first_letter_equal(street[0][0], prevletter):
                 heading_letter_count += 1
                 prevletter = street[0][0]
 
@@ -178,7 +178,7 @@ class IndexPageGenerator:
         for street in self.streets:
             # Letter label
             firstletter = street[0][0]
-            if not i18n.first_letter_equal(firstletter, prevletter):
+            if not self.i18n.first_letter_equal(firstletter, prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
@@ -244,9 +244,8 @@ class OCitySMap:
         assert bool(city_name) ^ bool(boundingbox)
         (self.city_name, self.boundingbox) = (city_name, boundingbox)
 
-        assert language is not None, "Language parameter is mandatory"
-        self.language = language
-        l.info('Language ' + self.language)
+        self.i18n = i18n.language_map[language]
+        l.info('Language ' + self.i18n.language_code())
 
         if self.city_name:
             l.info('OCitySMap renderer for %s.' % self.city_name)
@@ -471,7 +470,12 @@ class OCitySMap:
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
         prev_locale = locale.getlocale(locale.LC_COLLATE)
-        locale.setlocale(locale.LC_COLLATE, self.language)
+        locale.setlocale(locale.LC_COLLATE, self.i18n.language_code())
+
+        def _humanize_street_label(street):
+            return (self.i18n.user_readable_street(street[0]),
+                    _user_readable_label(street))
+
         try:
             sl = sorted(map(_humanize_street_label, sl),
                         lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
@@ -489,7 +493,7 @@ class OCitySMap:
         output_filename = "%s_index.%s" % (output_prefix, file_type)
         l.debug("rendering " + output_filename + "...")
 
-        generator = IndexPageGenerator(self.streets)
+        generator = IndexPageGenerator(self.streets, self.i18n)
 
         if file_type == 'xml':
             l.debug('not rendering index as xml (not supported)')

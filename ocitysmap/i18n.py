@@ -23,43 +23,65 @@
 
 import re
 
-APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
-                 u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
-                 u"Degré",
-                 u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
-                 u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", 
-                 u"Quai",
-                 u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", 
-                 u"Ruelle",
-                 u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
-                 u"Voie", u"Rond-point" ]
-DETERMINANTS = [ u" des", u" du", u" de la", u" de l'", u" de", u" d'", u"" ]
+class i18n:
+    """Functions needed to be implemented for a new language. 
+       See i18n_fr_FR_UTF8 below for an example. """
+    def language_code(self):
+        pass
 
-SPACE_REDUCE = re.compile(r"\s+")
-PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
-                           ("|".join(APPELLATIONS),
-                            "|".join(DETERMINANTS)), re.IGNORECASE | re.UNICODE)
+    def user_readable_street(self, name):
+        pass
 
-# for IndexPageGenerator._upper_unaccent_string
-E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    def first_letter_equal(self, a, b):
+        pass
 
-def user_readable_street(name):
-    name = name.strip()
-    name = SPACE_REDUCE.sub(" ", name)
-    name = PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
-    return name
+class i18n_fr_FR_UTF8(i18n):
+    APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
+                     u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
+                     u"Degré",
+                     u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
+                     u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", 
+                     u"Quai",
+                     u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", 
+                     u"Ruelle",
+                     u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
+                     u"Voie", u"Rond-point" ]
+    DETERMINANTS = [ u" des", u" du", u" de la", u" de l'",
+                          u" de", u" d'", u"" ]
 
-def _upper_unaccent_string(s):
-    s = E_ACCENT.sub("e", s)
-    s = I_ACCENT.sub("i", s)
-    s = A_ACCENT.sub("a", s)
-    s = O_ACCENT.sub("o", s)
-    s = U_ACCENT.sub("u", s)
-    return s.upper()
+    SPACE_REDUCE = re.compile(r"\s+")
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
+                                    ("|".join(APPELLATIONS),
+                                     "|".join(DETERMINANTS)), re.IGNORECASE
+                                                                 | re.UNICODE)
 
-def first_letter_equal(a, b):
-    return _upper_unaccent_string(a) == _upper_unaccent_string(b)
+    # for IndexPageGenerator._upper_unaccent_string
+    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+
+    def _upper_unaccent_string(self, s):
+        s = self.E_ACCENT.sub("e", s)
+        s = self.I_ACCENT.sub("i", s)
+        s = self.A_ACCENT.sub("a", s)
+        s = self.O_ACCENT.sub("o", s)
+        s = self.U_ACCENT.sub("u", s)
+        return s.upper()
+
+    def language_code(self):
+        return "fr_FR.UTF8"
+
+    def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
+
+    def first_letter_equal(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
+# The global map used by module users
+language_map = { 'fr_FR.UTF-8': i18n_fr_FR_UTF8() }
+
