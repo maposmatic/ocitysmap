@@ -129,14 +129,14 @@ distributions, minor adaptations might be needed.
 
     a. Install the dependencies
 
-    sudo aptitude install
-        libboost-dev libicu-dev libstdc++6-dev python-dev
-        libfreetype6-dev libjpeg62-dev libltdl3-dev libpng12-dev
-        libtiff4-dev libtiffxx0c2 python-imaging proj libcairo2-dev
-        python-cairo-dev libcairomm-1.0-dev libpixman-1-dev
-        libpthread-stubs0-dev ttf-dejavu ttf-dejavu-core
-        ttf-dejavu-extra libgdal-dev python-gdal
-        postgresql-server-dev-8.3 postgresql-contrib-8.3 libxslt1-dev
+    sudo aptitude install \
+        libboost-dev libicu-dev libstdc++6-dev python-dev \
+        libfreetype6-dev libjpeg62-dev libltdl3-dev libpng12-dev \
+        libtiff4-dev libtiffxx0c2 python-imaging proj libcairo2-dev \
+        python-cairo-dev libcairomm-1.0-dev libpixman-1-dev \
+        libpthread-stubs0-dev ttf-dejavu ttf-dejavu-core \
+        ttf-dejavu-extra libgdal-dev python-gdal \
+        postgresql-server-dev-8.3 postgresql-contrib-8.3 libxslt1-dev \
         libxml2-dev
 
     b. Download Mapnik
