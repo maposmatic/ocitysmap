@@ -229,7 +229,8 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, config_file=None, city_name=None, boundingbox=None):
+    def __init__(self, config_file=None, city_name=None, boundingbox=None,
+                 language=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
@@ -242,6 +243,10 @@ class OCitySMap:
         """
         assert bool(city_name) ^ bool(boundingbox)
         (self.city_name, self.boundingbox) = (city_name, boundingbox)
+
+        assert language is not None, "Language parameter is mandatory"
+        self.language = language
+        l.info('Language ' + self.language)
 
         if self.city_name:
             l.info('OCitySMap renderer for %s.' % self.city_name)

@@ -64,6 +64,11 @@ def main():
                       'rendering (default=16)', type='int', default =16)
     parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
                       metavar='LAT1,LON1 LAT2,LON2', help='Bounding box')
+    parser.add_option('-l', '--language', dest='language',
+                      metavar='LANGUAGE_CODE',
+                      help='Language to use when generating the index' 
+                           ' (default=fr_FR)',
+                      default='fr_FR')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -116,7 +121,8 @@ def main():
         city_name = None
 
     try:
-        renderer = OCitySMap(options.config_file, city_name, boundingbox)
+        renderer = OCitySMap(options.config_file, city_name, boundingbox,
+                             options.language)
     except BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
