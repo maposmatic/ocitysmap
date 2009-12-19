@@ -67,8 +67,8 @@ def main():
     parser.add_option('-l', '--language', dest='language',
                       metavar='LANGUAGE_CODE',
                       help='Language to use when generating the index' 
-                           ' (default=fr_FR)',
-                      default='fr_FR')
+                           ' (default=fr_FR.UTF-8)',
+                      default='fr_FR.UTF-8')
 
     (options, args) = parser.parse_args()
     if len(args):

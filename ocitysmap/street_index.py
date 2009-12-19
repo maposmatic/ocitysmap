@@ -471,7 +471,7 @@ class OCitySMap:
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
         prev_locale = locale.getlocale(locale.LC_COLLATE)
-        locale.setlocale(locale.LC_COLLATE, "fr_FR.UTF-8")
+        locale.setlocale(locale.LC_COLLATE, self.language)
         try:
             sl = sorted(map(_humanize_street_label, sl),
                         lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
