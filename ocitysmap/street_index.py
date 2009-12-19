@@ -24,6 +24,7 @@
 import logging, traceback
 import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip, csv
 import ConfigParser
+import i18n
 from coords import BoundingBox
 
 import map_canvas, grid, utils
@@ -31,26 +32,6 @@ import map_canvas, grid, utils
 from draw_utils import enclose_in_frame
 
 l = logging.getLogger('ocitysmap')
-
-APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
-                 u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", u"Degré",
-                 u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
-                 u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", u"Quai",
-                 u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", u"Ruelle",
-                 u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
-                 u"Voie", u"Rond-point" ]
-DETERMINANTS = [ u" des", u" du", u" de la", u" de l'", u" de", u" d'", u"" ]
-
-SPACE_REDUCE = re.compile(r"\s+")
-PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
-                           ("|".join(APPELLATIONS),
-                            "|".join(DETERMINANTS)), re.IGNORECASE | re.UNICODE)
-# for IndexPageGenerator._upper_unaccent_string
-E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -62,12 +43,6 @@ def _humanize_street_label(street):
     """Creates a street label usable in the street list adjacent to the map
     (like 'Bréhat (Allée des)' from the street definition tuple."""
 
-    def unprefix_street(name):
-        name = name.strip()
-        name = SPACE_REDUCE.sub(" ", name)
-        name = PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
-        return name
-
     def couple_compare(x,y):
         a = y[0] - x[0]
         if a:
@@ -77,7 +52,7 @@ def _humanize_street_label(street):
     def distance(a,b):
         return (b[0]-a[0])**2 + (b[1]-a[1])**2
 
-    name = unprefix_street(street[0])
+    name = i18n.user_readable_street(street[0])
     squares = street[1]
     minx = min([x[0] for x in squares])
     maxx = max([x[0] for x in squares])
@@ -143,24 +118,13 @@ class IndexPageGenerator:
             'em' : em,
             }
 
-    def _upper_unaccent_string(self, s):
-        s = E_ACCENT.sub("e", s)
-        s = I_ACCENT.sub("i", s)
-        s = A_ACCENT.sub("a", s)
-        s = O_ACCENT.sub("o", s)
-        s = U_ACCENT.sub("u", s)
-        return s.upper()
-
-    def _equal_without_accent(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
-
     def _fits_in_page(self, cr, paperwidth, paperheight, fontsize):
         fp = self._get_font_parameters(cr, fontsize)
 
         prevletter = u''
         heading_letter_count = 0
         for street in self.streets:
-            if not self._equal_without_accent(street[0][0], prevletter):
+            if not i18n.first_letter_equal(street[0][0], prevletter):
                 heading_letter_count += 1
                 prevletter = street[0][0]
 
@@ -214,7 +178,7 @@ class IndexPageGenerator:
         for street in self.streets:
             # Letter label
             firstletter = street[0][0]
-            if not self._equal_without_accent(firstletter, prevletter):
+            if not i18n.first_letter_equal(firstletter, prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
