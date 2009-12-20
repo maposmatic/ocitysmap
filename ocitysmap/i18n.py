@@ -82,6 +82,21 @@ class i18n_fr_FR_UTF8(i18n):
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
+
+class i18n_generic(i18n):
+    def __init__(self, language):
+        self.language = language
+
+    def language_code(self):
+        return self.language
+
+    def user_readable_street(self, name):
+        return name
+
+    def first_letter_equal(self, a, b):
+        return a == b
+
 # The global map used by module users
-language_map = { 'fr_FR.UTF-8': i18n_fr_FR_UTF8() }
+language_map = { 'fr_FR.UTF-8': i18n_fr_FR_UTF8(),
+                 'en_GB.UTF-8': i18n_generic('en_GB.UTF-8') }
 
