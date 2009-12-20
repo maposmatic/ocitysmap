@@ -52,7 +52,7 @@ class i18n_template_code_CODE(i18n):
         return a == b
 
 
-class i18n_fr_FR_UTF8(i18n):
+class i18n_fr_generic(i18n):
     APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour",
                      u"Chaussée", u"Chemin", u"Cheminement",
                      u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
@@ -80,6 +80,9 @@ class i18n_fr_FR_UTF8(i18n):
     O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
     U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
+    def __init__(self, language):
+        self.language = language
+
     def _upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
@@ -89,7 +92,7 @@ class i18n_fr_FR_UTF8(i18n):
         return s.upper()
 
     def language_code(self):
-        return "fr_FR.UTF8"
+        return self.language
 
     def user_readable_street(self, name):
         name = name.strip()
@@ -117,9 +120,9 @@ class i18n_generic(i18n):
 # The global map used by module users
 language_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
                                                                  # new language
-                 'fr_FR.UTF-8': i18n_fr_FR_UTF8(),
+                 'fr_FR.UTF-8': i18n_fr_generic('fr_FR.UTF-8'),
                  'en_GB.UTF-8': i18n_generic('en_GB.UTF-8'),
-                 'fr_BE.UTF-8': i18n_generic('fr_BE.UTF-8'),
+                 'fr_BE.UTF-8': i18n_fr_generic('fr_BE.UTF-8'),
                  'de_BE.UTF-8': i18n_generic('de_BE.UTF-8'),
                  'nl_BE.UTF-8': i18n_generic('nl_BE.UTF-8')}
 
