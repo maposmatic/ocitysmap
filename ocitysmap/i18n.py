@@ -68,7 +68,7 @@ class i18n_fr_FR_UTF8(i18n):
                           u" de", u" d'", u"" ]
 
     SPACE_REDUCE = re.compile(r"\s+")
-    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.*)" %
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
                                     ("|".join(APPELLATIONS),
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
