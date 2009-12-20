@@ -1,8 +1,10 @@
-OCitySmap installation instructions
+OCitySMap installation instructions
 ===================================
 
-These instructions refer to Debian/Ubuntu packages. For other
-distributions, minor adaptations might be needed.
+These instructions refer to software dependencies by using
+Debian/Ubuntu package names. Minor adaptations might be needed for
+other distributions or for the precise Debian or Ubuntu release you
+are using (here respectively Lenny and Intrepid or Jaunty).
 
  1. Installation of PostgreSQL and PostGIS
 
@@ -24,7 +26,7 @@ distributions, minor adaptations might be needed.
 
     psql -h localhost -U maposmatic maposmatic
 
-    If it doesn't work, fix your configuration
+    If it doesn't work, fix your configuration.
 
  4. Enable PostGIS on the database
 
@@ -89,8 +91,11 @@ distributions, minor adaptations might be needed.
 
     d. Install
 
-    Just copy the osm2pgsql binary somewhere in your PATH
+    Just copy the osm2pgsql binary somewhere in your PATH or link to
+    it like:
 
+    ln -s /path/to/osm2pgsql/osm2pgsql /usr/local/bin/osm2pgsql
+    
  6. Import the Google spatial referential system
 
     The osm2pgsql tool creates data in the PostGIS database relative
@@ -106,9 +111,7 @@ distributions, minor adaptations might be needed.
 
  7. Download the OSM data
 
-    For the moment OCitySMap only supports France (contributors are
-    welcome to adapt the few parts of OCitySMap that are
-    country-specific).
+    We give the example for France.
 
     wget http://download.geofabrik.de/osm/europe/france.osm.bz2
 
@@ -119,12 +122,13 @@ distributions, minor adaptations might be needed.
               -H localhost france.osm.bz2
 
     If you have a lot of RAM, remove '-s', it will make the import
-    faster.
+    faster. If you miss RAM (and have a lot of time available) you can
+    also use the '-C' option together with '-s'. (See osm2pgsql -h).
 
  9. Install Mapnik
 
-    We used Mapnik 0.6.1, which is not yet available in Debian/Ubuntu,
-    so we compiled it from source.
+    We used Mapnik 0.6.1, which is not yet available in stable
+    Debian/Ubuntu, so we compiled it from source.
 
     a. Install the dependencies
 
