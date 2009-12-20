@@ -164,7 +164,7 @@ distributions, minor adaptations might be needed.
     forget to set the PYTHONPATH and LD_LIBRARY_PATH environment
     variables.
 
- 7. Install Mapnik-OSM
+10. Install Mapnik-OSM
 
     Mapnik-OSM is the set of files that tell Mapnik how to render
     OpenStreetMap maps.
@@ -188,8 +188,7 @@ distributions, minor adaptations might be needed.
     wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
     tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
 
-    b. Configuration
-
+    c. Configuration
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
@@ -200,7 +199,7 @@ distributions, minor adaptations might be needed.
     The osm-maposmatic.xml file is the one you will have to use in
     ocitysmap (step 8d below).
 
- 8. Installation of OCitySMap
+11. Installation of OCitySMap
 
     a. Grab the sources
 
@@ -222,7 +221,7 @@ distributions, minor adaptations might be needed.
     Create a ~/.ocitysmap.conf configuration file, modeled after the
     provided ocitysmap.conf file.
 
- 9. Run OCitySMap
+12. Run OCitySMap
 
- ./ocitysmap-render -f png -c Sanguinet
+    ./ocitysmap-render -f png -c Sanguinet
 
