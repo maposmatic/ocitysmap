@@ -1,0 +1,149 @@
+OCitySmap installation instructions for Debian unstable
+=======================================================
+
+These instructions refer to Debian unstable packages. For other
+distributions, minor adaptations might be needed.
+
+ 1. Installation of PostgreSQL and PostGIS
+
+    sudo aptitude install postgresql-8.4-postgis postgresql-contrib-8.4
+
+ 2. Creation of a new PostgreSQL user
+
+    sudo -u postgres createuser -P maposmatic
+
+    Enter the password twice, and say no to "superuser", "be allowed
+    to create databases", "be allowed to create more new roles".
+
+ 3. Creation of the database
+
+    sudo -u postgres createdb -E UTF8 -O maposmatic maposmatic
+
+    (see http://wiki.openstreetmap.org/wiki/Mapnik/PostGIS)
+
+    You can now try to connect to the database, using:
+
+    psql -h localhost -U maposmatic maposmatic
+
+    If it doesn't work, fix your configuration
+
+ 4. Enable PostGIS on the database
+
+    PostGIS is in fact a set of functions and datatypes for
+    PostgreSQL, and every PostgreSQL database needing these features
+    must be initialized as follows. We do this initialization of the
+    database with superuser privileges, and then later fix the table
+    owners so that our normal user can use the database.
+
+    a. Enable the plpgsql language on the maposmatic database
+
+    sudo -u postgres createlang plpgsql maposmatic
+
+    b. Add the low-level PostGIS infrastructure
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/postgis.sql \
+              -d maposmatic
+
+    c. Add the list of spatial referential systems
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/spatial_ref_sys.sql \
+              -d maposmatic
+
+    d. Add the intarray extension for diff files support (osc)
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/_int.sql \
+              -d maposmatic
+
+    e. Change the owner of the new tables to maposmatic
+
+    echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
+          ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
+    sudo -u postgres psql -d maposmatic
+
+ 5. Installation of osm2pgsql
+
+    sudo aptitude install osm2pgsql
+
+ 6. Download the OSM data
+
+    For the moment OCitySMap only supports France (contributors are
+    welcome to adapt the few parts of OCitySMap that are
+    country-specific).
+
+    wget http://download.geofabrik.de/osm/europe/france.osm.bz2
+
+ 7. Import the OSM data
+
+    osm2pgsql -S '/usr/share/osm2pgsql/default.style' \
+              -s -c -d maposmatic -m -U maposmatic -W \
+              -H localhost france.osm.bz2
+
+    If you have a lot of RAM, remove '-s', it will make the import
+    faster.
+
+ 8. Install Mapnik
+
+    sudo aptitude install python-mapnik
+
+ 9. Install Mapnik-OSM
+
+    Mapnik-OSM is the set of files that tell Mapnik how to render
+    OpenStreetMap maps.
+
+    a. Download
+
+    svn checkout http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
+
+    b. Installation of static data
+
+    In addition to the OpenStreetMap data, some other static data are
+    used to render the maps (world boundaries, etc.)
+
+    wget http://tile.openstreetmap.org/world_boundaries-spherical.tgz
+    cd /path/to/mapnik-osm/
+    tar xzf ~/download/world_boundaries-spherical.tgz
+
+    wget http://tile.openstreetmap.org/processed_p.zip
+    unzip -j processed_p.zip -d /path/to/mapnik-osm/world_boundaries
+
+    wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
+    tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
+
+    c. Configuration
+
+    python ./generate_xml.py --dbname maposmatic --host 'localhost' \
+                             --user maposmatic --port 5432 \
+                             --password 'waeleephoo3Aew3u' \
+
+10. Installation of OCitySMap
+
+    a. Grab the sources
+
+    git clone git://git.savannah.nongnu.org/maposmatic/ocitysmap.git
+
+    b. Initialize OCitySMap SQL stuff
+
+    psql -h localhost  \
+         -U maposmatic \
+         -f /path/to/ocitysmap/ocitysmap-init.sql \
+         -d maposmatic
+
+    c. Install dependencies
+
+    sudo aptitude install python-pygresql python-gdal
+
+    d. Configuration file
+
+    Create a ~/.ocitysmap.conf configuration file, modeled after the
+    provided ocitysmap.conf file.
+
+ 11. Run OCitySMap
+
+    ./ocitysmap-render -f png -c Sanguinet
+
