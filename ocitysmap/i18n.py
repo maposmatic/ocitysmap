@@ -53,10 +53,11 @@ class i18n_template_code_CODE(i18n):
 
 
 class i18n_fr_FR_UTF8(i18n):
-    APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
-                     u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
-                     u"Degré",
-                     u"Esplanade", u"Impasse", u"Liaison", u"Mail", u"Montée",
+    APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour",
+                     u"Chaussée", u"Chemin", u"Cheminement", 
+                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
+                     u"Degré", u"Esplanade", u"Giratoire",
+                     u"Impasse", u"Liaison", u"Mail", u"Montée",
                      u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", 
                      u"Quai",
                      u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", 
