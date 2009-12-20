@@ -35,6 +35,23 @@ class i18n:
     def first_letter_equal(self, a, b):
         pass
 
+class i18n_template_code_CODE(i18n):
+    def language_code(self):
+        """returns the language code of the specific language
+           supported, e.g. fr_FR.UTF-8"""
+        return "code_Code.UTF-8"
+
+    def user_readable_street(self, name):
+        """ transforms a street name into a suitable form for
+            the map index, e.g. Paris (Rue de) for French"""
+        return name
+
+    def first_letter_equal(self, a, b):
+        """returns True if the letters a and b are equal in the map index,
+           e.g. É and E are equals in French map index"""
+        return a == b
+
+
 class i18n_fr_FR_UTF8(i18n):
     APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour", u"Chaussée",
                      u"Chemin", u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
@@ -97,6 +114,8 @@ class i18n_generic(i18n):
         return a == b
 
 # The global map used by module users
-language_map = { 'fr_FR.UTF-8': i18n_fr_FR_UTF8(),
+language_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
+                                                                 # new language
+                 'fr_FR.UTF-8': i18n_fr_FR_UTF8(),
                  'en_GB.UTF-8': i18n_generic('en_GB.UTF-8') }
 
