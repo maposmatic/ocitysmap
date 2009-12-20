@@ -193,11 +193,6 @@ distributions, minor adaptations might be needed.
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
                              --password 'waeleephoo3Aew3u' \
-                             --world_boundaries=/path/to/mapnik-osm/world_boundaries \
-                             osm.xml osm-maposmatic.xml
-
-    The osm-maposmatic.xml file is the one you will have to use in
-    ocitysmap (step 8d below).
 
 11. Installation of OCitySMap
 
