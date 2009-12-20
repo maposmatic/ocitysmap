@@ -24,7 +24,7 @@
 import re
 
 class i18n:
-    """Functions needed to be implemented for a new language. 
+    """Functions needed to be implemented for a new language.
        See i18n_fr_FR_UTF8 below for an example. """
     def language_code(self):
         pass
@@ -54,13 +54,13 @@ class i18n_template_code_CODE(i18n):
 
 class i18n_fr_FR_UTF8(i18n):
     APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour",
-                     u"Chaussée", u"Chemin", u"Cheminement", 
-                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours", 
+                     u"Chaussée", u"Chemin", u"Cheminement",
+                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
                      u"Degré", u"Esplanade", u"Giratoire",
                      u"Impasse", u"Liaison", u"Mail", u"Montée",
-                     u"Passage", u"Place", u"Placette", u"Pont", u"Promenade", 
+                     u"Passage", u"Place", u"Placette", u"Pont", u"Promenade",
                      u"Quai",
-                     u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue", 
+                     u"Résidence", u"Rond-Point", u"Rang", u"Route", u"Rue",
                      u"Ruelle",
                      u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
                      u"Voie", u"Rond-point" ]
