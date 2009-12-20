@@ -182,8 +182,8 @@ distributions, minor adaptations might be needed.
     cd /path/to/mapnik-osm/
     tar xzf ~/download/world_boundaries-spherical.tgz
 
-    wget http://tile.openstreetmap.org/processed_p.zip
-    unzip -j processed_p.zip -d /path/to/mapnik-osm/world_boundaries
+    wget http://tile.openstreetmap.org/processed_p.tar.bz2
+    tar xjf ~/download/processed_p.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
 
     wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
     tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
