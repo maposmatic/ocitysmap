@@ -14,7 +14,8 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     sudo -u postgres createuser -P -S -D -R maposmatic
 
-    Enter the password twice.
+    Enter the password twice (we use later 'ereiamjh' as example
+    password).
 
  3. Creation of the database
 
@@ -196,7 +197,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
-                             --password 'waeleephoo3Aew3u' \
+                             --password 'ereiamjh' \
 
 11. Installation of OCitySMap
 
