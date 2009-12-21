@@ -120,6 +120,7 @@ class i18n_generic(i18n):
 # The global map used by module users
 language_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
                                                                  # new language
+                 'C': i18n_generic('C'),
                  'fr_FR.UTF-8': i18n_fr_generic('fr_FR.UTF-8'),
                  'fr_CA.UTF-8': i18n_fr_generic('fr_CA.UTF-8'),
                  'fr_CH.UTF-8': i18n_fr_generic('fr_CH.UTF-8'),
