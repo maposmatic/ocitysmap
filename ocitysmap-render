@@ -35,7 +35,7 @@ from ocitysmap.coords import BoundingBox
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    usage = '%prog [options] [-c <cityname>|-b <lat1,long1 lat2,long2>]'
+    usage = '%prog [options] [-c <cityname>|-b <lat1,long1 lat2,long2>|--polygon-osmid <osmid>]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
@@ -64,6 +64,8 @@ def main():
                       'rendering (default=16)', type='int', default =16)
     parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
                       metavar='LAT1,LON1 LAT2,LON2', help='Bounding box')
+    parser.add_option('', '--polygon-osmid', dest='osmid', metavar='OSMID',
+                      help='OSM id representing the polygon of the city to render'),
     parser.add_option('-l', '--language', dest='language',
                       metavar='LANGUAGE_CODE',
                       help='Language to use when generating the index' 
@@ -76,11 +78,16 @@ def main():
         return 1
 
     # Make sure either -b or -c is given
-    if not options.city_name and not options.bbox:
-      parser.error("One of --city or --bounding-box is mandatory")
+    optcnt = 0
+    for var in options.city_name, options.bbox, options.osmid:
+        if var:
+            optcnt += 1
 
-    if options.city_name and options.bbox:
-      parser.error("--city or --bounding-box are exclusive")
+    if optcnt == 0:
+        parser.error("One of --city or --bounding-box or --osmid is mandatory")
+
+    if optcnt > 1:
+        parser.error("--city or --bounding-box or --osmid are exclusive")
 
     # Determine title
     if options.no_frame:
@@ -122,7 +129,7 @@ def main():
 
     try:
         renderer = OCitySMap(options.config_file, city_name, boundingbox,
-                             options.language)
+                             options.osmid, options.language)
     except BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1
