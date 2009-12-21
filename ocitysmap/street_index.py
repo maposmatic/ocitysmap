@@ -31,7 +31,7 @@ import map_canvas, grid, utils
 
 from draw_utils import enclose_in_frame
 
-l = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('ocitysmap')
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -253,16 +253,16 @@ class OCitySMap:
         (self.city_name, self.boundingbox, self.osmid) = (city_name, boundingbox, osmid)
 
         self.i18n = i18n.language_map[language]
-        l.info('Language ' + self.i18n.language_code())
+        LOG.info('Language ' + self.i18n.language_code())
 
         if self.city_name:
-            l.info('OCitySMap renderer for %s.' % self.city_name)
+            LOG.info('OCitySMap renderer for %s.' % self.city_name)
         elif self.boundingbox:
-            l.info('OCitySMap renderer for %s.' % self.boundingbox)
+            LOG.info('OCitySMap renderer for %s.' % self.boundingbox)
         else:
-            l.info('OCitySMap renderer for %s.' % self.osmid)
+            LOG.info('OCitySMap renderer for %s.' % self.osmid)
 
-        l.info('Reading config file.')
+        LOG.info('Reading config file.')
         self.parser = ConfigParser.RawConfigParser()
         if config_file:
             config_files = [config_file]
@@ -298,7 +298,7 @@ class OCitySMap:
         else:
             self.contour = None
 
-        l.info('City bounding box is %s.' % str(self.boundingbox))
+        LOG.info('City bounding box is %s.' % str(self.boundingbox))
 
     def find_bounding_box_by_name(self, db, name):
         """Find the bounding box of a city from its name.
@@ -310,7 +310,7 @@ class OCitySMap:
         the given city.
         """
 
-        l.info('Looking for bounding box around %s...' % name)
+        LOG.info('Looking for bounding box around %s...' % name)
 
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
@@ -321,7 +321,7 @@ class OCitySMap:
                            pgdb.escape_string(name.encode('utf-8')))
         records = cursor.fetchall()
         if not records:
-            raise UnsufficientDataError, "Wrong city name or missing administrative boundary in database!"
+            raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % (repr(name))
 
         return BoundingBox.parse_wkt(records[0][0])
 
@@ -335,7 +335,7 @@ class OCitySMap:
         the given city.
         """
 
-        l.info('Looking for bounding box around %s...' % osmid)
+        LOG.info('Looking for bounding box around %s...' % osmid)
 
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
@@ -346,7 +346,7 @@ class OCitySMap:
                            osmid)
         records = cursor.fetchall()
         if not records:
-            raise UnsufficientDataError, "Wrong OSM id!"
+            raise UnsufficientDataError, "Wrong OSM id (%s) !" % (repr(osmid))
 
         return BoundingBox.parse_wkt(records[0][0])
 
@@ -354,6 +354,7 @@ class OCitySMap:
     _regexp_coords  = re.compile('^(\S*)\s+(\S*)$')
 
     def parse_city_contour(self, contour):
+        LOG.info("Parsing contour: %s" % contour)
         try:
             cell00 = contour[0][0].strip()
         except (KeyError,AttributeError):
@@ -371,7 +372,7 @@ class OCitySMap:
             matches = self._regexp_contour.match(cell00)
             if not matches:
                 print "Area not conformant"
-                l.error("Area not conformant")
+                LOG.error("Area not conformant")
                 return None
             scoords, inside = matches.groups()
 
@@ -380,7 +381,7 @@ class OCitySMap:
             lcoords = scoords.split(',')
             if len(lcoords) != 5:
                 print "Coords look atypical"
-                l.warning("Coords look atypical: %s", lcoords)
+                LOG.warning("Coords look atypical: %s", lcoords)
             for scoord in lcoords:
                 matches = self._regexp_coords.match(scoord)
                 y,x = map(float,matches.groups())
@@ -399,8 +400,7 @@ class OCitySMap:
             return l
         except:
             # Regexp error: area is not a "simple" polygon
-            print "Unexpected exception"
-            l.exception("Unexpected exception")
+            LOG.exception("Unexpected exception")
             return None
         finally:
             locale.setlocale(locale.LC_ALL, prev_locale)
@@ -629,19 +629,19 @@ class OCitySMap:
         frame_width = int(max(paperheight / 20., 30))
 
         output_filename = "%s_index.%s" % (output_prefix, file_type)
-        l.debug("rendering " + output_filename + "...")
+        LOG.debug("rendering " + output_filename + "...")
 
         generator = IndexPageGenerator(self.streets, self.i18n)
 
         if file_type == 'xml':
-            l.debug('not rendering index as xml (not supported)')
+            LOG.debug('not rendering index as xml (not supported)')
             return
 
         elif file_type == 'csv':
             try:
                 writer = csv.writer(open(output_filename, 'w'))
             except Exception,ex:
-                l.warning('error while opening destination file %s: %s'
+                LOG.warning('error while opening destination file %s: %s'
                           % (output_filename, ex))
             else:
                 copyright_notice = (u'© 2009 MapOSMatic/ocitysmap authors. '
@@ -702,11 +702,11 @@ class OCitySMap:
                      paperwidth, paperheight):
 
         if not self.streets:
-            l.warning('No street to write to index')
+            LOG.warning('No street to write to index')
             return
 
         for fmt in output_format:
-            l.debug('saving %s.%s...' % (output_prefix, fmt))
+            LOG.debug('saving %s.%s...' % (output_prefix, fmt))
             try:
                 self._render_one_prefix(title, output_prefix, fmt,
                                         paperwidth, paperheight)
@@ -737,7 +737,7 @@ class OCitySMap:
             raise IOError, 'Invalid path to the osm.xml file (%s)' % osm_map_file
 
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
-        l.debug('rendering tmp dir: %s' % tmpdir)
+        LOG.debug('rendering tmp dir: %s' % tmpdir)
         try:
             return self._render_map_into_files(tmpdir, osm_map_file,
                                                title,
@@ -756,14 +756,14 @@ class OCitySMap:
                                zoom_factor):
         # Does the real job of rendering the map
         GRID_COLOR = '#8BB381'
-        l.debug('rendering from %s to %s.%s...' % (osm_map_file,
+        LOG.debug('rendering from %s to %s.%s...' % (osm_map_file,
                                                    out_prefix,
                                                    out_formats))
         bbox = self.boundingbox.create_expanded(self.griddesc.height_square_angle*.7,
                                                 self.griddesc.width_square_angle*.7)
-        l.debug('bbox is: %s' % bbox)
+        LOG.debug('bbox is: %s' % bbox)
         city = map_canvas.MapCanvas(osm_map_file, bbox, zoom_factor)
-        l.debug('adding labels...')
+        LOG.debug('adding labels...')
 
         # Add the greyed-out area
         if self.contour is not None:
@@ -774,7 +774,7 @@ class OCitySMap:
 
         # Determine font size, depending on the zoom factor
         half_km_in_pixels = city.one_meter_in_pixels * 500.
-        l.debug('500m = %f pixels' % half_km_in_pixels)
+        LOG.debug('500m = %f pixels' % half_km_in_pixels)
         if half_km_in_pixels < 10:
             font_size  = 6
             line_width = 1
@@ -843,10 +843,10 @@ class OCitySMap:
             copyright_logo = None
 
         # Rendering...
-        l.debug('rendering map...')
+        LOG.debug('rendering map...')
         _map = city.render_map()
         for fmt in out_formats:
-            l.debug('saving %s.%s...' % (out_prefix, fmt))
+            LOG.debug('saving %s.%s...' % (out_prefix, fmt))
             try:
                 city.save_map("%s.%s" % (out_prefix, fmt),
                               title,
