@@ -228,6 +228,17 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
+    SELECTED_AMENITIES = [
+        ("Places of worship", "place_of_worship", "Places of worship"),
+        ("Education", "kindergarten", "Kindergarten"),
+        ("Education", "school", "School"),
+        ("Education", "college", "College"),
+        ("Education", "university", "University"),
+        ("Education", "library", "Library"),
+        ("Public buildings", "townhall", "Town hall"),
+        ("Public buildings", "post_office", "Post office"),
+        ("Public buildings", "police", "Police")]
+
     def __init__(self, config_file=None, city_name=None, boundingbox=None,
                  osmid=None, language=None):
         """Creates a new OCitySMap renderer instance for the given city.
@@ -635,21 +646,13 @@ class OCitySMap:
                 [ map(int, x.split(',')) for x in amenity[2].split(';')[:-1] ] )
               for amenity in am]
 
-        # Street prefixes are postfixed, a human readable label is
-        # built to represent the list of squares, and the list is
-        # alphabetically-sorted.
-        prev_locale = locale.getlocale(locale.LC_COLLATE)
-        locale.setlocale(locale.LC_COLLATE, self.i18n.language_code())
-
+        # Street prefixes are postfixed and a human readable label is
+        # built to represent the list of squares.
         def _humanize_amenity_label(amenity):
             return (amenity[0], amenity[1],
                     _user_readable_label(amenity[2]))
-
-        try:
-            am = sorted(map(_humanize_amenity_label, am),
-                        lambda x, y: locale.strcoll(x[1].lower(), y[1].lower()))
-        finally:
-            locale.setlocale(locale.LC_COLLATE, prev_locale)
+        
+        am = map(_humanize_amenity_label, am)
 
         return am
 
@@ -699,27 +702,33 @@ class OCitySMap:
         #    database
         #
         # See ocitysmap-init.sql for details
-        cursor.execute("""select 'Places of worship', name, textcat_all(x || ',' || y || ';')
-                          from (select distinct name, x, y
-                                from planet_osm_point
-                                join map_areas
-                                on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_name on city='%s'
-                                where amenity = 'place_of_worship'
-                                and case when cities_area_by_name.area is null
-                                then
-                                  true
-                                else
-                                  st_intersects(way, cities_area_by_name.area)
-                                end)
-                          as foo
-                          group by name
-                          order by name;""" % \
-                           pgdb.escape_string(city.encode('utf-8')))
+        al = []
+        for cat, amenity, human in self.SELECTED_AMENITIES:
+            cursor.execute("""select '%s', name, textcat_all(x || ',' || y || ';')
+                              from (select distinct amenity, name, x, y
+                                    from planet_osm_point
+                                    join map_areas
+                                    on st_intersects(way, st_transform(geom, 900913))
+                                    left join cities_area_by_name on city='%s'
+                                    where amenity = '%s'
+                                    and case when cities_area_by_name.area is null
+                                    then
+                                      true
+                                    else
+                                      st_intersects(way, cities_area_by_name.area)
+                                    end)
+                              as foo
+                              group by amenity, name
+                              order by amenity, name;""" % \
+                              (cat, pgdb.escape_string(city.encode('utf-8')), amenity))
+            sub_al = cursor.fetchall()
+            for a in sub_al:
+                if a[1] == None:
+                    a[1] = human
+            sub_al = self.humanize_amenity_list(sub_al)
+            al.extend(sub_al)
 
-        al = cursor.fetchall()
-
-        return self.humanize_amenity_list(al)
+        return al
 
     def get_amenities_by_osmid(self, db, osmid):
 
@@ -758,27 +767,33 @@ class OCitySMap:
         #    database
         #
         # See ocitysmap-init.sql for details
-        cursor.execute("""select 'Place of worship', name, textcat_all(x || ',' || y || ';')
-                          from (select distinct name, x, y
-                                from planet_osm_point
-                                join map_areas
-                                on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
-                                where amenity = 'place_of_worship'
-                                and case when cities_area_by_osmid.area is null
-                                then
-                                  true
-                                else
-                                  st_intersects(way, cities_area_by_osmid.area)
-                                end)
-                          as foo
-                          group by name
-                          order by name;""" % \
-                           osmid)
+        al = []
+        for cat, amenity, human in self.SELECTED_AMENITIES:
+            cursor.execute("""select '%s', name, textcat_all(x || ',' || y || ';')
+                              from (select distinct amenity, name, x, y
+                                    from planet_osm_point
+                                    join map_areas
+                                    on st_intersects(way, st_transform(geom, 900913))
+                                    left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
+                                    where amenity = '%s'
+                                    and case when cities_area_by_osmid.area is null
+                                    then
+                                      true
+                                    else
+                                      st_intersects(way, cities_area_by_osmid.area)
+                                    end)
+                              as foo
+                              group by amenity, name
+                              order by amenity, name;""" % \
+                              (cat, osmid, amenity))
+            sub_al = cursor.fetchall()
+            for a in sub_al:
+                if a[1] == None:
+                    a[1] = human
+            sub_al = self.humanize_amenity_list(sub_al)
+            al.extend(sub_al)
 
-        al = cursor.fetchall()
-
-        return self.humanize_amenity_list(al)
+        return al
 
     def _render_one_prefix(self, title, output_prefix, file_type,
                            paperwidth, paperheight):
