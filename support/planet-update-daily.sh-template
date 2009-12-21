@@ -1,0 +1,92 @@
+#! /bin/sh
+
+##
+## Script to update your OSM planet. Meant to be run at least once
+## every day. Will make sure that multiple instances will never run
+## concurrently. Will also catch up with the latest snapshot, even
+## when the local planet is older than 1 day.
+##
+## Requirements:
+##   - ~/.pgpass or pgsql config so that osm2pgsql doesn't need user
+##     password intervention to connect to the local OSM DB
+##   - aptitude install wget
+##
+
+# Path to some dir where the state of the update script will be stored
+# (a few files, a few bytes, write access required):
+LOCAL_STATE="/path/to/some/directory/where/a/few/files/will/be/stored"
+
+# Path to the osm2pgsql executable:
+OSM2PGSQL="/path/to/executable/osm2pgsql"
+
+# osm2pgsql args to connect to the local OSM planet db:
+OSM2PGSQL_DBPARAMS="-d DB_NAME -U DB_USERNAME -H DB_HOSTNAME"
+
+############################################################################
+
+# Abort upon first error
+set -e
+
+# _iso8601_touch file [delta_update]
+_iso8601_touch ()
+{
+    iso8601_tstamp=`cat "$1"`
+    _yr=`echo $iso8601_tstamp | cut -c1-4`
+    _mo=`echo $iso8601_tstamp | cut -c6-7`
+    _dy=`echo $iso8601_tstamp | cut -c9-10`
+    _hr=`echo $iso8601_tstamp | cut -c12-13`
+    _mn=`echo $iso8601_tstamp | cut -c15-16`
+    if [ -n "$2" ] ; then
+	_touch_time=`date -u -d "$_yr-$_mo-$_dy $_hr:$_mn:00 UTC + $2"`
+	_tstamp=`date -u -d "$_touch_time" --iso-8601=seconds`
+	echo "$_tstamp" > "$1"
+    else
+	_touch_time=`date -u -d "$_yr-$_mo-$_dy $_hr:$_mn:00 UTC"`
+    fi
+    touch -d "$_touch_time" "$1"
+}
+
+# _iso8601_diff VAR "end-timestamp" "delta"
+_iso8601_diff ()
+{
+    iso8601_tstamp="$2"
+    _yr=`echo $iso8601_tstamp | cut -c1-4`
+    _mo=`echo $iso8601_tstamp | cut -c6-7`
+    _dy=`echo $iso8601_tstamp | cut -c9-10`
+    _hr=`echo $iso8601_tstamp | cut -c12-13`
+    _mn=`echo $iso8601_tstamp | cut -c15-16`
+    _start=`date -u -d "$_yr-$_mo-$_dy $_hr:$_mn:00 UTC - $3" +'%Y%m%d'`
+    _end=`date -u -d "$_yr-$_mo-$_dy $_hr:$_mn:00 UTC" +'%Y%m%d'`
+    eval "${1}=${_start}-${_end}.osc.gz"
+}
+
+# Prevent parallel updates
+ln -s "pid-$$" "$LOCAL_STATE/lock" 2>/dev/null || exit 1
+trap "rm -f '$LOCAL_STATE/lock' ; trap - EXIT" EXIT
+
+# Refresh remote timestamp
+rm -f "$LOCAL_STATE/remote-latest.txt"
+wget -q -O "$LOCAL_STATE/remote-latest.txt" \
+     'http://planet.openstreetmap.org/daily/timestamp.txt'
+_iso8601_touch "$LOCAL_STATE/remote-latest.txt"
+
+# Compute next local timestamp
+cp -f "$LOCAL_STATE/local-latest.txt" "$LOCAL_STATE/local-next.txt"
+_iso8601_touch "$LOCAL_STATE/local-next.txt" "1 day"
+
+# Don't do anything if remopte version older than expected next tstamp
+[ "$LOCAL_STATE/remote-latest.txt" -nt "$LOCAL_STATE/local-next.txt" ] \
+    || exit 2
+
+# Download new diff
+_iso8601_diff DIFF_FILE `cat "$LOCAL_STATE/local-next.txt"` "1 day"
+rm -f "$LOCAL_STATE/daily.osc.gz"
+wget -q -O "$LOCAL_STATE/daily.osc.gz" \
+     "http://planet.openstreetmap.org/daily/$DIFF_FILE"
+
+# Update the DB (slim mode MANDATORY, using a 1.5G cache)
+time "$OSM2PGSQL" -v -S "$HOME"/download/osm2pgsql/default.style -s -m -C 1500 \
+                  $OSM2PGSQL_DBPARAMS -a "$LOCAL_STATE/daily.osc.gz"
+
+# If we're here, then everything is fine: we can update the timestamp file
+mv -f "$LOCAL_STATE/local-next.txt" "$LOCAL_STATE/local-latest.txt"
