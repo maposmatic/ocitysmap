@@ -1,15 +1,19 @@
 #! /bin/sh
 
 ##
-## Script to update your OSM planet. Meant to be run at least once
-## every day. Will make sure that multiple instances will never run
-## concurrently. Will also catch up with the latest snapshot, even
+## Script to update your local OSM planet. Meant to be run at least
+## once every day. Will make sure that multiple instances will never
+## run concurrently. Will also catch up with the latest snapshot, even
 ## when the local planet is older than 1 day.
 ##
 ## Requirements:
-##   - ~/.pgpass or pgsql config so that osm2pgsql doesn't need user
-##     password intervention to connect to the local OSM DB
+##   - a planet already available in the local OSM DB (see
+##     openstreetmap wiki)
 ##   - aptitude install wget
+##
+## Additional requirement when this script is run as a cron job:
+##   - ~/.pgpass or pgsql config so that osm2pgsql doesn't need to
+##     prompt the user for her password to connect to the local OSM DB
 ##
 
 # Path to some dir where the state of the update script will be stored
