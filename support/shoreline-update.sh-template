@@ -1,0 +1,65 @@
+#! /bin/sh
+
+# ocitysmap, city map and street index generator from OpenStreetMap data
+# Copyright (C) 2009  David Decotigny
+# Copyright (C) 2009  Frédéric Lehobey
+# Copyright (C) 2009  David Mentré
+# Copyright (C) 2009  Maxime Petazzoni
+# Copyright (C) 2009  Thomas Petazzoni
+# Copyright (C) 2009  Gaël Utard
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+############################################################################
+## Script used to automate the update of the world and coastline shape files.
+## Run it with cron on a weekly/monthly basis
+
+# Where the shape files will be stored. This dir is expected to be valid and
+# writable
+DEST_DIRECTORY="/path/to/some/directory"
+
+############################################################################
+
+TMP_WORKDIR=`mktemp -d`
+_cleanup_tmp_workdir () {
+    trap "" KILL EXIT QUIT TERM INT
+    rm -rf "$TMP_WORKDIR"
+}
+trap "_cleanup_tmp_workdir" KILL EXIT QUIT TERM INT
+
+_retrieve_world_boundaries () {
+  wget -O- "http://tile.openstreetmap.org/world_boundaries-spherical.tgz" \
+    | tar xzf - -C "$TMP_WORKDIR"/ \
+  && mv -f "$TMP_WORKDIR"/world_boundaries/* "$DEST_DIRECTORY"/
+  rmdir "$TMP_WORKDIR"/world_boundaries
+}
+
+_retrieve_processed_p () {
+  wget -O- "http://tile.openstreetmap.org/processed_p.tar.bz2" \
+    | tar xjf - -C "$TMP_WORKDIR"/ \
+  && mv -f "$TMP_WORKDIR"/processed_p.* "$DEST_DIRECTORY"/
+}
+
+_retrieve_shoreline () {
+  wget -O- "http://tile.openstreetmap.org/shoreline_300.tar.bz2" \
+    | tar xjf - -C "$TMP_WORKDIR"/ \
+  && mv -f "$TMP_WORKDIR"/shoreline_300.* "$DEST_DIRECTORY"/
+}
+
+_retrieve_world_boundaries
+_retrieve_processed_p
+_retrieve_shoreline
+
+echo "Remaining stuff in temp dir:"
+ls -lR "$TMP_WORKDIR"
