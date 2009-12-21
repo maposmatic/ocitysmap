@@ -39,9 +39,9 @@ class BaseOCitySMapError(Exception):
 class UnsufficientDataError(BaseOCitySMapError):
     """Not enough data in the OSM database to proceed."""
 
-def _user_readable_label(street):
-    """Creates a street label usable in the street list adjacent to the map
-       from the street definition tuple."""
+def _user_readable_label(squares):
+    """Creates a label usable in the street index adjacent to the map
+       from a square list."""
 
     def couple_compare(x,y):
         a = y[0] - x[0]
@@ -52,7 +52,6 @@ def _user_readable_label(street):
     def distance(a,b):
         return (b[0]-a[0])**2 + (b[1]-a[1])**2
 
-    squares = street[1]
     minx = min([x[0] for x in squares])
     maxx = max([x[0] for x in squares])
     miny = min([x[1] for x in squares])
@@ -479,7 +478,7 @@ class OCitySMap:
 
         def _humanize_street_label(street):
             return (self.i18n.user_readable_street(street[0]),
-                    _user_readable_label(street))
+                    _user_readable_label(street[1]))
 
         try:
             sl = sorted(map(_humanize_street_label, sl),
