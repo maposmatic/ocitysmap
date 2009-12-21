@@ -340,9 +340,7 @@ class OCitySMap:
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
                           from planet_osm_polygon
-                          where boundary='administrative' and
-                                admin_level='8' and
-                                osm_id=%d;""" % \
+                          where osm_id=%d;""" % \
                            osmid)
         records = cursor.fetchall()
         if not records:
@@ -424,8 +422,7 @@ class OCitySMap:
                                     st_difference(st_envelope(way),
                                                   st_buildarea(way)), 4002))
                               from planet_osm_polygon
-                              where boundary='administrative'
-                                 and admin_level='8' and osm_id=%d;""" % \
+                              where osm_id=%d;""" % \
                            osmid)
         contour = cursor.fetchall()
         return self.parse_city_contour(contour)
