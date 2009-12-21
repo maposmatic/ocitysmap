@@ -120,16 +120,20 @@ def main():
             sys.stderr.write('ERROR: Invalid city bounding box!\n')
             return 1
 
-
-
     if options.city_name:
         city_name = unicode(options.city_name.decode('utf-8'))
     else:
         city_name = None
 
     try:
+        osmid = int(options.osmid)
+    except ValueError:
+        sys.stderr.write('ERROR: Invalid polygon OSM id!\n')
+        return 1
+
+    try:
         renderer = OCitySMap(options.config_file, city_name, boundingbox,
-                             options.osmid, options.language)
+                             osmid, options.language)
     except BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1

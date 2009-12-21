@@ -342,8 +342,8 @@ class OCitySMap:
                           from planet_osm_polygon
                           where boundary='administrative' and
                                 admin_level='8' and
-                                osm_id='%s';""" % \
-                           pgdb.escape_string(osmid))
+                                osm_id=%d;""" % \
+                           osmid)
         records = cursor.fetchall()
         if not records:
             raise UnsufficientDataError, "Wrong OSM id!"
@@ -425,8 +425,8 @@ class OCitySMap:
                                                   st_buildarea(way)), 4002))
                               from planet_osm_polygon
                               where boundary='administrative'
-                                 and admin_level='8' and osm_id='%s';""" % \
-                           pgdb.escape_string(osmid))
+                                 and admin_level='8' and osm_id=%d;""" % \
+                           osmid)
         contour = cursor.fetchall()
         return self.parse_city_contour(contour)
 
@@ -606,7 +606,7 @@ class OCitySMap:
                                 from planet_osm_line
                                 join map_areas
                                 on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_osmid on cities_area_by_osmid.osm_id='%s'
+                                left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
                                 where trim(name) != '' and highway is not null
                                 and case when cities_area_by_osmid.area is null
                                 then
@@ -617,7 +617,7 @@ class OCitySMap:
                           as foo
                           group by name
                           order by name;""" % \
-                           pgdb.escape_string(osmid))
+                           osmid)
 
         sl = cursor.fetchall()
 
