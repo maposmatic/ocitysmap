@@ -287,10 +287,13 @@ class OCitySMap:
 
         if self.osmid:
             self.streets = self.get_streets_by_osmid(db, self.osmid)
+            self.amenities = self.get_amenities_by_osmid(db, self.osmid)
         elif self.city_name:
             self.streets = self.get_streets_by_name(db, self.city_name)
+            self.amenities = self.get_amenities_by_name(db, self.city_name)
         else:
             self.streets = self.get_streets_by_name(db, None)
+            self.amenities = self.get_amenities_by_name(db, None)
 
         if self.city_name:
             self.contour = self.get_city_contour_by_name(db, self.city_name)
@@ -616,6 +619,163 @@ class OCitySMap:
         sl = cursor.fetchall()
 
         return self.humanize_street_list(sl)
+
+    # Given a list of amenities and their corresponding squares, do some
+    # cleanup and pass it through the internationalization layer to
+    # get proper sorting, filtering of common prefixes, etc. Returns a
+    # updated amenity list.
+    def humanize_amenity_list(self, al):
+        # We transform the string representing the squares list into a
+        # Python list
+        al = [( unicode(amenity[0].decode("utf-8")),
+		unicode(amenity[1].decode("utf-8")),
+                [ map(int, x.split(',')) for x in amenity[3].split(';')[:-1] ] )
+              for amenity in al]
+
+        # Street prefixes are postfixed, a human readable label is
+        # built to represent the list of squares, and the list is
+        # alphabetically-sorted.
+        prev_locale = locale.getlocale(locale.LC_COLLATE)
+        locale.setlocale(locale.LC_COLLATE, self.i18n.language_code())
+
+        def _humanize_amenity_label(amenity):
+            return (amenity[0], amenity[1],
+                    _user_readable_label(amenity[2]))
+
+        try:
+            al = sorted(map(_humanize_amenity_label, al),
+                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        finally:
+            locale.setlocale(locale.LC_COLLATE, prev_locale)
+
+        return al
+
+    def get_amenities_by_name(self, db, city):
+
+        """Get the list of amenities in the administrative area if city is
+        defined or in the bounding box otherwise, and for each
+        amenity, the list of squares that it intersects.
+
+        Returns a list of the form [(category, name, 'A-B1'),
+                                    (category, name, 'B3')]
+        """
+
+        cursor = db.cursor()
+
+        # pgdb.escape_string() doesn't like None strings, and when the
+        # city is not passed, we don't want to match any existing
+        # city. So the empty string doesn't sound like a good
+        # candidate, and the "-1" string is probably better.
+        #
+        # TODO: improve the following request to remove this hack
+        if city is None:
+            city = "-1"
+
+        # The inner select query creates the list of (amenity, square)
+        # for all the squares in the temporary map_areas table. The
+        # left_join + the test on cities_area is used to filter out
+        # the amenities outside the city administrative boundaries. The
+        # outer select builds an easy to parse list of the squares for
+        # each amenity.
+        #
+        # A typical result entry is:
+        #  [ "Places of worship", "Basilique Sainte Germaine", "0,1;1,2;1,3" ]
+        #
+        # REMARKS:
+        #
+        #  * The cities_area view is created once for all at
+        #    installation. It associates the name of a city with the
+        #    area covering it. As of today, only parts of the french
+        #    cities have these administrative boundaries available in
+        #    OSM. When available, this boundary is used to filter out
+        #    the streets that are not inside the selected city but
+        #    still in the bounding box rendered on the map. So these
+        #    streets will be shown but not listed in the street index.
+        #
+        #  * The textcat_all() aggregate must also be installed in the
+        #    database
+        #
+        # See ocitysmap-init.sql for details
+        cursor.execute("""select 'Places of worship', name, textcat_all(x || ',' || y || ';')
+                          from (select distinct name, x, y
+                                from planet_osm_point
+                                join map_areas
+                                on st_intersects(way, st_transform(geom, 900913))
+                                left join cities_area_by_name on city='%s'
+                                where amenity = 'place_of_worship'
+                                and case when cities_area_by_name.area is null
+                                then
+                                  true
+                                else
+                                  st_intersects(way, cities_area_by_name.area)
+                                end)
+                          as foo
+                          group by name
+                          order by name;""" % \
+                           pgdb.escape_string(city.encode('utf-8')))
+
+        am = cursor.fetchall()
+
+        return am
+
+    def get_amenities_by_osmid(self, db, osmid):
+
+        """Get the list of amenities in the administrative area if city is
+        defined or in the bounding box otherwise, and for each
+        amenity, the list of squares that it intersects.
+
+        Returns a list of the form [(category, name, 'A-B1'),
+                                    (category, name2, 'B3')]
+        """
+
+        cursor = db.cursor()
+
+        # The inner select query creates the list of (amenity, square)
+        # for all the squares in the temporary map_areas table. The
+        # left_join + the test on cities_area is used to filter out
+        # the streets outside the city administrative boundaries. The
+        # outer select builds an easy to parse list of the squares for
+        # each amenity.
+        #
+        # A typical result entry is:
+        #  [ "Place of worship", "Basilique Sainte Germaine", "0,1;1,2;1,3" ]
+        #
+        # REMARKS:
+        #
+        #  * The cities_area view is created once for all at
+        #    installation. It associates the name of a city with the
+        #    area covering it. As of today, only parts of the french
+        #    cities have these administrative boundaries available in
+        #    OSM. When available, this boundary is used to filter out
+        #    the streets that are not inside the selected city but
+        #    still in the bounding box rendered on the map. So these
+        #    streets will be shown but not listed in the street index.
+        #
+        #  * The textcat_all() aggregate must also be installed in the
+        #    database
+        #
+        # See ocitysmap-init.sql for details
+        cursor.execute("""select 'Place of worship', name, textcat_all(x || ',' || y || ';')
+                          from (select distinct name, x, y
+                                from planet_osm_point
+                                join map_areas
+                                on st_intersects(way, st_transform(geom, 900913))
+                                left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
+                                where amenity = 'place_of_worship'
+                                and case when cities_area_by_osmid.area is null
+                                then
+                                  true
+                                else
+                                  st_intersects(way, cities_area_by_osmid.area)
+                                end)
+                          as foo
+                          group by name
+                          order by name;""" % \
+                           osmid)
+
+        am = cursor.fetchall()
+
+        return am
 
     def _render_one_prefix(self, title, output_prefix, file_type,
                            paperwidth, paperheight):
