@@ -121,6 +121,9 @@ class i18n_generic(i18n):
 language_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
                                                                  # new language
                  'fr_FR.UTF-8': i18n_fr_generic('fr_FR.UTF-8'),
+                 'fr_CA.UTF-8': i18n_fr_generic('fr_CA.UTF-8'),
+                 'fr_CH.UTF-8': i18n_fr_generic('fr_CH.UTF-8'),
+                 'fr_LU.UTF-8': i18n_fr_generic('fr_LU.UTF-8'),
                  'en_GB.UTF-8': i18n_generic('en_GB.UTF-8'),
                  'fr_BE.UTF-8': i18n_fr_generic('fr_BE.UTF-8'),
                  'de_BE.UTF-8': i18n_generic('de_BE.UTF-8'),
