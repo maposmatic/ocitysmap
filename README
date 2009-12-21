@@ -7,9 +7,14 @@ including a street index and city grid.
 
 For example, for a simple Sanguinet rendering, run:
 
- ./ocitysmap-render -f png Sanguinet
+ ./ocitysmap-render -f png -c Sanguinet
 
-Alternately you may specify a bounding box rather than a City:
+Since several cities can have the same name, it is possible to render
+according to a polygon OSM id:
+
+ ./ocitysmap-render -f png -t Brunoy --polygon-osmid -114189
+
+Alternatively you may specify a bounding box rather than a City:
 
  ./ocitysmap-render -f png -b 44.4883,-1.0901 44.4778,-1.0637
 
