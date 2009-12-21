@@ -357,8 +357,8 @@ class OCitySMap:
         LOG.info("Parsing contour: %s" % contour)
         try:
             cell00 = contour[0][0].strip()
-        except (KeyError,AttributeError):
-            l.error("Invalid DB contour structure")
+        except (KeyError,IndexError,AttributeError):
+            LOG.error("Invalid DB contour structure")
             return None
 
         # Got nothing usable
