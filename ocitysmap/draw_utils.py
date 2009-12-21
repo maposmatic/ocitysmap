@@ -65,12 +65,18 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
     # Draw the title
     ctx.save()
-    ctx.move_to(out_margin * 2., out_margin * .85)
-    xlat1, _ = ctx.get_current_point()
     ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
                          cairo.FONT_WEIGHT_NORMAL)
     ctx.set_font_size(out_margin)
-    fascent, fdescent, fheight, fxadvance, fyadvance = ctx.font_extents()
+    _, _, width, _, _, _ = ctx.text_extents(title)
+    max_width = indest_w * .8
+    if width > max_width:
+        ratio = max_width / width
+    else:
+	ratio = 1.
+    ctx.set_font_size(out_margin * ratio)
+    ctx.move_to(out_margin * 2., out_margin * (.5 + .35 * ratio))
+    xlat1, _ = ctx.get_current_point()
     ctx.show_text(title)
     xlat2, _ = ctx.get_current_point()
     xlat = xlat2 - xlat1
