@@ -495,8 +495,8 @@ class OCitySMap:
         defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
 
-        Returns a list of the form [(street_name, [[0, 1], [1, 1]]),
-                                    (street2_name, [[1, 2]])]
+        Returns a list of the form [(street_name, 'A-B1'),
+                                    (street2_name, 'B3')]
         """
 
         self.gen_map_areas(db)
@@ -565,8 +565,8 @@ class OCitySMap:
         defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
 
-        Returns a list of the form [(street_name, [[0, 1], [1, 1]]),
-                                    (street2_name, [[1, 2]])]
+        Returns a list of the form [(street_name, 'A-B1'),
+                                    (street2_name, 'B3')]
         """
 
         self.gen_map_areas(db)
