@@ -105,7 +105,7 @@ class IndexPageGenerator:
 
         em = cr.text_extents("m")[2]
 
-        widths = map(lambda x: cr.text_extents(x[0])[2] + cr.text_extents(x[1])[2], self.streets)
+        widths = map(lambda x: cr.text_extents(x[1])[2] + cr.text_extents(x[2])[2], self.streets)
         maxwidth = max(widths)
         colwidth = maxwidth + 3 * em
 
@@ -123,9 +123,9 @@ class IndexPageGenerator:
         prevletter = u''
         heading_letter_count = 0
         for street in self.streets:
-            if not self.i18n.first_letter_equal(street[0][0], prevletter):
+            if not self.i18n.first_letter_equal(street[0], prevletter):
                 heading_letter_count += 1
-                prevletter = street[0][0]
+                prevletter = street[0]
 
         colheight = len(self.streets) * fp['fheight'] + heading_letter_count * fp['heading_fheight']
 
@@ -176,7 +176,7 @@ class IndexPageGenerator:
         prevletter = u''
         for street in self.streets:
             # Letter label
-            firstletter = street[0][0]
+            firstletter = street[0]
             if not self.i18n.first_letter_equal(firstletter, prevletter):
                 # Make sure we have no orphelin heading letter label at the
                 # end of a column
@@ -207,12 +207,12 @@ class IndexPageGenerator:
             cr.set_font_size(fontsize)
             # Compute length of the dashed line between the street name and
             # the squares label
-            street_name_width = cr.text_extents(street[0])[4]
-            squares_label_width = cr.text_extents(street[1])[2]
+            street_name_width = cr.text_extents(street[1])[4]
+            squares_label_width = cr.text_extents(street[2])[2]
             line_width = colwidth - street_name_width - squares_label_width - 2 * em
             # Draw street name
             cr.move_to(x, y)
-            cr.show_text(street[0])
+            cr.show_text(street[1])
             # Draw dashed line
             strokewidth = max(fontsize / 12, 1)
             cr.set_line_width(strokewidth)
@@ -222,7 +222,7 @@ class IndexPageGenerator:
             cr.stroke()
             # Draw squares label
             cr.move_to(x + colwidth - em - squares_label_width, y)
-            cr.show_text(street[1])
+            cr.show_text(street[2])
             if y + fheight > paperheight:
                 y = 0
                 x += colwidth
@@ -491,6 +491,9 @@ class OCitySMap:
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 
+        # Add the first letter of the street name as category
+        sl = [(street[0][0], street[0], street[1]) for street in sl]
+
         return sl
 
     def get_streets_by_name(self, db, city):
@@ -624,13 +627,13 @@ class OCitySMap:
     # cleanup and pass it through the internationalization layer to
     # get proper sorting, filtering of common prefixes, etc. Returns a
     # updated amenity list.
-    def humanize_amenity_list(self, al):
+    def humanize_amenity_list(self, am):
         # We transform the string representing the squares list into a
         # Python list
-        al = [( unicode(amenity[0].decode("utf-8")),
+        am = [( unicode(amenity[0].decode("utf-8")),
 		unicode(amenity[1].decode("utf-8")),
-                [ map(int, x.split(',')) for x in amenity[3].split(';')[:-1] ] )
-              for amenity in al]
+                [ map(int, x.split(',')) for x in amenity[2].split(';')[:-1] ] )
+              for amenity in am]
 
         # Street prefixes are postfixed, a human readable label is
         # built to represent the list of squares, and the list is
@@ -643,12 +646,12 @@ class OCitySMap:
                     _user_readable_label(amenity[2]))
 
         try:
-            al = sorted(map(_humanize_amenity_label, al),
-                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+            am = sorted(map(_humanize_amenity_label, am),
+                        lambda x, y: locale.strcoll(x[1].lower(), y[1].lower()))
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 
-        return al
+        return am
 
     def get_amenities_by_name(self, db, city):
 
@@ -714,9 +717,9 @@ class OCitySMap:
                           order by name;""" % \
                            pgdb.escape_string(city.encode('utf-8')))
 
-        am = cursor.fetchall()
+        al = cursor.fetchall()
 
-        return am
+        return self.humanize_amenity_list(al)
 
     def get_amenities_by_osmid(self, db, osmid):
 
@@ -773,9 +776,9 @@ class OCitySMap:
                           order by name;""" % \
                            osmid)
 
-        am = cursor.fetchall()
+        al = cursor.fetchall()
 
-        return am
+        return self.humanize_amenity_list(al)
 
     def _render_one_prefix(self, title, output_prefix, file_type,
                            paperwidth, paperheight):
@@ -785,7 +788,7 @@ class OCitySMap:
         output_filename = "%s_index.%s" % (output_prefix, file_type)
         LOG.debug("rendering " + output_filename + "...")
 
-        generator = IndexPageGenerator(self.streets, self.i18n)
+        generator = IndexPageGenerator(self.streets + self.amenities, self.i18n)
 
         if file_type == 'xml':
             LOG.debug('not rendering index as xml (not supported)')
