@@ -283,6 +283,8 @@ class OCitySMap:
 
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
+        self.gen_map_areas(db)
+
         if self.osmid:
             self.streets = self.get_streets_by_osmid(db, self.osmid)
         elif self.city_name:
@@ -498,8 +500,6 @@ class OCitySMap:
                                     (street2_name, 'B3')]
         """
 
-        self.gen_map_areas(db)
-
         cursor = db.cursor()
 
         # pgdb.escape_string() doesn't like None strings, and when the
@@ -567,8 +567,6 @@ class OCitySMap:
         Returns a list of the form [(street_name, 'A-B1'),
                                     (street2_name, 'B3')]
         """
-
-        self.gen_map_areas(db)
 
         cursor = db.cursor()
 
