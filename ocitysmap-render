@@ -125,11 +125,13 @@ def main():
     else:
         city_name = None
 
-    try:
-        osmid = int(options.osmid)
-    except ValueError:
-        sys.stderr.write('ERROR: Invalid polygon OSM id!\n')
-        return 1
+    osmid = None
+    if options.osmid:
+        try:
+            osmid = int(options.osmid)
+        except ValueError:
+            sys.stderr.write('ERROR: Invalid polygon OSM id!\n')
+            return 1
 
     try:
         renderer = OCitySMap(options.config_file, city_name, boundingbox,
