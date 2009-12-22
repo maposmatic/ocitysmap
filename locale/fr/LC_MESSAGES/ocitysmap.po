@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "POT-Creation-Date: 2009-12-22 11:50+CET\n"
-"PO-Revision-Date: 2009-12-22 11:57+0100\n"
-"Last-Translator: David MENTRÉ <dmentre@linux-france.org>\n"
+"PO-Revision-Date: 2009-12-22 23:43+0100\n"
+"Last-Translator: David Decotigny <d2@maposmatic.org>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -18,7 +18,7 @@ msgstr ""
 
 #: ocitysmap/street_index.py:235
 msgid "Places of worship"
-msgstr "Lieu de culte"
+msgstr "Lieux de culte"
 
 #: ocitysmap/street_index.py:236
 msgid "Kindergarten"
