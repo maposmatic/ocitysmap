@@ -271,7 +271,6 @@ class OCitySMap:
         locale_path = self.parser.get('ocitysmap', 'locale_path')
         self.i18n = i18n.install_translation(language, locale_path)
         LOG.info('Language: ' + self.i18n.language_code())
-        print _(u"Places of worship")
 
         self.SELECTED_AMENITIES = [
             (_(u"Places of worship"), "place_of_worship", _(u"Places of worship")),
@@ -644,7 +643,7 @@ class OCitySMap:
         # We transform the string representing the squares list into a
         # Python list
         am = [( unicode(amenity[0].decode("utf-8")),
-		unicode(amenity[1].decode("utf-8")),
+                unicode(amenity[1].decode("utf-8")),
                 [ map(int, x.split(',')) for x in amenity[2].split(';')[:-1] ] )
               for amenity in am]
 
@@ -735,7 +734,7 @@ class OCitySMap:
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
-                    a[1] = human
+                    a[1] = human.encode('utf-8')
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
         print al
@@ -809,7 +808,7 @@ class OCitySMap:
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
-                    a[1] = human
+                    a[1] = human.encode('utf-8')
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
 
