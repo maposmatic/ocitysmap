@@ -47,7 +47,7 @@ class i18n_template_code_CODE(i18n):
     def __init__(self, language, language_path):
         """Install the _() function for the chosen locale other
            object initialisation"""
-        self.language = language
+        self.language = str(language) # FIXME: why do we have unicode here?
         _install_language(language, locale_path)
         
     def language_code(self):
@@ -95,7 +95,7 @@ class i18n_fr_generic(i18n):
     U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
-        self.language = language
+        self.language = str(language)
         _install_language(language, locale_path)
 
     def _upper_unaccent_string(self, s):
@@ -121,7 +121,7 @@ class i18n_fr_generic(i18n):
 
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
-        self.language = language
+        self.language = str(language)
         _install_language(language, locale_path)
 
     def language_code(self):

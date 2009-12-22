@@ -791,7 +791,9 @@ class OCitySMap:
                               as foo
                               group by amenity, name
                               order by amenity, name;""" % \
-                              (cat, osmid, amenity))
+                              (pgdb.escape_string(cat.encode('utf-8')),
+                               osmid,
+                               amenity))
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
