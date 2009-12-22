@@ -331,7 +331,7 @@ class OCitySMap:
         LOG.info('Looking for bounding box around %s...' % name)
 
         cursor = db.cursor()
-        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
+        cursor.execute("""select osm_id, st_astext(st_transform(st_envelope(way), 4002))
                           from planet_osm_line
                           where boundary='administrative' and
                                 admin_level='8' and
@@ -341,7 +341,9 @@ class OCitySMap:
         if not records:
             raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % (repr(name))
 
-        return BoundingBox.parse_wkt(records[0][0])
+        osm_id, wkt = records[0]
+        LOG.info("osm_id for %s is: %s" % (repr(name), osm_id))
+        return BoundingBox.parse_wkt(wkt)
 
     def find_bounding_box_by_osmid(self, db, osmid):
         """Find the bounding box of a city from its OSM id.
@@ -705,21 +707,24 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
-            cursor.execute("""select '%s', name, textcat_all(x || ',' || y || ';')
+            cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, osm_id
-                                    from (select distinct amenity, name, way, osm_id
-                                          from planet_osm_point
-                                          where amenity = '%s'
-                                          union
-                                          select distinct amenity, name, way, osm_id
-                                          from
-                                          planet_osm_polygon
-                                          where amenity = '%s'
-                                    ) as foo2
-                                    join map_areas
+                                    from planet_osm_point join map_areas
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on city='%s'
-                                    where
+                                    left join cities_area_by_name on city='%(city)s'
+                                    where amenity = '%(amenity)s' and
+                                    case when cities_area_by_name.area is null
+                                    then
+                                      true
+                                    else
+                                      st_intersects(way, cities_area_by_name.area)
+                                    end
+                                  union
+                                    select distinct amenity, name, x, y, osm_id
+                                    from planet_osm_polygon join map_areas
+                                    on st_intersects(way, st_transform(geom, 900913))
+                                    left join cities_area_by_name on city='%(city)s'
+                                    where amenity = '%(amenity)s' and
                                     case when cities_area_by_name.area is null
                                     then
                                       true
@@ -729,8 +734,9 @@ class OCitySMap:
                               as foo
                               group by amenity, osm_id, name
                               order by amenity, name
-                              """ % \
-                              (pgdb.escape_string(cat.encode('utf-8')), amenity, amenity, pgdb.escape_string(city.encode('utf-8'))))
+                              """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                                         amenity=amenity,
+                                         city=pgdb.escape_string(city.encode('utf-8'))))
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
@@ -778,31 +784,36 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
-            cursor.execute("""select '%s', name, textcat_all(x || ',' || y || ';')
-                              from (select distinct amenity, name, x, y, osm_id
-                                    from (select distinct amenity, name, way, osm_id
-                                          from planet_osm_point
-                                          where amenity = '%s'
-                                          union
-                                          select distinct amenity, name, way, osm_id
-                                          from
-                                          planet_osm_polygon
-                                          where amenity = '%s'
-                                    ) as foo2
-                                    join map_areas
+            cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
+                              from (select distinct amenity, name, x, y, planet_osm_point.osm_id
+                                    from planet_osm_point join map_areas
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on osm_id ='%s'
-                                    where
-                                    case when cities_area_by_name.area is null
+                                    left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
+                                    where amenity = '%(amenity)s' and
+                                    case when cities_area_by_osmid.area is null
                                     then
                                       true
                                     else
-                                      st_intersects(way, cities_area_by_name.area)
+                                      st_intersects(way, cities_area_by_osmid.area)
+                                    end
+                                  union
+                                    select distinct amenity, name, x, y, planet_osm_polygon.osm_id
+                                    from planet_osm_polygon join map_areas
+                                    on st_intersects(way, st_transform(geom, 900913))
+                                    left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
+                                    where amenity = '%(amenity)s' and
+                                    case when cities_area_by_osmid.area is null
+                                    then
+                                      true
+                                    else
+                                      st_intersects(way, cities_area_by_osmid.area)
                                     end)
                               as foo
                               group by amenity, osm_id, name
-                              order by amenity, name""" % \
-                              (pgdb.escape_string(cat.encode('utf-8')), amenity, amenity, osmid))
+                              order by amenity, name
+                              """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                                         amenity=amenity,
+                                         osm_id=osmid))
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
