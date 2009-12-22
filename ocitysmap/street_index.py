@@ -737,8 +737,6 @@ class OCitySMap:
                     a[1] = human.encode('utf-8')
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
-        print al
-        
         return al
 
     def get_amenities_by_osmid(self, db, osmid):
