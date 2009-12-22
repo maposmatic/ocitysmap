@@ -1,0 +1,17 @@
+Translation support in ocitysmap
+
+ * To build .pot file
+
+   ocitysmap$ pygettext -d ocitysmap -p locale ocitysmap/street_index.py
+
+ * Make the .po file for your language. Look at Map_Features in your
+   language to find correct transaltions:
+     http://wiki.openstreetmap.org/wiki/Map_Features
+
+   ocitysmap$ cp locale/ocitysmap.pot locale/fr/LC_MESSAGES/ocitysmap.po
+
+   ocitysmap$ poedit locale/fr/LC_MESSAGES/ocitysmap.po
+
+ * Compile the .mo for your language
+
+   ocitysmap$ msgfmt locale/fr/LC_MESSAGES/ocitysmap.po

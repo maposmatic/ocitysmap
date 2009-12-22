@@ -228,17 +228,6 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    SELECTED_AMENITIES = [
-        ("Places of worship", "place_of_worship", "Places of worship"),
-        ("Education", "kindergarten", "Kindergarten"),
-        ("Education", "school", "School"),
-        ("Education", "college", "College"),
-        ("Education", "university", "University"),
-        ("Education", "library", "Library"),
-        ("Public buildings", "townhall", "Town hall"),
-        ("Public buildings", "post_office", "Post office"),
-        ("Public buildings", "police", "Police")]
-
     def __init__(self, config_file=None, city_name=None, boundingbox=None,
                  osmid=None, language=None):
         """Creates a new OCitySMap renderer instance for the given city.
@@ -262,9 +251,6 @@ class OCitySMap:
 
         (self.city_name, self.boundingbox, self.osmid) = (city_name, boundingbox, osmid)
 
-        self.i18n = i18n.language_map[language]
-        LOG.info('Language ' + self.i18n.language_code())
-
         if self.city_name:
             LOG.info('OCitySMap renderer for %s.' % self.city_name)
         elif self.boundingbox:
@@ -281,6 +267,23 @@ class OCitySMap:
                             os.getenv('HOME') + '/.ocitysmap.conf']
         if not self.parser.read(config_files):
             raise IOError, 'Failed to load the config file'
+
+        locale_path = self.parser.get('ocitysmap', 'locale_path')
+        self.i18n = i18n.install_translation(language, locale_path)
+        LOG.info('Language: ' + self.i18n.language_code())
+        print _(u"Places of worship")
+
+        self.SELECTED_AMENITIES = [
+            (_(u"Places of worship"), "place_of_worship", _(u"Places of worship")),
+            (_(u"Education"), "kindergarten", _(u"Kindergarten")),
+            (_(u"Education"), "school", _(u"School")),
+            (_(u"Education"), "college", _(u"College")),
+            (_(u"Education"), "university", _(u"University")),
+            (_(u"Education"), "library", _(u"Library")),
+            (_(u"Public buildings"), "townhall", _(u"Town hall")),
+            (_(u"Public buildings"), "post_office", _(u"Post office")),
+            (_(u"Public buildings"), "police", _(u"Police"))]
+
         datasource = dict(self.parser.items('datasource'))
 
         db = pgdb.connect('Notre Base', datasource['user'],
@@ -314,6 +317,7 @@ class OCitySMap:
             self.contour = None
 
         LOG.info('City bounding box is %s.' % str(self.boundingbox))
+
 
     def find_bounding_box_by_name(self, db, name):
         """Find the bounding box of a city from its name.
@@ -720,7 +724,9 @@ class OCitySMap:
                               as foo
                               group by amenity, name
                               order by amenity, name;""" % \
-                              (cat, pgdb.escape_string(city.encode('utf-8')), amenity))
+                              (pgdb.escape_string(cat.encode('utf-8')), 
+                               pgdb.escape_string(city.encode('utf-8')),
+                               amenity))
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:

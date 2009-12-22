@@ -22,6 +22,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import gettext
+
+def _install_language(language, locale_path):
+    t = gettext.translation(domain='ocitysmap', 
+                            localedir=locale_path,
+                            languages=[language],
+                            fallback=True)
+    t.install(unicode=True)
 
 class i18n:
     """Functions needed to be implemented for a new language.
@@ -36,10 +44,16 @@ class i18n:
         pass
 
 class i18n_template_code_CODE(i18n):
+    def __init__(self, language, language_path):
+        """Install the _() function for the chosen locale other
+           object initialisation"""
+        self.language = language
+        _install_language(language, locale_path)
+        
     def language_code(self):
         """returns the language code of the specific language
            supported, e.g. fr_FR.UTF-8"""
-        return "code_Code.UTF-8"
+        return self.language
 
     def user_readable_street(self, name):
         """ transforms a street name into a suitable form for
@@ -80,8 +94,9 @@ class i18n_fr_generic(i18n):
     O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
     U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
-    def __init__(self, language):
+    def __init__(self, language, locale_path):
         self.language = language
+        _install_language(language, locale_path)
 
     def _upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
@@ -105,8 +120,9 @@ class i18n_fr_generic(i18n):
 
 
 class i18n_generic(i18n):
-    def __init__(self, language):
+    def __init__(self, language, locale_path):
         self.language = language
+        _install_language(language, locale_path)
 
     def language_code(self):
         return self.language
@@ -117,31 +133,39 @@ class i18n_generic(i18n):
     def first_letter_equal(self, a, b):
         return a == b
 
-# The global map used by module users
-language_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
-                                                                 # new language
-                 'C': i18n_generic('C'),
-                 'fr_BE.UTF-8': i18n_fr_generic('fr_BE.UTF-8'),
-                 'fr_FR.UTF-8': i18n_fr_generic('fr_FR.UTF-8'),
-                 'fr_CA.UTF-8': i18n_fr_generic('fr_CA.UTF-8'),
-                 'fr_CH.UTF-8': i18n_fr_generic('fr_CH.UTF-8'),
-                 'fr_LU.UTF-8': i18n_fr_generic('fr_LU.UTF-8'),
-                 'en_AG': i18n_generic('en_AG'),
-                 'en_AU.UTF-8': i18n_generic('en_AU.UTF-8'),
-                 'en_BW.UTF-8': i18n_generic('en_BW.UTF-8'),
-                 'en_CA.UTF-8': i18n_generic('en_CA.UTF-8'),
-                 'en_DK.UTF-8': i18n_generic('en_DK.UTF-8'),
-                 'en_GB.UTF-8': i18n_generic('en_GB.UTF-8'),
-                 'en_HK.UTF-8': i18n_generic('en_HK.UTF-8'),
-                 'en_IE.UTF-8': i18n_generic('en_IE.UTF-8'),
-                 'en_IN': i18n_generic('en_IN'),
-                 'en_NG': i18n_generic('en_NG'),
-                 'en_NZ.UTF-8': i18n_generic('en_NZ.UTF-8'),
-                 'en_PH.UTF-8': i18n_generic('en_PH.UTF-8'),
-                 'en_SG.UTF-8': i18n_generic('en_SG.UTF-8'),
-                 'en_US.UTF-8': i18n_generic('en_US.UTF-8'),
-                 'en_ZA.UTF-8': i18n_generic('en_ZA.UTF-8'),
-                 'en_ZW.UTF-8': i18n_generic('en_ZW.UTF-8'),
-                 'de_BE.UTF-8': i18n_generic('de_BE.UTF-8'),
-                 'nl_BE.UTF-8': i18n_generic('nl_BE.UTF-8')}
+language_class_map = { # 'code_CODE.UTF-8': i18n_template_code_CODE(), # example for
+                                                             # new language
+    'C': 'i18n_generic',
+    'fr_BE.UTF-8': 'i18n_fr_generic',
+    'fr_FR.UTF-8': 'i18n_fr_generic',
+    'fr_CA.UTF-8': 'i18n_fr_generic',
+    'fr_CH.UTF-8': 'i18n_fr_generic',
+    'fr_LU.UTF-8': 'i18n_fr_generic',
+    'en_AG': 'i18n_generic',
+    'en_AU.UTF-8': 'i18n_generic',
+    'en_BW.UTF-8': 'i18n_generic',
+    'en_CA.UTF-8': 'i18n_generic',
+    'en_DK.UTF-8': 'i18n_generic',
+    'en_GB.UTF-8': 'i18n_generic',
+    'en_HK.UTF-8': 'i18n_generic',
+    'en_IE.UTF-8': 'i18n_generic',
+    'en_IN': 'i18n_generic',
+    'en_NG': 'i18n_generic',
+    'en_NZ.UTF-8': 'i18n_generic',
+    'en_PH.UTF-8': 'i18n_generic',
+    'en_SG.UTF-8': 'i18n_generic',
+    'en_US.UTF-8': 'i18n_generic',
+    'en_ZA.UTF-8': 'i18n_generic',
+    'en_ZW.UTF-8': 'i18n_generic',
+    'de_BE.UTF-8': 'i18n_generic',
+    'nl_BE.UTF-8': 'i18n_generic'}
+
+def install_translation(language, locale_path):
+    def _construct_by_name(cname,*p,**k):
+        """Instantiate an object from its class name with two parameters
+           p and k. Python black-magic given by d2"""
+        return globals()[cname](*p,**k)
+
+    return _construct_by_name(language_class_map[language], language,
+                              locale_path)
 
