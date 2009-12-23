@@ -872,7 +872,7 @@ class OCitySMap:
                 else:
                     writer.writerow(['# (UTF-8)', '', copyright_notice])
 
-                for street in self.streets:
+                for street in self.streets + self.amenities:
                     writer.writerow([e.encode('UTF-8') for e in street])
             return
 
