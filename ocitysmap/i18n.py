@@ -74,8 +74,8 @@ class i18n_fr_generic(i18n):
                      u"Impasse", u"Liaison", u"Mail", u"Montée",
                      u"Passage", u"Place", u"Placette", u"Pont", u"Promenade",
                      u"Quai",
-                     u"Résidence", u"Rond-Point", u"Rang", u"Route",
-                     u"Route forestière", u"Rue", u"Ruelle",
+                     u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
+                     u"Route", u"Rue", u"Ruelle",
                      u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
                      u"Voie", u"Rond-point" ]
     DETERMINANTS = [ u" des", u" du", u" de la", u" de l'",
