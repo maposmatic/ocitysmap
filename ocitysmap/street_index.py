@@ -342,7 +342,7 @@ class OCitySMap:
             raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % (repr(name))
 
         osm_id, wkt = records[0]
-        LOG.info("osm_id for %s is: %s" % (repr(name), osm_id))
+        LOG.info("osm_id for %s is: %s, bbox: %s" % (repr(name), osm_id, wkt))
         return BoundingBox.parse_wkt(wkt)
 
     def find_bounding_box_by_osmid(self, db, osmid):
@@ -366,6 +366,7 @@ class OCitySMap:
         if not records:
             raise UnsufficientDataError, "Wrong OSM id (%s) !" % (repr(osmid))
 
+        LOG.info("bbox is: %s" % records[0][0])
         return BoundingBox.parse_wkt(records[0][0])
 
     _regexp_contour = re.compile('^POLYGON\(\(([^)]*)\),\(([^)]*)\)\)$')
@@ -423,6 +424,7 @@ class OCitySMap:
 
     def get_city_contour_by_name(self, db, city):
         assert city is not None
+        LOG.info('Looking for contour around %s...' % repr(city))
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(
                                     st_difference(st_envelope(way),
@@ -432,9 +434,11 @@ class OCitySMap:
                                  and admin_level='8' and name='%s';""" % \
                                pgdb.escape_string(city.encode('utf-8')))
         contour = cursor.fetchall()
+        LOG.debug('Got contour.')
         return self.parse_city_contour(contour)
 
     def get_city_contour_by_osmid(self, db, osmid):
+        LOG.info('Looking for contour around osm id %s...' % repr(osmid))
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(
                                     st_difference(st_envelope(way),
@@ -443,6 +447,7 @@ class OCitySMap:
                               where osm_id=%d;""" % \
                            osmid)
         contour = cursor.fetchall()
+        LOG.debug('Got contour.')
         return self.parse_city_contour(contour)
 
     # This function creates a map_areas table that contains the list
@@ -455,12 +460,17 @@ class OCitySMap:
     # be performed in a single query
     def gen_map_areas(self, db):
         cursor = db.cursor()
+        LOG.debug('Call gen_map_areas...')
 
+        LOG.debug('drop...')
         cursor.execute("drop table if exists map_areas")
+        LOG.debug('create table...')
         cursor.execute("create table map_areas (x integer, y integer)")
+        LOG.debug('addgeometrycolumn...')
         cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
         for i in xrange(0, int(math.ceil(self.griddesc.width_square_count))):
             for j in xrange(0, int(math.ceil(self.griddesc.height_square_count))):
+                LOG.debug('add square %d,%d...' % (i,j))
                 lon1 = (self.boundingbox.get_top_left()[1] +
                         i * self.griddesc.width_square_angle)
                 lon2 = (self.boundingbox.get_top_left()[1] +
@@ -476,7 +486,9 @@ class OCitySMap:
                                   values (%d, %d, st_geomfromtext('%s', 4002))""" %
                                (i, j, poly))
 
+        LOG.debug('Commit gen_map_areas...')
         db.commit()
+        LOG.debug('Done with gen_map_areas.')
 
     # Given a list of street and their corresponding squares, do some
     # cleanup and pass it through the internationalization layer to
@@ -521,6 +533,7 @@ class OCitySMap:
         """
 
         cursor = db.cursor()
+	LOG.info("Getting streets for %s..." % repr(city))
 
         # pgdb.escape_string() doesn't like None strings, and when the
         # city is not passed, we don't want to match any existing
@@ -576,6 +589,7 @@ class OCitySMap:
 
         sl = cursor.fetchall()
 
+	LOG.debug("Got %d streets." % len(sl))
         return self.humanize_street_list(sl)
 
     def get_streets_by_osmid(self, db, osmid):
@@ -589,6 +603,7 @@ class OCitySMap:
         """
 
         cursor = db.cursor()
+	LOG.info("Getting streets for %s..." % osmid)
 
         # The inner select query creates the list of (street, square)
         # for all the squares in the temporary map_areas table. The
@@ -635,6 +650,7 @@ class OCitySMap:
 
         sl = cursor.fetchall()
 
+	LOG.debug("Got %d streets." % len(sl))
         return self.humanize_street_list(sl)
 
     # Given a list of amenities and their corresponding squares, do some
@@ -707,6 +723,7 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
+	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(city)))
             cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, osm_id
                                     from planet_osm_point join map_areas
@@ -737,6 +754,7 @@ class OCitySMap:
                               """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
                                          amenity=amenity,
                                          city=pgdb.escape_string(city.encode('utf-8'))))
+	    LOG.debug("Got amenities.")
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
@@ -784,6 +802,7 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
+	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(osmid)))
             cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, planet_osm_point.osm_id
                                     from planet_osm_point join map_areas
@@ -814,6 +833,7 @@ class OCitySMap:
                               """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
                                          amenity=amenity,
                                          osm_id=osmid))
+	    LOG.debug("Got amenities.")
             sub_al = cursor.fetchall()
             for a in sub_al:
                 if a[1] == None:
