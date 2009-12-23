@@ -14,4 +14,4 @@ Translation support in ocitysmap
 
  * Compile the .mo for your language
 
-   ocitysmap$ msgfmt locale/fr/LC_MESSAGES/ocitysmap.po
+   ocitysmap$ msgfmt -o locale/fr/LC_MESSAGES/ocitysmap.mo locale/fr/LC_MESSAGES/ocitysmap.po
