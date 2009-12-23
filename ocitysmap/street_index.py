@@ -272,6 +272,11 @@ class OCitySMap:
         self.i18n = i18n.install_translation(language, locale_path)
         LOG.info('Language: ' + self.i18n.language_code())
 
+        self._map_areas_table_name = "map_areas"
+        if self.parser.has_option('ocitysmap', 'map_areas_table_name'):
+            self._map_areas_table_name = self.parser.get('ocitysmap',
+                                                         'map_areas_table_name')
+
         self.SELECTED_AMENITIES = [
             (_(u"Places of worship"), "place_of_worship", _(u"Places of worship")),
             (_(u"Education"), "kindergarten", _(u"Kindergarten")),
@@ -296,7 +301,7 @@ class OCitySMap:
 
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
-        self.gen_map_areas(db)
+        self._gen_map_areas(db)
 
         if self.osmid:
             self.streets = self.get_streets_by_osmid(db, self.osmid)
@@ -458,16 +463,18 @@ class OCitySMap:
     # joint with the planet_osm_line or planet_osm_polygon tables, so
     # that getting the list of squares for a given set of streets can
     # be performed in a single query
-    def gen_map_areas(self, db):
+    def _gen_map_areas(self, db):
         cursor = db.cursor()
-        LOG.debug('Call gen_map_areas...')
+        LOG.debug('Call gen_map_areas table: %s...'
+                  % self._map_areas_table_name)
 
         LOG.debug('drop...')
-        cursor.execute("drop table if exists map_areas")
+        cursor.execute("drop table if exists %s" % self._map_areas_table_name)
         LOG.debug('create table...')
-        cursor.execute("create table map_areas (x integer, y integer)")
+        cursor.execute("create table %s (x integer, y integer)"
+                       % self._map_areas_table_name)
         LOG.debug('addgeometrycolumn...')
-        cursor.execute("select addgeometrycolumn('map_areas', 'geom', 4002, 'POLYGON', 2)")
+        cursor.execute("select addgeometrycolumn('%s', 'geom', 4002, 'POLYGON', 2)" % self._map_areas_table_name)
         for i in xrange(0, int(math.ceil(self.griddesc.width_square_count))):
             for j in xrange(0, int(math.ceil(self.griddesc.height_square_count))):
                 LOG.debug('add square %d,%d...' % (i,j))
@@ -482,13 +489,14 @@ class OCitySMap:
                 poly = ("POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))" %
                         (lon1, lat1, lon1, lat2, lon2,
                          lat2, lon2, lat1, lon1, lat1))
-                cursor.execute("""insert into map_areas (x, y, geom)
+                cursor.execute("""insert into %s (x, y, geom)
                                   values (%d, %d, st_geomfromtext('%s', 4002))""" %
-                               (i, j, poly))
+                               (self._map_areas_table_name, i, j, poly))
 
         LOG.debug('Commit gen_map_areas...')
         db.commit()
-        LOG.debug('Done with gen_map_areas.')
+        LOG.debug('Done with gen_map_areas for %s.'
+                  % self._map_areas_table_name)
 
     # Given a list of street and their corresponding squares, do some
     # cleanup and pass it through the internationalization layer to
@@ -572,7 +580,7 @@ class OCitySMap:
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
-                                join map_areas
+                                join %s
                                 on st_intersects(way, st_transform(geom, 900913))
                                 left join cities_area_by_name on city='%s'
                                 where trim(name) != '' and highway is not null
@@ -585,7 +593,8 @@ class OCitySMap:
                           as foo
                           group by name
                           order by name;""" % \
-                           pgdb.escape_string(city.encode('utf-8')))
+                           (self._map_areas_table_name,
+                            pgdb.escape_string(city.encode('utf-8'))))
 
         sl = cursor.fetchall()
 
@@ -633,7 +642,7 @@ class OCitySMap:
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
-                                join map_areas
+                                join %s
                                 on st_intersects(way, st_transform(geom, 900913))
                                 left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
                                 where trim(name) != '' and highway is not null
@@ -646,7 +655,7 @@ class OCitySMap:
                           as foo
                           group by name
                           order by name;""" % \
-                           osmid)
+                           (self._map_areas_table_name,osmid))
 
         sl = cursor.fetchall()
 
@@ -726,7 +735,7 @@ class OCitySMap:
 	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(city)))
             cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, osm_id
-                                    from planet_osm_point join map_areas
+                                    from planet_osm_point join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_name on city='%(city)s'
                                     where amenity = '%(amenity)s' and
@@ -738,7 +747,7 @@ class OCitySMap:
                                     end
                                   union
                                     select distinct amenity, name, x, y, osm_id
-                                    from planet_osm_polygon join map_areas
+                                    from planet_osm_polygon join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_name on city='%(city)s'
                                     where amenity = '%(amenity)s' and
@@ -752,6 +761,7 @@ class OCitySMap:
                               group by amenity, osm_id, name
                               order by amenity, name
                               """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                                         tmp_tblname=self._map_areas_table_name,
                                          amenity=amenity,
                                          city=pgdb.escape_string(city.encode('utf-8'))))
 	    LOG.debug("Got amenities.")
@@ -805,7 +815,7 @@ class OCitySMap:
 	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(osmid)))
             cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, planet_osm_point.osm_id
-                                    from planet_osm_point join map_areas
+                                    from planet_osm_point join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
                                     where amenity = '%(amenity)s' and
@@ -817,7 +827,7 @@ class OCitySMap:
                                     end
                                   union
                                     select distinct amenity, name, x, y, planet_osm_polygon.osm_id
-                                    from planet_osm_polygon join map_areas
+                                    from planet_osm_polygon join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
                                     where amenity = '%(amenity)s' and
@@ -831,6 +841,7 @@ class OCitySMap:
                               group by amenity, osm_id, name
                               order by amenity, name
                               """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                                         tmp_tblname=self._map_areas_table_name,
                                          amenity=amenity,
                                          osm_id=osmid))
 	    LOG.debug("Got amenities.")
