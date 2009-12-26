@@ -147,7 +147,7 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
 
     ctx.move_to(png.get_width(), png.get_height() * 0.33 + fontheight)
     today = datetime.date.today()
-    gendatetext = "This map has been rendered on %s and may not be complete or accurate." % today.strftime("%m %b %Y")
+    gendatetext = "This map has been rendered on %s and may be incomplete or inaccurate." % today.strftime("%d %b %Y")
     textwidth = max(textwidth, ctx.text_extents(gendatetext)[2])
     ctx.show_text(gendatetext)
 
