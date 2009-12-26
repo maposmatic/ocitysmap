@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2009-12-22 11:50+CET\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ocitysmap/street_index.py:235
+msgid "Places of worship"
+msgstr ""
+
+#: ocitysmap/street_index.py:236
+msgid "Kindergarten"
+msgstr ""
+
+#: ocitysmap/street_index.py:236 ocitysmap/street_index.py:237
+#: ocitysmap/street_index.py:238 ocitysmap/street_index.py:239
+#: ocitysmap/street_index.py:240
+msgid "Education"
+msgstr ""
+
+#: ocitysmap/street_index.py:237
+msgid "School"
+msgstr ""
+
+#: ocitysmap/street_index.py:238
+msgid "College"
+msgstr ""
+
+#: ocitysmap/street_index.py:239
+msgid "University"
+msgstr ""
+
+#: ocitysmap/street_index.py:240
+msgid "Library"
+msgstr ""
+
+#: ocitysmap/street_index.py:241
+msgid "Town hall"
+msgstr ""
+
+#: ocitysmap/street_index.py:241 ocitysmap/street_index.py:242
+#: ocitysmap/street_index.py:243
+msgid "Public buildings"
+msgstr ""
+
+#: ocitysmap/street_index.py:242
+msgid "Post office"
+msgstr ""
+
+#: ocitysmap/street_index.py:243
+msgid "Police"
+msgstr ""
+
