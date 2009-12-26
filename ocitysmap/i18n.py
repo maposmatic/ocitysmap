@@ -119,8 +119,9 @@ class i18n_fr_generic(i18n):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
 class i18n_it_generic(i18n):
-    APPELLATIONS = [ u"Via", u"Piazza", u"Scali", u"Strada", u"Largo",
-                     u"Corso", u"Viale",  ]
+    APPELLATIONS = [ u"Via", u"Viale", u"Piazza", u"Scali", u"Strada", u"Largo",
+                     u"Corso", u"Viale", u"Calle", u"Sottoportico",
+		     u"Sottoportego" ]
     DETERMINANTS = [ u" delle", u" dell'", u" dei", u" degli",
                           u" della", u" di", u"" ]
 
