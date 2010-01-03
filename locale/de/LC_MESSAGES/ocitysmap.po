@@ -5,7 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-12-22 11:50+CET\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-03 16:39+0100\n"
 "PO-Revision-Date: 2009-12-22 23:52+0100\n"
 "Last-Translator: Pierre Mauduit <pierre.mauduit@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,53 +15,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ocitysmap/street_index.py:235
+#: ocitysmap/street_index.py:281
 msgid "Places of worship"
 msgstr "Kultstätten"
 
-#: ocitysmap/street_index.py:236
-msgid "Kindergarten"
-msgstr "Kindergarten"
+#: ocitysmap/street_index.py:281
+#, fuzzy
+msgid "Place of worship"
+msgstr "Kultstätten"
 
-#: ocitysmap/street_index.py:236
-#: ocitysmap/street_index.py:237
-#: ocitysmap/street_index.py:238
-#: ocitysmap/street_index.py:239
-#: ocitysmap/street_index.py:240
+#: ocitysmap/street_index.py:282 ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284 ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
 msgid "Education"
 msgstr "Ausbildung"
 
-#: ocitysmap/street_index.py:237
+#: ocitysmap/street_index.py:282
+msgid "Kindergarten"
+msgstr "Kindergarten"
+
+#: ocitysmap/street_index.py:283
 msgid "School"
 msgstr "Schüle"
 
-#: ocitysmap/street_index.py:238
+#: ocitysmap/street_index.py:284
 msgid "College"
 msgstr "Gymnasium"
 
-#: ocitysmap/street_index.py:239
+#: ocitysmap/street_index.py:285
 msgid "University"
 msgstr "Universität"
 
-#: ocitysmap/street_index.py:240
+#: ocitysmap/street_index.py:286
 msgid "Library"
 msgstr "Bibliothek"
 
-#: ocitysmap/street_index.py:241
-msgid "Town hall"
-msgstr "Rathaus"
-
-#: ocitysmap/street_index.py:241
-#: ocitysmap/street_index.py:242
-#: ocitysmap/street_index.py:243
+#: ocitysmap/street_index.py:287 ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
 msgid "Public buildings"
 msgstr "Amtsgebaüde"
 
-#: ocitysmap/street_index.py:242
+#: ocitysmap/street_index.py:287
+msgid "Town hall"
+msgstr "Rathaus"
+
+#: ocitysmap/street_index.py:288
 msgid "Post office"
 msgstr "Postamt"
 
-#: ocitysmap/street_index.py:243
+#: ocitysmap/street_index.py:289
 msgid "Police"
 msgstr "Polizeirevier"
-
