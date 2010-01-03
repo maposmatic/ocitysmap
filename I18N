@@ -1,4 +1,39 @@
 Translation support in ocitysmap
+================================
+
+Translation support uses the standard Gettext system. See
+http://www.gnu.org/software/gettext/manual/gettext.html for the
+Gettext manual.
+
+Updating the template file
+--------------------------
+
+This template file is created by extracting all strings from the code
+into a .pot (PO template) file :
+
+ xgettext -o ocitysmap.pot -p locale ocitysmap/street_index.py
+
+Currently, only ocitysmap/street_index.py contains translated
+strings. The .pot file is generated in locale/ocitysmap.pot.
+
+Updating an existing translation
+--------------------------------
+
+Once the template file has been updated, the new version can be merged
+with an older translation using the 'msgmerge' tool:
+
+ msgmerge -U locale/fr/LC_MESSAGES/ocitysmap.po locale/ocitysmap.pot
+
+Then edit the locale/fr/LC_MESSAGES/ocitysmap.po file with poedit or
+another .po file editor.
+
+Tip: refer to http://wiki.openstreetmap.org/wiki/Map_Features for
+official translations of several words used in OpenStreetMap.
+
+Create a translation for a new language
+---------------------------------------
+
+This must be done using the 'msginit' tool.
 
  * To build .pot file
 
@@ -6,12 +41,8 @@ Translation support in ocitysmap
 
  * Make the .po file for your language. Look at Map_Features in your
    language to find correct transaltions:
-     http://wiki.openstreetmap.org/wiki/Map_Features
 
-   ocitysmap$ cp locale/ocitysmap.pot locale/fr/LC_MESSAGES/ocitysmap.po
+Compiling the message file
+--------------------------
 
-   ocitysmap$ poedit locale/fr/LC_MESSAGES/ocitysmap.po
-
- * Compile the .mo for your language
-
-   ocitysmap$ msgfmt -o locale/fr/LC_MESSAGES/ocitysmap.mo locale/fr/LC_MESSAGES/ocitysmap.po
+ ocitysmap$ msgfmt -o locale/fr/LC_MESSAGES/ocitysmap.mo locale/fr/LC_MESSAGES/ocitysmap.po
