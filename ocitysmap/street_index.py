@@ -278,7 +278,7 @@ class OCitySMap:
                                                          'map_areas_table_name')
 
         self.SELECTED_AMENITIES = [
-            (_(u"Places of worship"), "place_of_worship", _(u"Places of worship")),
+            (_(u"Places of worship"), "place_of_worship", _(u"Place of worship")),
             (_(u"Education"), "kindergarten", _(u"Kindergarten")),
             (_(u"Education"), "school", _(u"School")),
             (_(u"Education"), "college", _(u"College")),
