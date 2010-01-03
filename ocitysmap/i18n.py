@@ -121,9 +121,9 @@ class i18n_fr_generic(i18n):
 class i18n_it_generic(i18n):
     APPELLATIONS = [ u"Via", u"Viale", u"Piazza", u"Scali", u"Strada", u"Largo",
                      u"Corso", u"Viale", u"Calle", u"Sottoportico",
-		     u"Sottoportego" ]
+		     u"Sottoportego", u"Vicolo", u"Piazzetta" ]
     DETERMINANTS = [ u" delle", u" dell'", u" dei", u" degli",
-                          u" della", u" di", u"" ]
+                     u" della", u" del", u" di", u"" ]
 
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
