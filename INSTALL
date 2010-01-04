@@ -197,7 +197,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
-                             --password 'ereiamjh' \
+                             --password 'ereiamjh'
 
 11. Installation of OCitySMap
 

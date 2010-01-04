@@ -206,8 +206,10 @@ language_class_map = {
     'it_CH.UTF-8': i18n_it_generic,
 }
 
-def install_translation(language, locale_path):
+def install_translation(locale_name, locale_path):
     """Return a new i18n class instance, depending on the specified
-    language name"""
-    language_class = language_class_map.get(language, i18n_generic)
-    return language_class(language, locale_path)
+    locale name (eg. "fr_FR.UTF-8"). See output of "locale -a" for a
+    list of system-supported locale names. When none matching, default
+    class is i18n_generic"""
+    language_class = language_class_map.get(locale_name, i18n_generic)
+    return language_class(locale_name, locale_path)
