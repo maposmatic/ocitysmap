@@ -176,42 +176,38 @@ class i18n_generic(i18n):
     def first_letter_equal(self, a, b):
         return a == b
 
+# When not listed in the following map, default language class will be
+# i18n_generic
 language_class_map = {
-    # 'code_CODE.UTF-8': 'i18n_class', # example for new language
-    'C': 'i18n_generic',
-    'fr_BE.UTF-8': 'i18n_fr_generic',
-    'fr_FR.UTF-8': 'i18n_fr_generic',
-    'fr_CA.UTF-8': 'i18n_fr_generic',
-    'fr_CH.UTF-8': 'i18n_fr_generic',
-    'fr_LU.UTF-8': 'i18n_fr_generic',
-    'en_AG': 'i18n_generic',
-    'en_AU.UTF-8': 'i18n_generic',
-    'en_BW.UTF-8': 'i18n_generic',
-    'en_CA.UTF-8': 'i18n_generic',
-    'en_DK.UTF-8': 'i18n_generic',
-    'en_GB.UTF-8': 'i18n_generic',
-    'en_HK.UTF-8': 'i18n_generic',
-    'en_IE.UTF-8': 'i18n_generic',
-    'en_IN': 'i18n_generic',
-    'en_NG': 'i18n_generic',
-    'en_NZ.UTF-8': 'i18n_generic',
-    'en_PH.UTF-8': 'i18n_generic',
-    'en_SG.UTF-8': 'i18n_generic',
-    'en_US.UTF-8': 'i18n_generic',
-    'en_ZA.UTF-8': 'i18n_generic',
-    'en_ZW.UTF-8': 'i18n_generic',
-    'de_BE.UTF-8': 'i18n_generic',
-    'nl_BE.UTF-8': 'i18n_generic',
-    'it_IT.UTF-8': 'i18n_it_generic',
-    'it_CH.UTF-8': 'i18n_it_generic',
+    'fr_BE.UTF-8': i18n_fr_generic,
+    'fr_FR.UTF-8': i18n_fr_generic,
+    'fr_CA.UTF-8': i18n_fr_generic,
+    'fr_CH.UTF-8': i18n_fr_generic,
+    'fr_LU.UTF-8': i18n_fr_generic,
+    'en_AG': i18n_generic,
+    'en_AU.UTF-8': i18n_generic,
+    'en_BW.UTF-8': i18n_generic,
+    'en_CA.UTF-8': i18n_generic,
+    'en_DK.UTF-8': i18n_generic,
+    'en_GB.UTF-8': i18n_generic,
+    'en_HK.UTF-8': i18n_generic,
+    'en_IE.UTF-8': i18n_generic,
+    'en_IN': i18n_generic,
+    'en_NG': i18n_generic,
+    'en_NZ.UTF-8': i18n_generic,
+    'en_PH.UTF-8': i18n_generic,
+    'en_SG.UTF-8': i18n_generic,
+    'en_US.UTF-8': i18n_generic,
+    'en_ZA.UTF-8': i18n_generic,
+    'en_ZW.UTF-8': i18n_generic,
+    'de_BE.UTF-8': i18n_generic,
+    'nl_BE.UTF-8': i18n_generic,
+    'it_IT.UTF-8': i18n_it_generic,
+    'it_CH.UTF-8': i18n_it_generic,
 }
 
 def install_translation(language, locale_path):
-    def _construct_by_name(cname,*p,**k):
-        """Instantiate an object from its class name with two parameters
-           p and k. Python black-magic given by d2"""
-        return globals()[cname](*p,**k)
-
-    return _construct_by_name(language_class_map[language], language,
-                              locale_path)
-
+    """Return a new i18n class instance, depending on the specified
+    language name"""
+    language_class = language_class_map.get(language, i18n_generic)
+    return language_class(language, locale_path)
