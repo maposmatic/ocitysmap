@@ -70,13 +70,14 @@ class i18n_fr_generic(i18n):
     APPELLATIONS = [ u"Allée", u"Avenue", u"Boulevard", u"Carrefour",
                      u"Chaussée", u"Chemin", u"Cheminement",
                      u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
-                     u"Degré", u"Esplanade", u"Giratoire",
+                     u"Degré", u"Esplanade", u"Giratoire", u"Hameau",
                      u"Impasse", u"Liaison", u"Mail", u"Montée",
                      u"Passage", u"Place", u"Placette", u"Pont", u"Promenade",
-                     u"Quai",
+                     u"Petite Avenue", u"Quai",
                      u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
                      u"Route", u"Rue", u"Ruelle",
-                     u"Square", u"Traboule", u"Traverse", u"Venelle", u"Villa",
+                     u"Square", u"Sentier",
+                     u"Traboule", u"Traverse", u"Venelle", u"Villa",
                      u"Voie", u"Rond-point" ]
     DETERMINANTS = [ u" des", u" du", u" de la", u" de l'",
                           u" de", u" d'", u"" ]
