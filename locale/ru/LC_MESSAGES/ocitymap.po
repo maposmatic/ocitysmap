@@ -1,0 +1,68 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ocitymap\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-03 16:39+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Konstantin Mochalov <incredible.angst@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
+
+#: ocitysmap/street_index.py:281
+msgid "Places of worship"
+msgstr "Религиозные места"
+
+#: ocitysmap/street_index.py:281
+msgid "Place of worship"
+msgstr "Религиозное место"
+
+#: ocitysmap/street_index.py:282
+#: ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
+msgid "Education"
+msgstr "Образование"
+
+#: ocitysmap/street_index.py:282
+msgid "Kindergarten"
+msgstr "Детский сад"
+
+#: ocitysmap/street_index.py:283
+msgid "School"
+msgstr "Школа"
+
+#: ocitysmap/street_index.py:284
+msgid "College"
+msgstr "Колледж"
+
+#: ocitysmap/street_index.py:285
+msgid "University"
+msgstr "Университет"
+
+#: ocitysmap/street_index.py:286
+msgid "Library"
+msgstr "Библиотека"
+
+#: ocitysmap/street_index.py:287
+#: ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+msgid "Public buildings"
+msgstr "Публичные здания"
+
+#: ocitysmap/street_index.py:287
+msgid "Town hall"
+msgstr "Мэрия"
+
+#: ocitysmap/street_index.py:288
+msgid "Post office"
+msgstr "Почтовое отделение"
+
+#: ocitysmap/street_index.py:289
+msgid "Police"
+msgstr "Милиция"
+
