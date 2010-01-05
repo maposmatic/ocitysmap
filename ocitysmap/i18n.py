@@ -205,6 +205,10 @@ language_class_map = {
     'nl_BE.UTF-8': i18n_generic,
     'it_IT.UTF-8': i18n_it_generic,
     'it_CH.UTF-8': i18n_it_generic,
+    'de_AT.UTF-8': i18n_generic,
+    'de_DE.UTF-8': i18n_generic,
+    'de_LU.UTF-8': i18n_generic,
+    'de_CH.UTF-8': i18n_generic,
 }
 
 def install_translation(locale_name, locale_path):
