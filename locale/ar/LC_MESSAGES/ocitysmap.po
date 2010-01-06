@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Bassem JARKAS <jarkas@gmail.com>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-03 16:39+0100\n"
+"PO-Revision-Date: 2010-01-06 09:11+0300\n"
+"Last-Translator: Bassem JARKAS <jarkas@gmail.com>\n"
+"Language-Team: Arabic Translation\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"X-Generator: Virtaal 0.5.0\n"
+
+#: ocitysmap/street_index.py:281
+msgid "Places of worship"
+msgstr "معبد"
+
+#: ocitysmap/street_index.py:281
+msgid "Place of worship"
+msgstr "معابد"
+
+#: ocitysmap/street_index.py:282 ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284 ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
+msgid "Education"
+msgstr "تعليم"
+
+#: ocitysmap/street_index.py:282
+msgid "Kindergarten"
+msgstr "حضانة أطفال"
+
+#: ocitysmap/street_index.py:283
+msgid "School"
+msgstr "مدرسة"
+
+#: ocitysmap/street_index.py:284
+msgid "College"
+msgstr "كلّية"
+
+#: ocitysmap/street_index.py:285
+msgid "University"
+msgstr "جامعة"
+
+#: ocitysmap/street_index.py:286
+msgid "Library"
+msgstr "مكتبة"
+
+#: ocitysmap/street_index.py:287 ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+msgid "Public buildings"
+msgstr "مباني عامة"
+
+#: ocitysmap/street_index.py:287
+msgid "Town hall"
+msgstr "مبنى بلدية"
+
+#: ocitysmap/street_index.py:288
+msgid "Post office"
+msgstr "مكتب بريد"
+
+#: ocitysmap/street_index.py:289
+msgid "Police"
+msgstr "شرطة"
