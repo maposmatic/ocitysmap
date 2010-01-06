@@ -348,6 +348,41 @@ class i18n_ar_generic(i18n):
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
+class i18n_ru_generic(i18n):
+    APPELLATIONS = [ u"ул", u"бул", u"пер", u"пр", u"улица", u"бульвар", u"проезд",
+                     u"проспект", u"площадь", u"сквер", u"парк" ]
+    # only "ул." and "пер." are recommended shortenings, however other words can 
+    # occur shortened.
+    #
+    # http://bit.ly/6ASISp (OSM wiki)
+    #
+
+    SPACE_REDUCE = re.compile(r"\s+")
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)\.?)\s?\b(?P<name>.+)" %
+                                    ("|".join(APPELLATIONS)), re.IGNORECASE
+                                                                 | re.UNICODE)
+
+    def __init__(self, language, locale_path):
+        self.language = str(language)
+        _install_language(language, locale_path)
+
+    def _upper_unaccent_string(self, s):
+        # usually, there are no accents in russian names, only "ё" sometimes, but
+        # not as first letter
+        return s.upper()
+
+    def language_code(self):
+        return self.language
+
+    def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
+
+    def first_letter_equal(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -416,6 +451,7 @@ language_class_map = {
     'ar_SY.UTF-8': i18n_ar_generic,
     'ar_TN.UTF-8': i18n_ar_generic,
     'ar_YE.UTF-8': i18n_ar_generic,
+    'ru_RU.UTF-8': i18n_ru_generic,
 }
 
 def install_translation(locale_name, locale_path):
