@@ -32,6 +32,7 @@ import map_canvas, grid, utils
 from draw_utils import enclose_in_frame
 
 LOG = logging.getLogger('ocitysmap')
+STATEMENT_TIMEOUT_MINUTES = 18
 
 class BaseOCitySMapError(Exception):
     """Base class for exceptions thrown by OCitySMap."""
@@ -293,6 +294,16 @@ class OCitySMap:
         db = pgdb.connect('Notre Base', datasource['user'],
                           datasource['password'], datasource['host'],
                           datasource['dbname'])
+
+        # Set session timeout parameter (18mn)
+        cursor = db.cursor()
+        cursor.execute("show statement_timeout;")
+        LOG.debug("Initial statement timeout: %s" % cursor.fetchall()[0][0])
+        cursor.execute("set session statement_timeout=%d;"
+                       % (STATEMENT_TIMEOUT_MINUTES*60*1000))
+        cursor.execute("show statement_timeout;")
+        LOG.info("Configured statement timeout: %s" % cursor.fetchall()[0][0])
+        del cursor
 
         if self.city_name:
             self.boundingbox = self.find_bounding_box_by_name(db, self.city_name)
