@@ -259,6 +259,56 @@ class i18n_ca_generic(i18n):
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
+class i18n_pt_br_generic(i18n):
+    APPELLATIONS = [ u"Aeroporto", u"Alameda", u"Área", u"Avenida",
+                     u"Campo", u"Chácara", u"Colônia",
+                     u"Condomínio", u"Conjunto", u"Distrito", u"Esplanada", u"Estação",
+                     u"Estrada", u"Favela", u"Fazenda",
+                     u"Feira", u"Jardim", u"Ladeira", u"Lago",
+                     u"Lagoa", u"Largo", u"Loteamento", u"Morro", u"Núcleo",
+                     u"Parque", u"Passarela", u"Pátio", u"Praça", u"Quadra",
+                     u"Recanto", u"Residencial", u"Rua",
+                     u"Setor", u"Sítio", u"Travessa", u"Trecho", u"Trevo",
+                     u"Vale", u"Vereda", u"Via", u"Viaduto", u"Viela",
+                     u"Vila" ]
+    DETERMINANTS = [ u" do", u" da", u" dos", u" das'", u"" ]
+    SPACE_REDUCE = re.compile(r"\s+")
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
+                                    ("|".join(APPELLATIONS),
+                                     "|".join(DETERMINANTS)), re.IGNORECASE
+                                                                 | re.UNICODE)
+
+    # for IndexPageGenerator._upper_unaccent_string
+    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+
+    def __init__(self, language, locale_path):
+        self.language = str(language)
+        _install_language(language, locale_path)
+
+    def _upper_unaccent_string(self, s):
+        s = self.E_ACCENT.sub("e", s)
+        s = self.I_ACCENT.sub("i", s)
+        s = self.A_ACCENT.sub("a", s)
+        s = self.O_ACCENT.sub("o", s)
+        s = self.U_ACCENT.sub("u", s)
+        return s.upper()
+
+    def language_code(self):
+        return self.language
+
+    def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
+
+    def first_letter_equal(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -307,6 +357,7 @@ language_class_map = {
     'de_CH.UTF-8': i18n_generic,
     'es_ES.UTF-8': i18n_es_generic,
     'ca_ES.UTF-8': i18n_ca_generic,
+    'pt_BR.UTF-8': i18n_pt_br_generic,
 }
 
 def install_translation(locale_name, locale_path):
