@@ -291,9 +291,12 @@ class OCitySMap:
 
         datasource = dict(self.parser.items('datasource'))
 
-        db = pgdb.connect('Notre Base', datasource['user'],
-                          datasource['password'], datasource['host'],
-                          datasource['dbname'])
+        LOG.info('Connecting to database %s at %s (user: %s)...' %
+                 (datasource['dbname'], datasource['host'], datasource['user']))
+        db = pgdb.connect(user=datasource['user'],
+                          password=datasource['password'],
+                          host=datasource['host'],
+                          database=datasource['dbname'])
 
         # Set session timeout parameter (18mn)
         cursor = db.cursor()
