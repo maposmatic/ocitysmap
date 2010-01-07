@@ -1,0 +1,72 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ocitysmap\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-03 16:39+0100\n"
+"PO-Revision-Date: 2010-01-06 17:42+0100\n"
+"Last-Translator: Joan Montané <joan--sense spam--montane.cat>\n"
+"Language-Team: Catalan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Catalan\n"
+
+#: ocitysmap/street_index.py:281
+msgid "Places of worship"
+msgstr "Llocs de culte"
+
+#: ocitysmap/street_index.py:281
+msgid "Place of worship"
+msgstr "Lloc de culte"
+
+#: ocitysmap/street_index.py:282
+#: ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
+msgid "Education"
+msgstr "Educació"
+
+#: ocitysmap/street_index.py:282
+msgid "Kindergarten"
+msgstr "Llar d'infants"
+
+#: ocitysmap/street_index.py:283
+msgid "School"
+msgstr "Escola"
+
+#: ocitysmap/street_index.py:284
+msgid "College"
+msgstr "Institut"
+
+#: ocitysmap/street_index.py:285
+msgid "University"
+msgstr "Universitat"
+
+#: ocitysmap/street_index.py:286
+msgid "Library"
+msgstr "Biblioteca"
+
+#: ocitysmap/street_index.py:287
+#: ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+msgid "Public buildings"
+msgstr "Edificis públics"
+
+#: ocitysmap/street_index.py:287
+msgid "Town hall"
+msgstr "Ajuntament"
+
+#: ocitysmap/street_index.py:288
+msgid "Post office"
+msgstr "Oficina de correus"
+
+#: ocitysmap/street_index.py:289
+msgid "Police"
+msgstr "Policia"
+
