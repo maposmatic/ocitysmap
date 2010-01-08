@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-03 16:39+0100\n"
-"PO-Revision-Date: 2010-01-06 09:11+0300\n"
+"PO-Revision-Date: 2010-01-08 16:13+0300\n"
 "Last-Translator: Bassem JARKAS <jarkas@gmail.com>\n"
 "Language-Team: Arabic Translation\n"
 "Language: ar\n"
@@ -20,11 +20,11 @@ msgstr ""
 
 #: ocitysmap/street_index.py:281
 msgid "Places of worship"
-msgstr "معبد"
+msgstr "معابد"
 
 #: ocitysmap/street_index.py:281
 msgid "Place of worship"
-msgstr "معابد"
+msgstr "معبد"
 
 #: ocitysmap/street_index.py:282 ocitysmap/street_index.py:283
 #: ocitysmap/street_index.py:284 ocitysmap/street_index.py:285
