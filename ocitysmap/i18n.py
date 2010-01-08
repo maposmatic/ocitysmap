@@ -309,6 +309,45 @@ class i18n_pt_br_generic(i18n):
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
+class i18n_ar_generic(i18n):
+    APPELLATIONS = [ u"شارع", u"طريق", u"زقاق", u"نهج", u"جادة",
+                     u"ممر", u"حارة",
+                     u"كوبري", u"كوبرى", u"جسر", u"مطلع", u"منزل",
+                     u"مفرق", u"ملف", u"تقاطع",
+                     u"ساحل",
+                     u"ميدان", u"ساحة", u"دوار" ]
+
+    DETERMINANTS = [ u" ال", u"" ]
+
+    SPACE_REDUCE = re.compile(r"\s+")
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?(?P<name>.+)" %
+                                    ("|".join(APPELLATIONS),
+                                     "|".join(DETERMINANTS)), re.IGNORECASE
+                                                                 | re.UNICODE)
+
+    # for IndexPageGenerator._upper_unaccent_string
+    A_ACCENT = re.compile(ur"[اإآ]", re.IGNORECASE | re.UNICODE)
+
+    def __init__(self, language, locale_path):
+        self.language = str(language)
+        _install_language(language, locale_path)
+
+    def _upper_unaccent_string(self, s):
+        s = self.A_ACCENT.sub("أ", s)
+        return s.upper()
+
+    def language_code(self):
+        return self.language
+
+    def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
+
+    def first_letter_equal(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -359,6 +398,24 @@ language_class_map = {
     'ca_ES.UTF-8': i18n_ca_generic,
     'pt_BR.UTF-8': i18n_pt_br_generic,
     'da_DK.UTF-8': i18n_generic,
+    'ar_AE.UTF-8': i18n_ar_generic,
+    'ar_BH.UTF-8': i18n_ar_generic,
+    'ar_DZ.UTF-8': i18n_ar_generic,
+    'ar_EG.UTF-8': i18n_ar_generic,
+    'ar_IN': i18n_ar_generic,
+    'ar_IQ.UTF-8': i18n_ar_generic,
+    'ar_JO.UTF-8': i18n_ar_generic,
+    'ar_KW.UTF-8': i18n_ar_generic,
+    'ar_LB.UTF-8': i18n_ar_generic,
+    'ar_LY.UTF-8': i18n_ar_generic,
+    'ar_MA.UTF-8': i18n_ar_generic,
+    'ar_OM.UTF-8': i18n_ar_generic,
+    'ar_QA.UTF-8': i18n_ar_generic,
+    'ar_SA.UTF-8': i18n_ar_generic,
+    'ar_SD.UTF-8': i18n_ar_generic,
+    'ar_SY.UTF-8': i18n_ar_generic,
+    'ar_TN.UTF-8': i18n_ar_generic,
+    'ar_YE.UTF-8': i18n_ar_generic,
 }
 
 def install_translation(locale_name, locale_path):
