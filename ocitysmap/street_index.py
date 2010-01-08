@@ -287,6 +287,7 @@ class OCitySMap:
             (_(u"Education"), "library", _(u"Library")),
             (_(u"Public buildings"), "townhall", _(u"Town hall")),
             (_(u"Public buildings"), "post_office", _(u"Post office")),
+            (_(u"Public buildings"), "public_building", _(u"Public building")),
             (_(u"Public buildings"), "police", _(u"Police"))]
 
         datasource = dict(self.parser.items('datasource'))
