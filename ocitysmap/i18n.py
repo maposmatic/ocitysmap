@@ -422,7 +422,7 @@ class i18n_nl_generic(i18n):
     def language_code(self):
         return self.language
 
-   def user_readable_street(self, name):
+    def user_readable_street(self, name):
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
         matches = self.PREFIX_REGEXP.match(name)
