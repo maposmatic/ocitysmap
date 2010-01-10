@@ -383,6 +383,57 @@ class i18n_ru_generic(i18n):
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
+class i18n_nl_generic(i18n):
+    APPELLATIONS = [ u"St.", u"Sint", u"Ptr.", u"Pater",
+                     u"Prof.", u"Professor", u"Past.", u"Pastoor",
+                     u"Pr.", u"Prins", u"Prinses", u"Gen.", u"Generaal",
+                     u"Mgr.", u"Monseigneur", u"Mr.", u"Meester",
+                     u"Burg.", u"Burgermeester", u"Dr.", u"Dokter",
+                     u"Ir.", "Ingenieur",
+                     u""]
+    DETERMINANTS = [ u"\s?van der", u"\s?van den", u"\s?van de", u"\s?van",
+                     u"\s?Den", u"\s?D'n", u"\s?D'", u"\s?De", u"\s?'T", u"\s?Het" ]
+    
+    SPACE_REDUCE = re.compile(r"\s+")
+    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
+                                    ("|".join(APPELLATIONS),
+                                     "|".join(DETERMINANTS)),
+                                      re.IGNORECASE | re.UNICODE)
+
+    # for IndexPageGenerator._upper_unaccent_string
+    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+
+    def __init__(self, language, locale_path):
+        self.language = str(language)
+        _install_language(language, locale_path)
+
+    def _upper_unaccent_string(self, s):
+        s = self.E_ACCENT.sub("e", s)
+        s = self.I_ACCENT.sub("i", s)
+        s = self.A_ACCENT.sub("a", s)
+        s = self.O_ACCENT.sub("o", s)
+        s = self.U_ACCENT.sub("u", s)
+        return s.upper()
+
+    def language_code(self):
+        return self.language
+
+   def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        matches = self.PREFIX_REGEXP.match(name)
+        if matches.group('prefix'):
+            name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        return name
+
+    def first_letter_equal(self, a, b):
+        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
+
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -422,7 +473,8 @@ language_class_map = {
     'en_ZA.UTF-8': i18n_generic,
     'en_ZW.UTF-8': i18n_generic,
     'de_BE.UTF-8': i18n_generic,
-    'nl_BE.UTF-8': i18n_generic,
+    'nl_BE.UTF-8': i18n_nl_generic,
+    'nl_NL.UTF-8': i18n_nl_generic,
     'it_IT.UTF-8': i18n_it_generic,
     'it_CH.UTF-8': i18n_it_generic,
     'de_AT.UTF-8': i18n_generic,
