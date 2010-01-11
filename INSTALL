@@ -100,7 +100,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
     it like:
 
     ln -s /path/to/osm2pgsql/osm2pgsql /usr/local/bin/osm2pgsql
-    
+
  6. Import the Google spatial referential system
 
     The osm2pgsql tool creates data in the PostGIS database relative
@@ -222,7 +222,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     d. Install dependencies
 
-    sudo aptitude install python-pygresql python-gdal
+    sudo aptitude install python-psycopg2 python-gdal
 
     e. Configuration file
 

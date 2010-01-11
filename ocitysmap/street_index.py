@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging, traceback
-import sys, os, tempfile, pgdb, re, math, cairo, locale, gzip, csv
+import sys, os, tempfile, psycopg2, re, math, cairo, locale, gzip, csv
 import ConfigParser
 import i18n
 from coords import BoundingBox
@@ -30,6 +30,12 @@ from coords import BoundingBox
 import map_canvas, grid, utils
 
 from draw_utils import enclose_in_frame
+
+import psycopg2.extensions
+# compatibility with django: see http://code.djangoproject.com/ticket/5996
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+# SQL string escaping routine
+sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
 LOG = logging.getLogger('ocitysmap')
 STATEMENT_TIMEOUT_MINUTES = 18
@@ -96,7 +102,8 @@ class IndexPageGenerator:
         self.i18n = i18n
 
     def _get_font_parameters(self, cr, fontsize):
-        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
+                            cairo.FONT_WEIGHT_NORMAL)
         cr.set_font_size(fontsize * 1.2)
         heading_fascent, heading_fdescent, heading_fheight = cr.font_extents()[:3]
 
@@ -105,7 +112,6 @@ class IndexPageGenerator:
         fascent, fdescent, fheight, fxadvance, fyadvance = cr.font_extents()
 
         em = cr.text_extents("m")[2]
-
         widths = map(lambda x: cr.text_extents(x[1])[2] + cr.text_extents(x[2])[2], self.streets)
         maxwidth = max(widths)
         colwidth = maxwidth + 3 * em
@@ -294,10 +300,14 @@ class OCitySMap:
 
         LOG.info('Connecting to database %s at %s (user: %s)...' %
                  (datasource['dbname'], datasource['host'], datasource['user']))
-        db = pgdb.connect(user=datasource['user'],
-                          password=datasource['password'],
-                          host=datasource['host'],
-                          database=datasource['dbname'])
+        db = psycopg2.connect(user=datasource['user'],
+                              password=datasource['password'],
+                              host=datasource['host'],
+                              database=datasource['dbname'])
+
+        # Force everything to be unicode-encoded, in case we run along
+        # django (which loads the unicode extensions for psycopg2)
+        db.set_client_encoding('utf8')
 
         # Set session timeout parameter (18mn)
         cursor = db.cursor()
@@ -355,8 +365,8 @@ class OCitySMap:
                           from planet_osm_line
                           where boundary='administrative' and
                                 admin_level='8' and
-                                name='%s';""" % \
-                           pgdb.escape_string(name.encode('utf-8')))
+                                name=%s;""" % \
+                           sql_escape_unicode(name))
         records = cursor.fetchall()
         if not records:
             raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % (repr(name))
@@ -451,8 +461,8 @@ class OCitySMap:
                                                   st_buildarea(way)), 4002))
                               from planet_osm_line
                               where boundary='administrative'
-                                 and admin_level='8' and name='%s';""" % \
-                               pgdb.escape_string(city.encode('utf-8')))
+                                 and admin_level='8' and name=%s;""" % \
+                               sql_escape_unicode(city))
         contour = cursor.fetchall()
         LOG.debug('Got contour.')
         return self.parse_city_contour(contour)
@@ -520,7 +530,7 @@ class OCitySMap:
     def humanize_street_list(self, sl):
         # We transform the string representing the squares list into a
         # Python list
-        sl = [( unicode(street[0].decode("utf-8")),
+        sl = [( street[0],
                 [ map(int, x.split(',')) for x in street[1].split(';')[:-1] ] )
               for street in sl]
 
@@ -597,7 +607,7 @@ class OCitySMap:
                                 from planet_osm_line
                                 join %s
                                 on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_name on city='%s'
+                                left join cities_area_by_name on city=%s
                                 where trim(name) != '' and highway is not null
                                 and case when cities_area_by_name.area is null
                                 then
@@ -609,10 +619,9 @@ class OCitySMap:
                           group by name
                           order by name;""" % \
                            (self._map_areas_table_name,
-                            pgdb.escape_string(city.encode('utf-8'))))
+                            sql_escape_unicode(city)))
 
         sl = cursor.fetchall()
-
 	LOG.debug("Got %d streets." % len(sl))
         return self.humanize_street_list(sl)
 
@@ -675,6 +684,7 @@ class OCitySMap:
         sl = cursor.fetchall()
 
 	LOG.debug("Got %d streets." % len(sl))
+        print "STREETS", repr(sl)
         return self.humanize_street_list(sl)
 
     # Given a list of amenities and their corresponding squares, do some
@@ -684,8 +694,7 @@ class OCitySMap:
     def humanize_amenity_list(self, am):
         # We transform the string representing the squares list into a
         # Python list
-        am = [( unicode(amenity[0].decode("utf-8")),
-                unicode(amenity[1].decode("utf-8")),
+        am = [( amenity[0], amenity[1],
                 [ map(int, x.split(',')) for x in amenity[2].split(';')[:-1] ] )
               for amenity in am]
 
@@ -748,12 +757,12 @@ class OCitySMap:
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
 	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(city)))
-            cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
+            cursor.execute("""select %(category)s, name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, osm_id
                                     from planet_osm_point join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on city='%(city)s'
-                                    where amenity = '%(amenity)s' and
+                                    left join cities_area_by_name on city=%(city)s
+                                    where amenity = %(amenity)s and
                                     case when cities_area_by_name.area is null
                                     then
                                       true
@@ -764,8 +773,8 @@ class OCitySMap:
                                     select distinct amenity, name, x, y, osm_id
                                     from planet_osm_polygon join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on city='%(city)s'
-                                    where amenity = '%(amenity)s' and
+                                    left join cities_area_by_name on city=%(city)s
+                                    where amenity = %(amenity)s and
                                     case when cities_area_by_name.area is null
                                     then
                                       true
@@ -775,15 +784,12 @@ class OCitySMap:
                               as foo
                               group by amenity, osm_id, name
                               order by amenity, name
-                              """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                              """ % dict(category=sql_escape_unicode(cat),
                                          tmp_tblname=self._map_areas_table_name,
-                                         amenity=amenity,
-                                         city=pgdb.escape_string(city.encode('utf-8'))))
+                                         amenity=sql_escape_unicode(amenity),
+                                         city=sql_escape_unicode(city)))
 	    LOG.debug("Got amenities.")
-            sub_al = cursor.fetchall()
-            for a in sub_al:
-                if a[1] == None:
-                    a[1] = human.encode('utf-8')
+            sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
         return al
@@ -828,12 +834,12 @@ class OCitySMap:
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
 	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(osmid)))
-            cursor.execute("""select '%(category)s', name, textcat_all(x || ',' || y || ';')
+            cursor.execute("""select %(category)s, name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, planet_osm_point.osm_id
                                     from planet_osm_point join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
-                                    where amenity = '%(amenity)s' and
+                                    where amenity = %(amenity)s and
                                     case when cities_area_by_osmid.area is null
                                     then
                                       true
@@ -845,7 +851,7 @@ class OCitySMap:
                                     from planet_osm_polygon join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
                                     left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
-                                    where amenity = '%(amenity)s' and
+                                    where amenity = %(amenity)s and
                                     case when cities_area_by_osmid.area is null
                                     then
                                       true
@@ -855,15 +861,12 @@ class OCitySMap:
                               as foo
                               group by amenity, osm_id, name
                               order by amenity, name
-                              """ % dict(category=pgdb.escape_string(cat.encode('utf-8')),
+                              """ % dict(category=sql_escape_unicode(cat),
                                          tmp_tblname=self._map_areas_table_name,
-                                         amenity=amenity,
+                                         amenity=sql_escape_unicode(amenity),
                                          osm_id=osmid))
 	    LOG.debug("Got amenities.")
-            sub_al = cursor.fetchall()
-            for a in sub_al:
-                if a[1] == None:
-                    a[1] = human.encode('utf-8')
+            sub_al = sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
 
@@ -890,16 +893,26 @@ class OCitySMap:
                 LOG.warning('error while opening destination file %s: %s'
                           % (output_filename, ex))
             else:
+                # Try to treat indifferently unicode and str in CSV rows
+                def csv_writerow(row):
+                    _r = []
+                    for e in row:
+                        if type(e) is unicode:
+                            _r.append(e.encode('UTF-8'))
+                        else:
+                            _r.append(e)
+                    return writer.writerow(_r)
+
                 copyright_notice = (u'© 2009 MapOSMatic/ocitysmap authors. '
                                     u'Map data © 2009 OpenStreetMap.org '
-                                    u'and contributors (CC-BY-SA)').encode('UTF-8')
+                                    u'and contributors (CC-BY-SA)')
                 if title is not None:
-                    writer.writerow(['# (UTF-8)', title.encode('UTF-8'), copyright_notice])
+                    csv_writerow(['# (UTF-8)', title, copyright_notice])
                 else:
-                    writer.writerow(['# (UTF-8)', '', copyright_notice])
+                    csv_writerow(['# (UTF-8)', '', copyright_notice])
 
-                for street in self.streets + self.amenities:
-                    writer.writerow([e.encode('UTF-8') for e in street])
+                for entry in self.streets + self.amenities:
+                    csv_writerow(entry)
             return
 
         if file_type in ('png', 'png24'):
