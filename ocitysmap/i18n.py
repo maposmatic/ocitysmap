@@ -271,7 +271,7 @@ class i18n_pt_br_generic(i18n):
                      u"Setor", u"Sítio", u"Travessa", u"Trecho", u"Trevo",
                      u"Vale", u"Vereda", u"Via", u"Viaduto", u"Viela",
                      u"Vila" ]
-    DETERMINANTS = [ u" do", u" da", u" dos", u" das'", u"" ]
+    DETERMINANTS = [ u" do", u" da", u" dos", u" das", u"" ]
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
                                     ("|".join(APPELLATIONS),
