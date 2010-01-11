@@ -384,15 +384,31 @@ class i18n_ru_generic(i18n):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
 class i18n_nl_generic(i18n):
+    #
+    # Dutch streets are often named after people and include a title.
+    # The title will be captured as part of the <prefix>
+    #
     APPELLATIONS = [ u"St.", u"Sint", u"Ptr.", u"Pater",
                      u"Prof.", u"Professor", u"Past.", u"Pastoor",
                      u"Pr.", u"Prins", u"Prinses", u"Gen.", u"Generaal",
                      u"Mgr.", u"Monseigneur", u"Mr.", u"Meester",
                      u"Burg.", u"Burgermeester", u"Dr.", u"Dokter",
-                     u"Ir.", "Ingenieur",
-                     u""]
+                     u"Ir.", u"Ingenieur", u"Ds.", u"Dominee", u"Deken",
+                     u"Drs.",
+                     # counting words before street name,
+                     # e.g. "1e Walstraat" => "Walstraat (1e)"
+                     u"\d+e",
+                     u"" ]
+    #
+    # Surnames in Dutch streets named after people tend to have the middle name
+    # listed after the rest of the surname,
+    # e.g. "Prins van Oranjestraat" => "Oranjestraat (Prins van)"
+    # Likewise, articles are captured as part of the prefix,
+    # e.g. "Den Urling" => "Urling (Den)"
+    #
     DETERMINANTS = [ u"\s?van der", u"\s?van den", u"\s?van de", u"\s?van",
-                     u"\s?Den", u"\s?D'n", u"\s?D'", u"\s?De", u"\s?'T", u"\s?Het" ]
+                     u"\s?Den", u"\s?D'n", u"\s?D'", u"\s?De", u"\s?'T", u"\s?Het",
+                     u"" ]
     
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
@@ -423,9 +439,20 @@ class i18n_nl_generic(i18n):
         return self.language
 
     def user_readable_street(self, name):
+        #
+        # Make sure name actually contains something,
+        # the PREFIX_REGEXP.match fails on zero-length strings
+        #
+        if len(name) == 0:
+            return name
+
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
         matches = self.PREFIX_REGEXP.match(name)
+        #
+        # If no prefix was captured, that's okay. Don't substitute
+        # the name however, "<name> ()" looks silly
+        #
         if matches.group('prefix'):
             name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
         return name
