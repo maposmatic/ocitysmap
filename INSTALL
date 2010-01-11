@@ -76,21 +76,25 @@ are using (here respectively Lenny and Intrepid or Jaunty).
     enough, so we grab a fresh version from SVN (we used revision
     17318).
 
-    a. Grab osm2pgsql code
+    a. If needed, install SVN
+
+    sudo aptitude install subversion
+
+    b. Grab osm2pgsql code
 
     svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
 
-    b. Install the build dependencies
+    c. Install the build dependencies
 
     sudo aptitude install build-essential libxml2-dev libgeos-dev \
                           libpq-dev libbz2-dev proj libbz2-dev
 
-    c. Compile
+    d. Compile
 
     cd osm2pgsql
     make
 
-    d. Install
+    e. Install
 
     Just copy the osm2pgsql binary somewhere in your PATH or link to
     it like:
@@ -176,7 +180,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     a. Download
 
-    svn checkout http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
+    svn co http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
 
     b. Installation of static data
 
@@ -201,22 +205,26 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
 11. Installation of OCitySMap
 
-    a. Grab the sources
+    a. Install Git if needed
+
+    sudo aptitude install git-core
+
+    b. Grab the sources
 
     git clone git://git.savannah.nongnu.org/maposmatic/ocitysmap.git
 
-    b. Initialize OCitySMap SQL stuff
+    c. Initialize OCitySMap SQL stuff
 
     psql -h localhost  \
          -U maposmatic \
          -f /path/to/ocitysmap/ocitysmap-init.sql \
          -d maposmatic
 
-    c. Install dependencies
+    d. Install dependencies
 
     sudo aptitude install python-pygresql python-gdal
 
-    d. Configuration file
+    e. Configuration file
 
     Create a ~/.ocitysmap.conf configuration file, modeled after the
     provided ocitysmap.conf file.
