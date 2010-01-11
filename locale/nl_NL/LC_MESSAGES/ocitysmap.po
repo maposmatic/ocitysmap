@@ -22,8 +22,10 @@ msgstr "Gebedshuizen"
 msgid "Place of worship"
 msgstr "Gebedshuis"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
+#: ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
 #: ocitysmap/street_index.py:287
 msgid "Education"
 msgstr "Onderwijs"
@@ -48,8 +50,10 @@ msgstr "Universiteit"
 msgid "Library"
 msgstr "Bibliotheek"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
+#: ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+#: ocitysmap/street_index.py:290
+#: ocitysmap/street_index.py:291
 msgid "Public buildings"
 msgstr "Openbare gebouwen"
 
@@ -62,7 +66,6 @@ msgid "Post office"
 msgstr "Postkantoor"
 
 #: ocitysmap/street_index.py:290
-#, fuzzy
 msgid "Public building"
 msgstr "Openbare gebouwen"
 
@@ -73,9 +76,9 @@ msgstr "Politie"
 #: ocitysmap/draw_utils.py:150
 #, python-format
 msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr ""
+msgstr "Deze kaart is gereproduceerd op %s en kan incompleet of inaccuraat zijn."
 
 #: ocitysmap/draw_utils.py:155
-msgid ""
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr ""
+msgid "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr "U kunt deze kaart beter maken met uw bijdrage. Zie http://wiki.openstreetmap.org"
+
