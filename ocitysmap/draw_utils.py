@@ -147,12 +147,12 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
 
     ctx.move_to(png.get_width(), png.get_height() * 0.33 + fontheight)
     today = datetime.date.today()
-    gendatetext = "This map has been rendered on %s and may be incomplete or inaccurate." % today.strftime("%d %b %Y")
+    gendatetext = _("This map has been rendered on %s and may be incomplete or inaccurate.") % today.strftime("%d %b %Y")
     textwidth = max(textwidth, ctx.text_extents(gendatetext)[2])
     ctx.show_text(gendatetext)
 
     ctx.move_to(png.get_width(), png.get_height() * 0.66 + fontheight)
-    contribute_text = "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+    contribute_text = _("You can contribute to improve this map. See http://wiki.openstreetmap.org")
     textwidth = max(textwidth, ctx.text_extents(contribute_text)[2])
     ctx.show_text(contribute_text)
 

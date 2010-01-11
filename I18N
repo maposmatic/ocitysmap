@@ -11,10 +11,11 @@ Updating the template file
 This template file is created by extracting all strings from the code
 into a .pot (PO template) file :
 
- xgettext -o ocitysmap.pot -p locale ocitysmap/street_index.py
+ xgettext -o ocitysmap.pot -p locale ocitysmap/street_index.py ocitysmap/draw_utils.py
 
-Currently, only ocitysmap/street_index.py contains translated
-strings. The .pot file is generated in locale/ocitysmap.pot.
+Currently, only ocitysmap/street_index.py and ocitysmap/draw_utils.py
+contain translated strings. The .pot file is generated in
+locale/ocitysmap.pot.
 
 Updating an existing translation
 --------------------------------

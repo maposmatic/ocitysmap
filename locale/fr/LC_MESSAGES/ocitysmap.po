@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-08 18:55+0100\n"
+"POT-Creation-Date: 2010-01-11 22:31+0100\n"
 "PO-Revision-Date: 2010-01-08 18:57+0100\n"
 "Last-Translator: David MENTRÉ <dmentre@linux-france.org>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
@@ -25,10 +25,8 @@ msgstr "Lieux de culte"
 msgid "Place of worship"
 msgstr "Lieu de culte"
 
-#: ocitysmap/street_index.py:283
-#: ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285
-#: ocitysmap/street_index.py:286
+#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
 #: ocitysmap/street_index.py:287
 msgid "Education"
 msgstr "Éducation"
@@ -53,10 +51,8 @@ msgstr "Université"
 msgid "Library"
 msgstr "Bibliothèque"
 
-#: ocitysmap/street_index.py:288
-#: ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290
-#: ocitysmap/street_index.py:291
+#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
+#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
 msgid "Public buildings"
 msgstr "Bâtiments publics"
 
@@ -76,3 +72,13 @@ msgstr "Bâtiment public"
 msgid "Police"
 msgstr "Police"
 
+#: ocitysmap/draw_utils.py:150
+#, python-format
+msgid "This map has been rendered on %s and may be incomplete or inaccurate."
+msgstr "Cette carte a été générée le %s et peut-être incomplète ou inexacte."
+
+#: ocitysmap/draw_utils.py:155
+msgid ""
+"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+"Vous pouvez contribuer à améliorer cette carte. Votre http://wiki.openstreetmap.org"

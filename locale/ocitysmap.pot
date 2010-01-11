@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-08 18:55+0100\n"
+"POT-Creation-Date: 2010-01-11 22:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,4 +69,14 @@ msgstr ""
 
 #: ocitysmap/street_index.py:291
 msgid "Police"
+msgstr ""
+
+#: ocitysmap/draw_utils.py:150
+#, python-format
+msgid "This map has been rendered on %s and may be incomplete or inaccurate."
+msgstr ""
+
+#: ocitysmap/draw_utils.py:155
+msgid ""
+"You can contribute to improve this map. See http://wiki.openstreetmap.org"
 msgstr ""
