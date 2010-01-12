@@ -212,9 +212,81 @@ class i18n_es_generic(i18n):
 
 class i18n_ca_generic(i18n):
 
-    APPELLATIONS = [ u"Avenida", u"Avinguda", u"Calle", u"Camino",
-                     u"Camí", u"Carrer",
-                     u"Carretera", u"Plaza", u"Plaça", u"Ronda" ]
+    APPELLATIONS = [ # Catalan
+                     u"Autopista", u"Autovia", u"Avinguda",
+                     u"Baixada", u"Barranc", u"Barri", u"Barriada",
+                     u"Biblioteca", u"Carrer", u"Carreró", u"Carretera",
+                     u"Cantonada", u"Església", u"Estació", u"Hospital",
+                     u"Monestir", u"Monument", u"Museu", u"Passatge",
+                     u"Passeig", u"Plaça", u"Planta", u"Polígon",
+                     u"Pujada", u"Rambla", u"Ronda", u"Travessera",
+                     u"Travessia", u"Urbanització", u"Via",
+                     u"Avenida", u"Calle", u"Camino", u"Plaza",
+
+                     # Spanish (being distinct from Catalan)
+                     u"Acceso", u"Acequia", u"Alameda", u"Alquería",
+                     u"Andador", u"Angosta", u"Apartamentos", u"Apeadero",
+                     u"Arboleda", u"Arrabal", u"Arroyo", u"Autovía",
+                     u"Avenida", u"Bajada", u"Balneario", u"Banda",
+                     u"Barranco", u"Barranquil", u"Barrio", u"Bloque",
+                     u"Brazal", u"Bulevar", u"Calle", u"Calleja",
+                     u"Callejón", u"Callejuela", u"Callizo", u"Calzada",
+                     u"Camino", u"Camping", u"Cantera", u"Cantina",
+                     u"Cantón", u"Carrera", u"Carrero", u"Carreterín",
+                     u"Carretil", u"Carril", u"Caserío", u"Chalet",
+                     u"Cinturón", u"Circunvalación", u"Cobertizo",
+                     u"Colonia", u"Complejo", u"Conjunto", u"Convento",
+                     u"Cooperativa", u"Corral", u"Corralillo", u"Corredor",
+                     u"Cortijo", u"Costanilla", u"Costera", u"Cuadra",
+                     u"Cuesta", u"Dehesa", u"Demarcación", u"Diagonal",
+                     u"Diseminado", u"Edificio", u"Empresa", u"Entrada",
+                     u"Escalera", u"Escalinata", u"Espalda", u"Estación",
+                     u"Estrada", u"Explanada", u"Extramuros", u"Extrarradio",
+                     u"Fábrica", u"Galería", u"Glorieta", u"Gran Vía",
+                     u"Granja", u"Hipódromo", u"Jardín", u"Ladera",
+                     u"Llanura", u"Malecón", u"Mercado", u"Mirador",
+                     u"Monasterio", u"Muelle", u"Núcleo", u"Palacio",
+                     u"Pantano", u"Paraje", u"Parque", u"Particular",
+                     u"Partida", u"Pasadizo", u"Pasaje", u"Paseo",
+                     u"Paseo marítimo", u"Pasillo", u"Plaza", u"Plazoleta",
+                     u"Plazuela", u"Poblado", u"Polígono", u"Polígono industrial",
+                     u"Portal", u"Pórtico", u"Portillo", u"Prazuela",
+                     u"Prolongación", u"Pueblo", u"Puente", u"Puerta",
+                     u"Puerto", u"Punto kilométrico", u"Rampla",
+                     u"Residencial", u"Ribera", u"Rincón", u"Rinconada",
+                     u"Sanatorio", u"Santuario", u"Sector", u"Sendera",
+                     u"Sendero", u"Subida", u"Torrente", u"Tránsito",
+                     u"Transversal", u"Trasera", u"Travesía", u"Urbanización",
+                     u"Vecindario", u"Vereda", u"Viaducto", u"Viviendas",
+
+                     #French (being distinct from Catalan and Spanish)
+                     u"Allée", u"Allées", u"Avenue", u"Boulevard", u"Carrefour",
+                     u"Chaussée", u"Chemin", u"Cheminement",
+                     u"Cale", u"Cales",
+                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
+                     u"Degré", u"Esplanade", u"Giratoire", u"Hameau",
+                     u"Impasse", u"Liaison", u"Mail", u"Montée",
+                     u"Passage", u"Passerelle", u"Passerelles",
+                     u"Place", u"Placette", u"Pont",
+                     u"Promenade", u"Petite Avenue", u"Petite Rue", u"Quai",
+                     u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
+                     u"Route", u"Rue", u"Ruelle",
+                     u"Square", u"Sentier", u"Sentiers",
+                     u"Traboule", u"Traverse", u"Venelle", u"Villa",
+                     u"Voie", u"Rond-point" ]
+
+    DETERMINANTS = [ # Catalan
+                     u" de", u" de la", u" del", u" dels", u" d'",
+                     u" de l'", u" de sa", u" de son", u" de s'",
+                     u" de ses", u" d'en", u" de na", u" de n'",
+
+                     # Spanish (being distinct from Catalan)
+                     u" de las",  u" de los",
+
+                     # French (being distinct from Catalan and Spanish)
+                     u" du",
+                     u""]
+
 
     DETERMINANTS = [ u" de", u" de la", u" del", u" de las",
                      u" dels", u" de los", u" d'", u" de l'", u"de sa", u"de son", u"de s'",
@@ -515,6 +587,8 @@ language_class_map = {
     'de_CH.UTF-8': i18n_generic,
     'es_ES.UTF-8': i18n_es_generic,
     'ca_ES.UTF-8': i18n_ca_generic,
+    'ca_AD.UTF-8': i18n_ca_generic,
+    'ca_FR.UTF-8': i18n_ca_generic,
     'pt_BR.UTF-8': i18n_pt_br_generic,
     'da_DK.UTF-8': i18n_generic,
     'ar_AE.UTF-8': i18n_ar_generic,
