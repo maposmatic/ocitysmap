@@ -455,6 +455,9 @@ class i18n_nl_generic(i18n):
         # If no prefix was captured, that's okay. Don't substitute
         # the name however, "<name> ()" looks silly
         #
+        if matches == None:
+            return name
+
         if matches.group('prefix'):
             name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
         return name
