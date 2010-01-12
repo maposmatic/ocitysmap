@@ -67,7 +67,7 @@ msgstr "Postkantoor"
 
 #: ocitysmap/street_index.py:290
 msgid "Public building"
-msgstr "Openbare gebouwen"
+msgstr "Openbaar gebouw"
 
 #: ocitysmap/street_index.py:291
 msgid "Police"
