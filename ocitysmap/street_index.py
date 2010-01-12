@@ -684,7 +684,6 @@ class OCitySMap:
         sl = cursor.fetchall()
 
 	LOG.debug("Got %d streets." % len(sl))
-        print "STREETS", repr(sl)
         return self.humanize_street_list(sl)
 
     # Given a list of amenities and their corresponding squares, do some
