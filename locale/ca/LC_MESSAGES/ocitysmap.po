@@ -8,13 +8,14 @@ msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-11 22:31+0100\n"
-"PO-Revision-Date: 2010-01-06 17:42+0100\n"
-"Last-Translator: Joan Montané <joan--sense spam--montane.cat>\n"
+"PO-Revision-Date: 2010-01-12 18:34+0100\n"
+"Last-Translator: Joan Montané <joan---sense spam---montane.cat>\n"
 "Language-Team: Catalan\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Catalan\n"
+"Plural-Forms: n != 1\n"
 
 #: ocitysmap/street_index.py:282
 msgid "Places of worship"
@@ -24,8 +25,10 @@ msgstr "Llocs de culte"
 msgid "Place of worship"
 msgstr "Lloc de culte"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
+#: ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
 #: ocitysmap/street_index.py:287
 msgid "Education"
 msgstr "Educació"
@@ -50,8 +53,10 @@ msgstr "Universitat"
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
+#: ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+#: ocitysmap/street_index.py:290
+#: ocitysmap/street_index.py:291
 msgid "Public buildings"
 msgstr "Edificis públics"
 
@@ -64,9 +69,8 @@ msgid "Post office"
 msgstr "Oficina de correus"
 
 #: ocitysmap/street_index.py:290
-#, fuzzy
 msgid "Public building"
-msgstr "Edificis públics"
+msgstr "Edifici públic"
 
 #: ocitysmap/street_index.py:291
 msgid "Police"
@@ -75,9 +79,9 @@ msgstr "Policia"
 #: ocitysmap/draw_utils.py:150
 #, python-format
 msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr ""
+msgstr "Aquest mapa es va renderitzar el %s i pot ser incomplet o poc precís."
 
 #: ocitysmap/draw_utils.py:155
-msgid ""
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr ""
+msgid "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr "Podeu col·laborar en millorar aquest mapa. Visiteu http://wiki.openstreetmap.org"
+
