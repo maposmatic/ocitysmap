@@ -7,13 +7,13 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-11 22:31+0100\n"
-"PO-Revision-Date: 2010-01-08 16:13+0300\n"
+"PO-Revision-Date: 2010-01-12 17:30+0300\n"
 "Last-Translator: Bassem JARKAS <jarkas@gmail.com>\n"
 "Language-Team: Arabic Translation\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ar\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 "X-Generator: Virtaal 0.5.0\n"
@@ -66,9 +66,8 @@ msgid "Post office"
 msgstr "مكتب بريد"
 
 #: ocitysmap/street_index.py:290
-#, fuzzy
 msgid "Public building"
-msgstr "مباني عامة"
+msgstr "مبنى عام"
 
 #: ocitysmap/street_index.py:291
 msgid "Police"
@@ -77,9 +76,9 @@ msgstr "شرطة"
 #: ocitysmap/draw_utils.py:150
 #, python-format
 msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr ""
+msgstr "تم توليد هذه الخريطة في %s وربما تكون ناقصة أو غير دقيقة."
 
 #: ocitysmap/draw_utils.py:155
 msgid ""
 "You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr ""
+msgstr "بإمكانك المساهمة بتحسين هذه الخريطة. انظر http://wiki.openstreetmap.org"
