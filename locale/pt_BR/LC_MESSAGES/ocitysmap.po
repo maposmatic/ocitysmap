@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-11 22:31+0100\n"
-"PO-Revision-Date: 2010-01-07 10:35+0100\n"
-"Last-Translator: Thomas Petazzoni <thomas.petazzoni@enix.org>\n"
+"PO-Revision-Date: 2010-01-12 09:24-0300\n"
+"Last-Translator: Rodrigo de Avila <rodrigo@avila.net.br>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -23,8 +23,10 @@ msgstr "Locais de adoração"
 msgid "Place of worship"
 msgstr "Local de adoração"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
+#: ocitysmap/street_index.py:283
+#: ocitysmap/street_index.py:284
+#: ocitysmap/street_index.py:285
+#: ocitysmap/street_index.py:286
 #: ocitysmap/street_index.py:287
 msgid "Education"
 msgstr "Educação"
@@ -49,8 +51,10 @@ msgstr "Universidade"
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
+#: ocitysmap/street_index.py:288
+#: ocitysmap/street_index.py:289
+#: ocitysmap/street_index.py:290
+#: ocitysmap/street_index.py:291
 msgid "Public buildings"
 msgstr "Prédios públicos"
 
@@ -63,9 +67,8 @@ msgid "Post office"
 msgstr "Correios"
 
 #: ocitysmap/street_index.py:290
-#, fuzzy
 msgid "Public building"
-msgstr "Prédios públicos"
+msgstr "Prédio público"
 
 #: ocitysmap/street_index.py:291
 msgid "Police"
@@ -74,9 +77,9 @@ msgstr "Polícia"
 #: ocitysmap/draw_utils.py:150
 #, python-format
 msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr ""
+msgstr "Este mapa foi renderizado em %s e pode estar incompleto ou incorreto."
 
 #: ocitysmap/draw_utils.py:155
-msgid ""
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr ""
+msgid "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr "Você pode contribuir para melhorar este mapa. Veja como em http://wiki.openstreetmap.org"
+
