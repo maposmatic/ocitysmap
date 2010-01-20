@@ -8,42 +8,39 @@ Gettext manual.
 Updating the template file
 --------------------------
 
-This template file is created by extracting all strings from the code
-into a .pot (PO template) file :
+Do:
+ ./i18n.py --make-pot
 
- xgettext -o ocitysmap.pot -p locale ocitysmap/street_index.py ocitysmap/draw_utils.py
-
-Currently, only ocitysmap/street_index.py and ocitysmap/draw_utils.py
-contain translated strings. The .pot file is generated in
-locale/ocitysmap.pot.
+The file "locale/ocitysmap.pot" is now up-to-date with the code.
 
 Updating an existing translation
 --------------------------------
 
-Once the template file has been updated, the new version can be merged
-with an older translation using the 'msgmerge' tool:
+Do:
+ ./i18n.py --make-po
 
- msgmerge -U locale/fr/LC_MESSAGES/ocitysmap.po locale/ocitysmap.pot
-
-Then edit the locale/fr/LC_MESSAGES/ocitysmap.po file with poedit or
-another .po file editor.
+Then edit the locale/YOUR_COUNTRY_CODE/LC_MESSAGES/ocitysmap.po file
+with poedit or another .po file editor.
 
 Tip: refer to http://wiki.openstreetmap.org/wiki/Map_Features for
 official translations of several words used in OpenStreetMap.
 
-Create a translation for a new language
----------------------------------------
-
-This must be done using the 'msginit' tool.
-
- * To build .pot file
-
-   ocitysmap$ pygettext -d ocitysmap -p locale ocitysmap/street_index.py
-
- * Make the .po file for your language. Look at Map_Features in your
-   language to find correct transaltions:
-
 Compiling the message file
 --------------------------
 
- ocitysmap$ msgfmt -o locale/fr/LC_MESSAGES/ocitysmap.mo locale/fr/LC_MESSAGES/ocitysmap.po
+Do:
+ ./i18n.py --compile-mo
+
+Create a translation for a new language
+---------------------------------------
+
+Do:
+ ./i18n.py --new-language=LANGUAGE_CODE
+
+Where LANGUAGE_CODE is like fr_FR, it, pt_BR, ...
+
+Then edit the locale/LANGUAGE_CODE/LC_MESSAGES/ocitysmap.po file with
+poedit or another .po file editor.
+
+Tip: refer to http://wiki.openstreetmap.org/wiki/Map_Features for
+official translations of several words used in OpenStreetMap.
