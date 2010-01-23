@@ -134,8 +134,9 @@ def main():
             return 1
 
     try:
-        renderer = OCitySMap(options.config_file, city_name, boundingbox,
-                             osmid, options.language)
+        prefix = 'ocitysmap_render_%d' % os.getpid()
+        renderer = OCitySMap(options.config_file, prefix, city_name,
+                             boundingbox, osmid, options.language)
     except BaseOCitySMapError, e:
         sys.stderr.write('ERROR: %s\n' % e)
         return 1

@@ -235,12 +235,13 @@ class IndexPageGenerator:
                 x += colwidth
 
 class OCitySMap:
-    def __init__(self, config_file=None, city_name=None, boundingbox=None,
-                 osmid=None, language=None):
+    def __init__(self, config_file=None, map_areas_prefix=None,
+                 city_name=None, boundingbox=None, osmid=None, language=None):
         """Creates a new OCitySMap renderer instance for the given city.
 
         Args:
-            config_file: location of the config file
+            config_file (string): location of the config file
+            map_areas_prefix (string): map_areas table name prefix
             city_name (string): The name of the city we're created the map of.
             boundingbox (BoundingBox): An optional BoundingBox object defining
                 the city's bounding box. If not given, OCitySMap will try to
@@ -279,10 +280,9 @@ class OCitySMap:
         self.i18n = i18n.install_translation(language, locale_path)
         LOG.info('Language: ' + self.i18n.language_code())
 
-        self._map_areas_table_name = "map_areas"
-        if self.parser.has_option('ocitysmap', 'map_areas_table_name'):
-            self._map_areas_table_name = self.parser.get('ocitysmap',
-                                                         'map_areas_table_name')
+        # Create the map_areas table name string using the provided prefix
+        map_areas_prefix = map_areas_prefix or ''
+        self._map_areas_table_name = '%smap_areas' % map_areas_prefix
 
         self.SELECTED_AMENITIES = [
             (_(u"Places of worship"), "place_of_worship", _(u"Place of worship")),
@@ -326,24 +326,29 @@ class OCitySMap:
 
         self.griddesc = grid.GridDescriptor(self.boundingbox, db)
 
-        self._gen_map_areas(db)
+        try:
+            self._gen_map_areas(db)
 
-        if self.osmid:
-            self.streets = self.get_streets_by_osmid(db, self.osmid)
-            self.amenities = self.get_amenities_by_osmid(db, self.osmid)
-        elif self.city_name:
-            self.streets = self.get_streets_by_name(db, self.city_name)
-            self.amenities = self.get_amenities_by_name(db, self.city_name)
-        else:
-            self.streets = self.get_streets_by_name(db, None)
-            self.amenities = self.get_amenities_by_name(db, None)
+            if self.osmid:
+                self.streets = self.get_streets_by_osmid(db, self.osmid)
+                self.amenities = self.get_amenities_by_osmid(db, self.osmid)
+            elif self.city_name:
+                self.streets = self.get_streets_by_name(db, self.city_name)
+                self.amenities = self.get_amenities_by_name(db, self.city_name)
+            else:
+                self.streets = self.get_streets_by_name(db, None)
+                self.amenities = self.get_amenities_by_name(db, None)
 
-        if self.city_name:
-            self.contour = self.get_city_contour_by_name(db, self.city_name)
-        elif self.osmid:
-            self.contour = self.get_city_contour_by_osmid(db, self.osmid)
-        else:
-            self.contour = None
+            if self.city_name:
+                self.contour = self.get_city_contour_by_name(db, self.city_name)
+            elif self.osmid:
+                self.contour = self.get_city_contour_by_osmid(db, self.osmid)
+            else:
+                self.contour = None
+        finally:
+            LOG.debug('Restoring database state...')
+            db.rollback()
+            self._del_map_areas(db)
 
         LOG.info('City bounding box is %s.' % str(self.boundingbox))
 
@@ -493,9 +498,13 @@ class OCitySMap:
         LOG.debug('Call gen_map_areas table: %s...'
                   % self._map_areas_table_name)
 
-        LOG.debug('drop...')
+        # Make sure our map_areas table does not exist already. We don't call
+        # _del_map_areas here because we want this to be part of the local
+        # DB transaction.
+        LOG.debug('drop %s...' % self._map_areas_table_name)
         cursor.execute("drop table if exists %s" % self._map_areas_table_name)
-        LOG.debug('create table...')
+
+        LOG.debug('create table %s...' % self._map_areas_table_name)
         cursor.execute("create table %s (x integer, y integer)"
                        % self._map_areas_table_name)
         LOG.debug('addgeometrycolumn...')
@@ -522,6 +531,15 @@ class OCitySMap:
         db.commit()
         LOG.debug('Done with gen_map_areas for %s.'
                   % self._map_areas_table_name)
+
+    def _del_map_areas(self, db):
+        """Destroys the map_areas table used by this OCitySMap instance
+        (parametrized by its prefix)."""
+
+        cursor = db.cursor()
+        LOG.debug('drop %s...' % self._map_areas_table_name)
+        cursor.execute("drop table if exists %s" % self._map_areas_table_name)
+        db.commit()
 
     # Given a list of street and their corresponding squares, do some
     # cleanup and pass it through the internationalization layer to
