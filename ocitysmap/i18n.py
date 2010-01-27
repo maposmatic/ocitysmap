@@ -73,7 +73,7 @@ class i18n_fr_generic(i18n):
                      u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
                      u"Degré", u"Esplanade", u"Giratoire", u"Hameau",
                      u"Impasse", u"Liaison", u"Mail", u"Montée",
-                     u"Passage", u"Passerelle", u"Passerelles",
+                     u"Parc", u"Passage", u"Passerelle", u"Passerelles",
                      u"Place", u"Placette", u"Pont",
                      u"Promenade", u"Petite Avenue", u"Petite Rue", u"Quai",
                      u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
