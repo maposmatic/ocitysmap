@@ -1,0 +1,85 @@
+# Copyright (C) 2010 Maposmatic
+# This file is licensed under the same terms as the ocitysmap package.
+#
+# Łukasz Jernaś <deejay1@srem.org>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2010-02-08 10:18+CET\n"
+"PO-Revision-Date: 2010-02-08 10:28+0100\n"
+"Last-Translator: Łukasz Jernaś <deejay1@srem.org>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+
+#: ocitysmap/draw_utils.py:150
+msgid "This map has been rendered on %s and may be incomplete or inaccurate."
+msgstr ""
+"Mapa ta została wygenerowana dnia %s i może być niekompletna, bądź niedokładka."
+
+#: ocitysmap/draw_utils.py:155
+msgid "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+"Aby pomóc ulepszyć tą mapę, zajrzyj na stronę internetową http://wiki.openstreetmap.org"
+
+#: ocitysmap/street_index.py:288
+msgid "Place of worship"
+msgstr "Miejsce kultu"
+
+#: ocitysmap/street_index.py:288
+msgid "Places of worship"
+msgstr "Miejsca kultu"
+
+#: ocitysmap/street_index.py:289
+msgid "Kindergarten"
+msgstr "Przedszkole"
+
+#: ocitysmap/street_index.py:289 ocitysmap/street_index.py:290
+#: ocitysmap/street_index.py:291 ocitysmap/street_index.py:292
+#: ocitysmap/street_index.py:293
+msgid "Education"
+msgstr "Edukacja"
+
+#: ocitysmap/street_index.py:290
+msgid "School"
+msgstr "Szkoła"
+
+#: ocitysmap/street_index.py:291
+msgid "College"
+msgstr "Szkoła wyższa"
+
+#: ocitysmap/street_index.py:292
+msgid "University"
+msgstr "Uniwersytet"
+
+#: ocitysmap/street_index.py:293
+msgid "Library"
+msgstr "Biblioteka"
+
+#: ocitysmap/street_index.py:294
+msgid "Town hall"
+msgstr "Ratusz"
+
+#: ocitysmap/street_index.py:294 ocitysmap/street_index.py:295
+#: ocitysmap/street_index.py:296 ocitysmap/street_index.py:297
+msgid "Public buildings"
+msgstr "Budynki użyteczności publicznej"
+
+#: ocitysmap/street_index.py:295
+msgid "Post office"
+msgstr "Poczta"
+
+#: ocitysmap/street_index.py:296
+msgid "Public building"
+msgstr "Budynek użyteczności publicznej"
+
+#: ocitysmap/street_index.py:297
+msgid "Police"
+msgstr "Policja"
+
+
