@@ -51,7 +51,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # SQL string escaping routine
 sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
-LOG = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('maposmatic')
 STATEMENT_TIMEOUT_MINUTES = 18
 
 class BaseOCitySMapError(Exception):
