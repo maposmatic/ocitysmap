@@ -21,14 +21,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging, traceback
-import sys, os, tempfile, psycopg2, re, math, cairo, locale, gzip, csv, pango, pangocairo
+import cairo
 import ConfigParser
+import csv
+import gzip
+import locale
+import logging
+import math
+import os
+import pango
+import pangocairo
+import psycopg2
+import re
+import sys
+import tempfile
+import traceback
+
+import grid
 import i18n
+import map_canvas
+import utils
+
 from coords import BoundingBox
-
-import map_canvas, grid, utils
-
 from draw_utils import enclose_in_frame
 
 import psycopg2.extensions
