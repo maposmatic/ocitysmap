@@ -222,7 +222,12 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     d. Install dependencies
 
-    sudo aptitude install python-psycopg2 python-gdal
+    sudo aptitude install python-psycopg2 python-gdal \
+                          python-gtk2 python-cairo
+
+    Note that python-gtk2 is not needed for any graphical interface,
+    but because it contains Pango and PangoCairo that we use to render
+    text on the map.
 
     e. Configuration file
 
