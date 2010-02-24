@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import cairo, logging
+import cairo, logging, pango, pangocairo
 import datetime
 
 l = logging.getLogger('ocitysmap')
@@ -66,27 +66,49 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
 
     # Draw the title
     ctx.save()
-    ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
-                         cairo.FONT_WEIGHT_NORMAL)
-    ctx.set_font_size(out_margin)
-    _, _, width, _, _, _ = ctx.text_extents(title)
+
+    pc = pangocairo.CairoContext(ctx)
+    layout = pc.create_layout()
+    fd = pango.FontDescription("DejaVu")
+
+    # Do a first test with a font size of out_margin
+    fd.set_size(out_margin * pango.SCALE)
+    layout.set_font_description(fd)
+    layout.set_text(title)
+    width = layout.get_size()[0] / pango.SCALE
+    height = layout.get_size()[1] / pango.SCALE
+
+    # Compute the ratio to be applied on the font size to make the
+    # text fit in the available space
+    if height > out_margin:
+        hratio = float(out_margin) / height
+    else:
+        hratio = 1.
+
     max_width = indest_w * .8
     if width > max_width:
-        ratio = max_width / width
+        wratio = max_width / width
     else:
-	ratio = 1.
-    ctx.set_font_size(out_margin * ratio)
-    ctx.move_to(out_margin * 2., out_margin * (.5 + .35 * ratio))
-    xlat1, _ = ctx.get_current_point()
-    ctx.show_text(title)
-    xlat2, _ = ctx.get_current_point()
-    xlat = xlat2 - xlat1
+        wratio = 1.
+
+    ratio = min(wratio, hratio)
+
+    # Render the text at the appropriate size and location
+    fd.set_size(int(out_margin * ratio * pango.SCALE))
+    layout.set_font_description(fd)
+    width = layout.get_size()[0] / pango.SCALE
+    f = layout.get_context().load_font(fd)
+    fm = f.get_metrics()
+    ascent = fm.get_ascent() / pango.SCALE
+    ctx.move_to(out_margin * 2., out_margin * (.5 + .35 * ratio) - ascent)
+    pc.show_layout(layout)
+
     ctx.restore()
 
     # Draw the rounded rectangle
     ctx.save()
     ctx.set_line_width(max(out_margin/9., 2.))
-    ctx.move_to (out_margin * 2 + xlat + out_margin/2., out_margin / 2.)
+    ctx.move_to (out_margin * 2 + width + out_margin/2., out_margin / 2.)
     ctx.line_to (outsurf_w - out_margin, out_margin / 2.)
     ctx.rel_curve_to(0,0, out_margin/2., 0, out_margin/2., out_margin/2.)
     ctx.rel_line_to (0, outsurf_h - 2*out_margin)
