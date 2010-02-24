@@ -148,35 +148,46 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
     ctx.move_to(0,0)
     xlat1, ylat1 = ctx.get_current_point()
 
-    ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
-                         cairo.FONT_WEIGHT_NORMAL)
-    ctx.set_font_size(14)
-
-    fontheight = ctx.font_extents()[2]
-
     # Draw the png in the buffer
     if png:
         ctx.set_source_surface(png)
         ctx.paint()
-        ctx.rel_move_to(png.get_width(), fontheight)
+        ctx.rel_move_to(png.get_width(), 0)
     else:
         ctx.rel_move_to(0, font_size*1.5)
 
     # Write the notice in the buffer
-    textwidth = ctx.text_extents(copyright_notice)[2]
-    ctx.set_source_rgb (0, 0, 0)
-    ctx.show_text(copyright_notice)
+    ctx.set_source_rgb(0, 0, 0)
 
-    ctx.move_to(png.get_width(), png.get_height() * 0.33 + fontheight)
+    # Set up a layout
+    pc = pangocairo.CairoContext(ctx)
+    fd = pango.FontDescription("DejaVu")
+    fd.set_size(14 * pango.SCALE)
+    layout = pc.create_layout()
+    layout.set_font_description(fd)
+
+    # Render copyright notice
+    layout.set_text(copyright_notice)
+    textwidth = layout.get_size()[0] / pango.SCALE
+    pc.show_layout(layout)
+
+    ctx.move_to(png.get_width(), png.get_height() * 0.33)
+
+    # Render date of rendering
     today = datetime.date.today()
     gendatetext = _("This map has been rendered on %s and may be incomplete or inaccurate.") % today.strftime("%d %b %Y")
-    textwidth = max(textwidth, ctx.text_extents(gendatetext)[2])
-    ctx.show_text(gendatetext)
 
-    ctx.move_to(png.get_width(), png.get_height() * 0.66 + fontheight)
+    layout.set_text(gendatetext)
+    textwidth = max(textwidth, layout.get_size()[0] / pango.SCALE)
+    pc.show_layout(layout)
+
+    # Render contribution text
+    ctx.move_to(png.get_width(), png.get_height() * 0.66)
     contribute_text = _("You can contribute to improve this map. See http://wiki.openstreetmap.org")
-    textwidth = max(textwidth, ctx.text_extents(contribute_text)[2])
-    ctx.show_text(contribute_text)
+
+    layout.set_text(contribute_text)
+    textwidth = max(textwidth, layout.get_size()[0] / pango.SCALE)
+    pc.show_layout(layout)
 
     # Determine the size of the virtual buffer
     if png:
@@ -184,8 +195,7 @@ def add_logo(ctx, paperwidth, paperheight, logo_path,
     else:
         vbufheight = font_size * 2.5
 
-    vbufwidth = png.get_width() + max(ctx.text_extents(copyright_notice)[2],
-                                      ctx.text_extents(gendatetext)[2])
+    vbufwidth = png.get_width() + textwidth
 
     grp = ctx.pop_group()
     # Virtual buffer done.
