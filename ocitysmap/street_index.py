@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging, traceback
-import sys, os, tempfile, psycopg2, re, math, cairo, locale, gzip, csv
+import sys, os, tempfile, psycopg2, re, math, cairo, locale, gzip, csv, pango, pangocairo
 import ConfigParser
 import i18n
 from coords import BoundingBox
@@ -101,31 +101,42 @@ class IndexPageGenerator:
         self.streets = streets
         self.i18n = i18n
 
-    def _get_font_parameters(self, cr, fontsize):
-        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL,
-                            cairo.FONT_WEIGHT_NORMAL)
-        cr.set_font_size(fontsize * 1.2)
-        heading_fascent, heading_fdescent, heading_fheight = cr.font_extents()[:3]
+    def _street_label_width(self, street, layout):
+        (firstletter, label, location) = street
+        layout.set_text(label)
+        width = layout.get_size()[0] / pango.SCALE
+        layout.set_text(location)
+        width += layout.get_size()[0] / pango.SCALE
+        return width
 
-        cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        cr.set_font_size(fontsize)
-        fascent, fdescent, fheight, fxadvance, fyadvance = cr.font_extents()
+    def _get_font_parameters(self, cr, pc, fontsize):
+        layout = pc.create_layout()
+        fd = pango.FontDescription("DejaVu")
+        fd.set_size(int(fontsize * 1.2 * pango.SCALE))
+        f = layout.get_context().load_font(fd)
+        heading_fm = f.get_metrics()
 
-        em = cr.text_extents("m")[2]
-        widths = map(lambda x: cr.text_extents(x[1])[2] + cr.text_extents(x[2])[2], self.streets)
+        fd.set_size(fontsize * pango.SCALE)
+        layout.set_font_description(fd)
+        f = layout.get_context().load_font(fd)
+        fm = f.get_metrics()
+
+        em = fm.get_approximate_char_width() / pango.SCALE
+        widths = map(lambda x: self._street_label_width(x, layout), self.streets)
         maxwidth = max(widths)
         colwidth = maxwidth + 3 * em
 
         return {
             'colwidth' : colwidth,
-            'heading_fascent' : heading_fascent,
-            'heading_fheight' : heading_fheight,
-            'fheight' : fheight,
+            'heading_fascent': heading_fm.get_ascent() / pango.SCALE,
+            'heading_fheight' : (heading_fm.get_ascent() + heading_fm.get_descent()) / pango.SCALE,
+            'fascent': fm.get_ascent() / pango.SCALE,
+            'fheight' : (fm.get_ascent() + fm.get_descent()) / pango.SCALE,
             'em' : em,
             }
 
-    def _fits_in_page(self, cr, paperwidth, paperheight, fontsize):
-        fp = self._get_font_parameters(cr, fontsize)
+    def _fits_in_page(self, cr, pc, paperwidth, paperheight, fontsize):
+        fp = self._get_font_parameters(cr, pc, fontsize)
 
         prevletter = u''
         heading_letter_count = 0
@@ -144,17 +155,17 @@ class IndexPageGenerator:
         colheight /= paperncols
         return colheight < paperheight
 
-    def _compute_font_size(self, cr, paperwidth, paperheight):
+    def _compute_font_size(self, cr, pc, paperwidth, paperheight):
         minfontsize = 6
         maxfontsize = 128
 
-        if not self._fits_in_page(cr, paperwidth, paperheight, minfontsize):
+        if not self._fits_in_page(cr, pc, paperwidth, paperheight, minfontsize):
             print "Index does not fit even with font size %d" % minfontsize
             sys.exit(1)
 
         while maxfontsize - minfontsize != 1:
             meanfontsize = int((maxfontsize + minfontsize) / 2)
-            if self._fits_in_page(cr, paperwidth, paperheight, meanfontsize):
+            if self._fits_in_page(cr, pc, paperwidth, paperheight, meanfontsize):
                 minfontsize = meanfontsize
             else:
                 maxfontsize = meanfontsize
@@ -162,16 +173,19 @@ class IndexPageGenerator:
         return minfontsize
 
     def render(self, cr, paperwidth, paperheight):
+        pc = pangocairo.CairoContext(cr)
+
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
         cr.set_source_rgb(0.0, 0.0, 0.0)
 
-        fontsize = self._compute_font_size(cr, paperwidth, paperheight)
+        fontsize = self._compute_font_size(cr, pc, paperwidth, paperheight)
 
-        fp = self._get_font_parameters(cr, fontsize)
+        fp = self._get_font_parameters(cr, pc, fontsize)
         heading_fheight = fp['heading_fheight']
         heading_fascent = fp['heading_fascent']
         fheight = fp['fheight']
+        fascent = fp['fascent']
         colwidth = fp['colwidth']
         em = fp['em']
 
@@ -190,6 +204,7 @@ class IndexPageGenerator:
                 if y + heading_fheight + fheight > paperheight:
                     y = 0
                     x += colwidth
+
                 # Reserve height for the heading letter label
                 y += heading_fheight
 
@@ -200,26 +215,36 @@ class IndexPageGenerator:
                 cr.set_source_rgb(0, 0, 0)
 
                 # Draw the heading letter label
-                cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-                cr.set_font_size(fontsize * 1.2)
-                w = cr.text_extents(firstletter)[2]
+                layout = pc.create_layout()
+                fd = pango.FontDescription("DejaVu")
+                fd.set_size(int(fontsize * 1.2 * pango.SCALE))
+                layout.set_font_description(fd)
+                layout.set_text(firstletter)
+                w = layout.get_size()[0] / pango.SCALE
                 indent = (colwidth - 2 * em - w) / 2
-                cr.move_to(x + indent, y)
-                cr.show_text(firstletter)
+                cr.move_to(x + indent, y - heading_fascent)
+                pc.show_layout(layout)
                 prevletter = firstletter
 
             # Reserve height for the street
             y += fheight
-            cr.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-            cr.set_font_size(fontsize)
+            layout = pc.create_layout()
+            fd = pango.FontDescription("DejaVu")
+            fd.set_size(int(fontsize * pango.SCALE))
+            layout.set_font_description(fd)
+
             # Compute length of the dashed line between the street name and
             # the squares label
-            street_name_width = cr.text_extents(street[1])[4]
-            squares_label_width = cr.text_extents(street[2])[2]
+            layout.set_text(street[1])
+            street_name_width = layout.get_size()[0] / pango.SCALE
+            layout.set_text(street[2])
+            squares_label_width = layout.get_size()[0] / pango.SCALE
             line_width = colwidth - street_name_width - squares_label_width - 2 * em
+
             # Draw street name
-            cr.move_to(x, y)
-            cr.show_text(street[1])
+            cr.move_to(x, y - fascent)
+            layout.set_text(street[1])
+            pc.show_layout(layout)
             # Draw dashed line
             strokewidth = max(fontsize / 12, 1)
             cr.set_line_width(strokewidth)
@@ -228,8 +253,10 @@ class IndexPageGenerator:
             cr.rel_line_to(line_width, 0)
             cr.stroke()
             # Draw squares label
-            cr.move_to(x + colwidth - em - squares_label_width, y)
-            cr.show_text(street[2])
+            cr.move_to(x + colwidth - em - squares_label_width, y - fascent)
+            layout.set_text(street[2])
+            pc.show_layout(layout)
+
             if y + fheight > paperheight:
                 y = 0
                 x += colwidth
