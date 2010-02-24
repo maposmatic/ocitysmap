@@ -43,6 +43,9 @@ class i18n:
     def first_letter_equal(self, a, b):
         pass
 
+    def isrtl(self):
+        return False
+
 class i18n_template_code_CODE(i18n):
     def __init__(self, language, locale_path):
         """Install the _() function for the chosen locale other
@@ -64,6 +67,9 @@ class i18n_template_code_CODE(i18n):
         """returns True if the letters a and b are equal in the map index,
            e.g. É and E are equals in French map index"""
         return a == b
+
+    def isrtl(self):
+        return False
 
 
 class i18n_fr_generic(i18n):
@@ -421,6 +427,9 @@ class i18n_ar_generic(i18n):
 
     def first_letter_equal(self, a, b):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+
+    def isrtl(self):
+        return True
 
 class i18n_ru_generic(i18n):
     APPELLATIONS = [ u"ул", u"бул", u"пер", u"пр", u"улица", u"бульвар", u"проезд",

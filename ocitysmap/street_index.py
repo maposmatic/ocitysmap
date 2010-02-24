@@ -193,7 +193,12 @@ class IndexPageGenerator:
         colwidth += (remaining / int(paperwidth / colwidth))
 
         y = 0
-        x = em
+
+        if self.i18n.isrtl():
+            x = paperwidth - colwidth + em
+        else:
+            x = em
+
         prevletter = u''
         for street in self.streets:
             # Letter label
@@ -203,7 +208,11 @@ class IndexPageGenerator:
                 # end of a column
                 if y + heading_fheight + fheight > paperheight:
                     y = 0
-                    x += colwidth
+
+                    if self.i18n.isrtl():
+                        x -= colwidth
+                    else:
+                        x += colwidth
 
                 # Reserve height for the heading letter label
                 y += heading_fheight
@@ -241,25 +250,46 @@ class IndexPageGenerator:
             squares_label_width = layout.get_size()[0] / pango.SCALE
             line_width = colwidth - street_name_width - squares_label_width - 2 * em
 
-            # Draw street name
-            cr.move_to(x, y - fascent)
-            layout.set_text(street[1])
-            pc.show_layout(layout)
-            # Draw dashed line
-            strokewidth = max(fontsize / 12, 1)
-            cr.set_line_width(strokewidth)
-            cr.set_dash([ strokewidth, strokewidth * 2 ])
-            cr.move_to(x + street_name_width + em / 2, y - 0.1 * em)
-            cr.rel_line_to(line_width, 0)
-            cr.stroke()
-            # Draw squares label
-            cr.move_to(x + colwidth - em - squares_label_width, y - fascent)
-            layout.set_text(street[2])
-            pc.show_layout(layout)
+            if self.i18n.isrtl():
+                # Draw squares label
+                cr.move_to(x, y - fascent)
+                layout.set_text(street[2])
+                pc.show_layout(layout)
+                # Draw dashed line
+                strokewidth = max(fontsize / 12, 1)
+                cr.set_line_width(strokewidth)
+                cr.set_dash([ strokewidth, strokewidth * 2 ])
+                cr.move_to(x + squares_label_width + em / 2, y - 0.1 * em)
+                cr.rel_line_to(line_width, 0)
+                cr.stroke()
+                # Draw street label
+                cr.move_to(x + colwidth - em - street_name_width, y - fascent)
+                layout.set_text(street[1])
+                pc.show_layout(layout)
+            else:
+                # Draw street name
+                cr.move_to(x, y - fascent)
+                layout.set_text(street[1])
+                pc.show_layout(layout)
+                # Draw dashed line
+                strokewidth = max(fontsize / 12, 1)
+                cr.set_line_width(strokewidth)
+                cr.set_dash([ strokewidth, strokewidth * 2 ])
+                cr.move_to(x + street_name_width + em / 2, y - 0.1 * em)
+                cr.rel_line_to(line_width, 0)
+                cr.stroke()
+                # Draw squares label
+                cr.move_to(x + colwidth - em - squares_label_width, y - fascent)
+                layout.set_text(street[2])
+                pc.show_layout(layout)
 
             if y + fheight > paperheight:
                 y = 0
-                x += colwidth
+
+                if self.i18n.isrtl():
+                    x -= colwidth
+                else:
+                    x += colwidth
 
 class OCitySMap:
     def __init__(self, config_file=None, map_areas_prefix=None,
