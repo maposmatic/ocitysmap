@@ -333,23 +333,25 @@ class OCitySMap:
         if self.city_name:
             LOG.info('OCitySMap renderer for %s.' % self.city_name)
         elif self.boundingbox:
-            LOG.info('OCitySMap renderer for %s.' % self.boundingbox)
+            LOG.info('OCitySMap renderer for bounding box %s.' % self.boundingbox)
         else:
-            LOG.info('OCitySMap renderer for %s.' % self.osmid)
+            LOG.info('OCitySMap renderer for OSMID %s.' % self.osmid)
 
-        LOG.info('Reading config file.')
-        self.parser = ConfigParser.RawConfigParser()
+
         if config_file:
             config_files = [config_file]
         else:
             config_files = ['/etc/ocitysmap.conf',
                             os.getenv('HOME') + '/.ocitysmap.conf']
+
+        LOG.info('Reading configuration from %s...' % ', '.join(config_files))
+        self.parser = ConfigParser.RawConfigParser()
         if not self.parser.read(config_files):
             raise IOError, 'Failed to load the config file'
 
         locale_path = self.parser.get('ocitysmap', 'locale_path')
         self.i18n = i18n.install_translation(language, locale_path)
-        LOG.info('Language: ' + self.i18n.language_code())
+        LOG.info('Rendering language: ' + self.i18n.language_code())
 
         # Create the map_areas table name string using the provided prefix
         map_areas_prefix = map_areas_prefix or ''
@@ -387,7 +389,7 @@ class OCitySMap:
         cursor.execute("set session statement_timeout=%d;"
                        % (STATEMENT_TIMEOUT_MINUTES*60*1000))
         cursor.execute("show statement_timeout;")
-        LOG.info("Configured statement timeout: %s" % cursor.fetchall()[0][0])
+        LOG.debug("Configured statement timeout: %s" % cursor.fetchall()[0][0])
         del cursor
 
         if self.city_name:
@@ -434,7 +436,7 @@ class OCitySMap:
         the given city.
         """
 
-        LOG.info('Looking for bounding box around %s...' % name)
+        LOG.info("Looking for rendering bounding box around %s..." % name)
 
         cursor = db.cursor()
         cursor.execute("""select osm_id, st_astext(st_transform(st_envelope(way), 4002))
@@ -445,10 +447,10 @@ class OCitySMap:
                            sql_escape_unicode(name))
         records = cursor.fetchall()
         if not records:
-            raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % (repr(name))
+            raise UnsufficientDataError, "Wrong city name (%s) or missing administrative boundary in database!" % repr(name)
 
         osm_id, wkt = records[0]
-        LOG.info("osm_id for %s is: %s, bbox: %s" % (repr(name), osm_id, wkt))
+        LOG.info("Found matching OSMID %s with bounding box %s." % (osm_id, wkt))
         return BoundingBox.parse_wkt(wkt)
 
     def find_bounding_box_by_osmid(self, db, osmid):
@@ -461,7 +463,7 @@ class OCitySMap:
         the given city.
         """
 
-        LOG.info('Looking for bounding box around %s...' % osmid)
+        LOG.info('Looking for rendering bounding box around OSMID %s...' % osmid)
 
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
@@ -470,9 +472,9 @@ class OCitySMap:
                            osmid)
         records = cursor.fetchall()
         if not records:
-            raise UnsufficientDataError, "Wrong OSM id (%s) !" % (repr(osmid))
+            raise UnsufficientDataError, "OSMID %s not found in the database!" % repr(osmid)
 
-        LOG.info("bbox is: %s" % records[0][0])
+        LOG.info("Found bounding box: %s" % records[0][0])
         return BoundingBox.parse_wkt(records[0][0])
 
     _regexp_contour = re.compile('^POLYGON\(\(([^)]*)\),\(([^)]*)\)\)$')
@@ -544,7 +546,7 @@ class OCitySMap:
         return self.parse_city_contour(contour)
 
     def get_city_contour_by_osmid(self, db, osmid):
-        LOG.info('Looking for contour around osm id %s...' % repr(osmid))
+        LOG.info('Looking for contour around OSMID %s...' % repr(osmid))
         cursor = db.cursor()
         cursor.execute("""select st_astext(st_transform(
                                     st_difference(st_envelope(way),
@@ -566,8 +568,8 @@ class OCitySMap:
     # be performed in a single query
     def _gen_map_areas(self, db):
         cursor = db.cursor()
-        LOG.debug('Call gen_map_areas table: %s...'
-                  % self._map_areas_table_name)
+        LOG.info("Generating map grid in table %s..."
+                 % self._map_areas_table_name)
 
         # Make sure our map_areas table does not exist already. We don't call
         # _del_map_areas here because we want this to be part of the local
@@ -645,7 +647,6 @@ class OCitySMap:
         return sl
 
     def get_streets_by_name(self, db, city):
-
         """Get the list of streets in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
@@ -655,7 +656,7 @@ class OCitySMap:
         """
 
         cursor = db.cursor()
-	LOG.info("Getting streets for %s..." % repr(city))
+        LOG.info("Getting streets...")
 
         # pgdb.escape_string() doesn't like None strings, and when the
         # city is not passed, we don't want to match any existing
@@ -711,11 +712,10 @@ class OCitySMap:
                             sql_escape_unicode(city)))
 
         sl = cursor.fetchall()
-	LOG.debug("Got %d streets." % len(sl))
+        LOG.debug("Got %d streets." % len(sl))
         return self.humanize_street_list(sl)
 
     def get_streets_by_osmid(self, db, osmid):
-
         """Get the list of streets in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
@@ -725,7 +725,7 @@ class OCitySMap:
         """
 
         cursor = db.cursor()
-	LOG.info("Getting streets for %s..." % osmid)
+        LOG.info("Getting streets...")
 
         # The inner select query creates the list of (street, square)
         # for all the squares in the temporary map_areas table. The
@@ -771,8 +771,7 @@ class OCitySMap:
                            (self._map_areas_table_name,osmid))
 
         sl = cursor.fetchall()
-
-	LOG.debug("Got %d streets." % len(sl))
+        LOG.debug("Got %d streets." % len(sl))
         return self.humanize_street_list(sl)
 
     # Given a list of amenities and their corresponding squares, do some
@@ -791,13 +790,12 @@ class OCitySMap:
         def _humanize_amenity_label(amenity):
             return (amenity[0], amenity[1],
                     _user_readable_label(amenity[2]))
-        
+
         am = map(_humanize_amenity_label, am)
 
         return am
 
     def get_amenities_by_name(self, db, city):
-
         """Get the list of amenities in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         amenity, the list of squares that it intersects.
@@ -844,7 +842,7 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
-	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(city)))
+            LOG.info("Getting amenities: %s..." % amenity)
             cursor.execute("""select %(category)s, name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, osm_id
                                     from planet_osm_point join %(tmp_tblname)s
@@ -876,14 +874,13 @@ class OCitySMap:
                                          tmp_tblname=self._map_areas_table_name,
                                          amenity=sql_escape_unicode(amenity),
                                          city=sql_escape_unicode(city)))
-	    LOG.debug("Got amenities.")
+            LOG.debug("Got amenities: %s." % amenity)
             sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
         return al
 
     def get_amenities_by_osmid(self, db, osmid):
-
         """Get the list of amenities in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         amenity, the list of squares that it intersects.
@@ -921,7 +918,7 @@ class OCitySMap:
         # See ocitysmap-init.sql for details
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
-	    LOG.info("Get amenities %s for %s..." % (repr(amenity), repr(osmid)))
+            LOG.info("Getting amenities: %s..." % amenity)
             cursor.execute("""select %(category)s, name, textcat_all(x || ',' || y || ';')
                               from (select distinct amenity, name, x, y, planet_osm_point.osm_id
                                     from planet_osm_point join %(tmp_tblname)s
@@ -953,7 +950,7 @@ class OCitySMap:
                                          tmp_tblname=self._map_areas_table_name,
                                          amenity=sql_escape_unicode(amenity),
                                          osm_id=osmid))
-	    LOG.debug("Got amenities.")
+            LOG.debug("Got amenities: %s." % amenity)
             sub_al = sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
             sub_al = self.humanize_amenity_list(sub_al)
             al.extend(sub_al)
@@ -1190,7 +1187,8 @@ class OCitySMap:
             copyright_logo = None
 
         # Rendering...
-        LOG.debug('rendering map...')
+        LOG.info("Rendering generated map to %s outputs..."
+                 % ', '.join(out_formats))
         _map = city.render_map()
         for fmt in out_formats:
             LOG.debug('saving %s.%s...' % (out_prefix, fmt))
