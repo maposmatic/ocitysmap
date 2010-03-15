@@ -172,8 +172,10 @@ class i18n_it_generic(i18n):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
 class i18n_es_generic(i18n):
-    APPELLATIONS = [ u"Avenida", u"Avinguda", u"Calle", u"Camino", u"Camí", u"Carrer",
-		     u"Carretera", u"Plaza", u"Plaça", u"Ronda" ]
+    APPELLATIONS = [ u"Avenida", u"Avinguda", u"Calle", u"Callejón",
+            u"Calzada", u"Camino", u"Camí", u"Carrer", u"Carretera",
+            u"Glorieta", u"Parque", u"Pasaje", u"Pasarela", u"Paseo", u"Plaza",
+            u"Plaça", u"Privada", u"Puente", u"Ronda", u"Salida", u"Travesia" ]
     DETERMINANTS = [ u" de", u" de la", u" del", u" de las",
                      u" dels", u" de los", u" d'", u" de l'", u"" ]
 
