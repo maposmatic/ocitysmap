@@ -988,9 +988,10 @@ class OCitySMap:
                             _r.append(e)
                     return writer.writerow(_r)
 
-                copyright_notice = (u'© 2009 MapOSMatic/ocitysmap authors. '
-                                    u'Map data © 2009 OpenStreetMap.org '
-                                    u'and contributors (CC-BY-SA)')
+                copyright_notice = (u'© %(year)d MapOSMatic/ocitysmap authors. '
+                                    u'Map data © %(year)d OpenStreetMap.org '
+                                    u'and contributors (CC-BY-SA)' %
+                                    {'year': datetime.date.today().year})
                 if title is not None:
                     csv_writerow(['# (UTF-8)', title, copyright_notice])
                 else:
