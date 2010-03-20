@@ -125,10 +125,11 @@ def enclose_in_frame(renderer, insurf_w, insurf_h,
     return outsurf
 
 
-def add_logo(ctx, paperwidth, paperheight, logo_path,
-             copyright_notice = u'© 2009 MapOSMatic/ocitysmap authors. '
-             u'Map data © 2009 OpenStreetMap.org '
-             u'and contributors (CC-BY-SA)'):
+def add_logo(ctx, paperwidth, paperheight, logo_path, copyright_notice=None):
+    copyright_notice = copyright_notice or \
+        (u'© %(year)d MapOSMatic/ocitysmap authors. '
+         u'Map data © %(year)d OpenStreetMap.org '
+         u'and contributors (CC-BY-SA)' % {'year': datetime.date.today().year})
 
     # Open logo file
     png =  None
