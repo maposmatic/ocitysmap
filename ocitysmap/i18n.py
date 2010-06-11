@@ -25,7 +25,7 @@ import re
 import gettext
 
 def _install_language(language, locale_path):
-    t = gettext.translation(domain='ocitysmap', 
+    t = gettext.translation(domain='ocitysmap',
                             localedir=locale_path,
                             languages=[language],
                             fallback=True)
@@ -52,7 +52,7 @@ class i18n_template_code_CODE(i18n):
            object initialisation"""
         self.language = str(language) # FIXME: why do we have unicode here?
         _install_language(language, locale_path)
-        
+
     def language_code(self):
         """returns the language code of the specific language
            supported, e.g. fr_FR.UTF-8"""
@@ -73,22 +73,26 @@ class i18n_template_code_CODE(i18n):
 
 
 class i18n_fr_generic(i18n):
-    APPELLATIONS = [ u"Allée", u"Allées", u"Avenue", u"Boulevard", u"Carrefour",
-                     u"Chaussée", u"Chemin", u"Cheminement",
-                     u"Cale", u"Cales",
-                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
-                     u"Degré", u"Esplanade", u"Giratoire", u"Hameau",
-                     u"Impasse", u"Liaison", u"Mail", u"Montée",
+    APPELLATIONS = [ u"Accès", u"Allée", u"Allées", u"Autoroute", u"Avenue", u"Barrage",
+                     u"Boulevard", u"Carrefour", u"Chaussée", u"Chemin",
+                     u"Cheminement", u"Cale", u"Cales", u"Cavée", u"Cité",
+                     u"Clos", u"Coin", u"Côte", u"Cour", u"Cours", u"Descente",
+                     u"Degré", u"Escalier",
+                     u"Escaliers", u"Esplanade", u"Funiculaire",
+                     u"Giratoire", u"Hameau", u"Impasse", u"Jardin",
+                     u"Jardins", u"Liaison", u"Mail", u"Montée", u"Môle",
                      u"Parc", u"Passage", u"Passerelle", u"Passerelles",
-                     u"Place", u"Placette", u"Pont",
-                     u"Promenade", u"Petite Avenue", u"Petite Rue", u"Quai",
-                     u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
-                     u"Route", u"Rue", u"Ruelle",
-                     u"Square", u"Sentier", u"Sentiers",
-                     u"Traboule", u"Traverse", u"Venelle", u"Villa",
-                     u"Voie", u"Rond-point" ]
+                     u"Place", u"Placette", u"Pont", u"Promenade",
+                     u"Petite Avenue", u"Petite Rue", u"Quai",
+                     u"Rampe", u"Rang", u"Résidence", u"Rond-Point",
+                     u"Route forestière", u"Route", u"Rue", u"Ruelle",
+                     u"Square", u"Sente", u"Sentier", u"Sentiers", u"Terre-Plein",
+                     u"Télécabine", u"Traboule", u"Traverse", u"Tunnel",
+                     u"Venelle", u"Villa", u"Virage"
+                   ]
     DETERMINANTS = [ u" des", u" du", u" de la", u" de l'",
-                          u" de", u" d'", u"" ]
+                     u" de", u" d'", u" aux", u""
+                   ]
 
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
@@ -267,21 +271,24 @@ class i18n_ca_generic(i18n):
                      u"Transversal", u"Trasera", u"Travesía", u"Urbanización",
                      u"Vecindario", u"Vereda", u"Viaducto", u"Viviendas",
 
-                     #French (being distinct from Catalan and Spanish)
-                     u"Allée", u"Allées", u"Avenue", u"Boulevard", u"Carrefour",
-                     u"Chaussée", u"Chemin", u"Cheminement",
-                     u"Cale", u"Cales",
-                     u"Cité", u"Clos", u"Côte", u"Cour", u"Cours",
-                     u"Degré", u"Esplanade", u"Giratoire", u"Hameau",
-                     u"Impasse", u"Liaison", u"Mail", u"Montée",
-                     u"Passage", u"Passerelle", u"Passerelles",
-                     u"Place", u"Placette", u"Pont",
-                     u"Promenade", u"Petite Avenue", u"Petite Rue", u"Quai",
-                     u"Résidence", u"Rond-Point", u"Rang", u"Route forestière",
-                     u"Route", u"Rue", u"Ruelle",
-                     u"Square", u"Sentier", u"Sentiers",
-                     u"Traboule", u"Traverse", u"Venelle", u"Villa",
-                     u"Voie", u"Rond-point" ]
+                     # French (being distinct from Catalan and Spanish)
+                     u"Accès", u"Allée", u"Allées", u"Autoroute", u"Avenue", u"Barrage",
+                     u"Boulevard", u"Carrefour", u"Chaussée", u"Chemin",
+                     u"Cheminement", u"Cale", u"Cales", u"Cavée", u"Cité",
+                     u"Clos", u"Coin", u"Côte", u"Cour", u"Cours", u"Descente",
+                     u"Degré", u"Escalier",
+                     u"Escaliers", u"Esplanade", u"Funiculaire",
+                     u"Giratoire", u"Hameau", u"Impasse", u"Jardin",
+                     u"Jardins", u"Liaison", u"Mail", u"Montée", u"Môle",
+                     u"Parc", u"Passage", u"Passerelle", u"Passerelles",
+                     u"Place", u"Placette", u"Pont", u"Promenade",
+                     u"Petite Avenue", u"Petite Rue", u"Quai",
+                     u"Rampe", u"Rang", u"Résidence", u"Rond-Point",
+                     u"Route forestière", u"Route", u"Rue", u"Ruelle",
+                     u"Square", u"Sente", u"Sentier", u"Sentiers", u"Terre-Plein",
+                     u"Télécabine", u"Traboule", u"Traverse", u"Tunnel",
+                     u"Venelle", u"Villa", u"Virage"
+                   ]
 
     DETERMINANTS = [ # Catalan
                      u" de", u" de la", u" del", u" dels", u" d'",
@@ -494,7 +501,7 @@ class i18n_nl_generic(i18n):
     DETERMINANTS = [ u"\s?van der", u"\s?van den", u"\s?van de", u"\s?van",
                      u"\s?Den", u"\s?D'n", u"\s?D'", u"\s?De", u"\s?'T", u"\s?Het",
                      u"" ]
-    
+
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
                                     ("|".join(APPELLATIONS),
@@ -589,7 +596,7 @@ class i18n_hr_HR(i18n):
         return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
 
 class i18n_pl_generic(i18n):
- 
+
     APPELLATIONS = [ u"Dr.", u"Doktora", u"Ks.", u"Księdza",
                      u"Generała", u"Gen.",
                      u"Aleja", u"Plac", u"Pl.",
@@ -599,7 +606,7 @@ class i18n_pl_generic(i18n):
 
     DETERMINANTS = [ u"\s?im.", u"\s?imienia", u"\s?pw.",
                      u"" ]
-    
+
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
                                     ("|".join(APPELLATIONS),
