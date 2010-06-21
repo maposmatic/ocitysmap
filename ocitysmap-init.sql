@@ -25,22 +25,6 @@ create index admin_city_names
        on planet_osm_line (boundary,admin_level,name)
        where (boundary='administrative' and admin_level='8');
 
--- Create a view that associates each city with an area representing
---  its territory, based on the administrative boundaries available in
---  OSM database.
-
-create or replace view cities_area_by_name
-   as select name as city, st_buildarea(way) as area
-   from planet_osm_line where boundary='administrative' and admin_level='8';
-
--- Create a similar view that associates each polygon ID with an area
---  representing its territory, based on the administrative boundaries
---  available in OSM database.
-
-create or replace view cities_area_by_osmid
-   as select osm_id, st_buildarea(way) as area
-   from planet_osm_polygon where boundary='administrative' and admin_level='8';
-
 -- Create an aggregate used to build the list of squares that each
 -- street intersects
 

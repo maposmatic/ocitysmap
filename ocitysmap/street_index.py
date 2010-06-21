@@ -403,22 +403,18 @@ class OCitySMap:
         try:
             self._gen_map_areas(db)
 
-            if self.osmid:
-                self.streets = self.get_streets_by_osmid(db, self.osmid)
-                self.amenities = self.get_amenities_by_osmid(db, self.osmid)
-            elif self.city_name:
-                self.streets = self.get_streets_by_name(db, self.city_name)
-                self.amenities = self.get_amenities_by_name(db, self.city_name)
-            else:
-                self.streets = self.get_streets_by_name(db, None)
-                self.amenities = self.get_amenities_by_name(db, None)
+            self.contour = None
+            self.polygon = None
 
             if self.city_name:
-                self.contour = self.get_city_contour_by_name(db, self.city_name)
+                self.contour, self.polygon = \
+                        self.get_city_contour_by_name(db, self.city_name)
             elif self.osmid:
-                self.contour = self.get_city_contour_by_osmid(db, self.osmid)
-            else:
-                self.contour = None
+                self.contour, self.polygon = \
+                        self.get_city_contour_by_osmid(db, self.osmid)
+
+            self.streets = self.get_streets(db, self.polygon)
+            self.amenities = self.get_amenities(db, self.polygon)
         finally:
             LOG.debug('Restoring database state...')
             db.rollback()
@@ -478,39 +474,40 @@ class OCitySMap:
         LOG.info("Found bounding box: %s" % records[0][0])
         return BoundingBox.parse_wkt(records[0][0])
 
-    _regexp_contour = re.compile('^POLYGON\(\(([^)]*)\),\(([^)]*)\)\)$')
+    _regexp_contour = re.compile('^POLYGON\(\(([^)]*)\)\)$')
     _regexp_coords  = re.compile('^(\S*)\s+(\S*)$')
 
-    def parse_city_contour(self, contour):
+    def parse_city_contour(self, data):
         try:
-            cell00 = contour[0][0].strip()
+            contour = data[0][0].strip()
+            polygon = data[0][1].strip()
         except (KeyError,IndexError,AttributeError):
-            LOG.error("Invalid DB contour structure")
+            LOG.error("Invalid DB row structure")
             return None
 
         # Got nothing usable
-        if not cell00:
+        if not contour or not polygon:
             return None
 
         # Parse the answer, in order to add a margin around the area
         prev_locale = locale.getlocale(locale.LC_ALL)
         locale.setlocale(locale.LC_ALL, "C")
         try:
-            matches = self._regexp_contour.match(cell00)
+            matches = self._regexp_contour.match(contour)
             if not matches:
-                print "Area not conformant"
                 LOG.error("Area not conformant")
                 return None
-            scoords, inside = matches.groups()
+            bbox_coords = matches.groups()[0].split(',')
 
             # Determine bbox envelope
-            xmin, ymin, ymax, xmax = (None,)*4
-            lcoords = scoords.split(',')
-            if len(lcoords) != 5:
-                print "Coords look atypical"
-                LOG.warning("Coords look atypical: %s", lcoords)
-            for scoord in lcoords:
-                matches = self._regexp_coords.match(scoord)
+            if len(bbox_coords) != 5:
+                LOG.error("Coords look atypical: %s", bbox_coords)
+                return None
+
+            # Find the four corners
+            xmin, xmax, ymin, ymax = (None,)*4
+            for point in bbox_coords:
+                matches = self._regexp_coords.match(point)
                 y,x = map(float,matches.groups())
                 if (xmax is None) or xmax < x: xmax = x
                 if (xmin is None) or xmin > x: xmin = x
@@ -520,10 +517,17 @@ class OCitySMap:
             # Add one degree around the area
             xmin -= 1. ; xmax += 1.
             ymin -= 1. ; ymax += 1.
-            l = "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f),(%s))" \
+
+            matches = self._regexp_contour.match(polygon)
+            if not matches:
+                LOG.error("Administrative boundary looks invalid")
+                return None
+            inside = matches.groups()[0]
+
+            l = "MULTIPOLYGON(((%f %f, %f %f, %f %f, %f %f, %f %f)),((%s)))" \
                 % (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
                   inside)
-            return l
+            return (l, polygon)
         except:
             # Regexp error: area is not a "simple" polygon
             LOG.exception("Unexpected exception")
@@ -535,29 +539,31 @@ class OCitySMap:
         assert city is not None
         LOG.info('Looking for contour around %s...' % repr(city))
         cursor = db.cursor()
-        cursor.execute("""select st_astext(st_transform(
-                                    st_difference(st_envelope(way),
-                                                  st_buildarea(way)), 4002))
+        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
+                                   as contour,
+                                 st_astext(st_transform(st_buildarea(way), 4002))
+                                   as polygon
                               from planet_osm_line
                               where boundary='administrative'
                                  and admin_level='8' and name=%s;""" % \
                                sql_escape_unicode(city))
-        contour = cursor.fetchall()
+        data = cursor.fetchall()
         LOG.debug('Got contour.')
-        return self.parse_city_contour(contour)
+        return self.parse_city_contour(data)
 
     def get_city_contour_by_osmid(self, db, osmid):
         LOG.info('Looking for contour around OSMID %s...' % repr(osmid))
         cursor = db.cursor()
-        cursor.execute("""select st_astext(st_transform(
-                                    st_difference(st_envelope(way),
-                                                  st_buildarea(way)), 4002))
+        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
+                                   as contour,
+                                 st_astext(st_transform(st_buildarea(way), 4002))
+                                   as polygon
                               from planet_osm_polygon
                               where osm_id=%d;""" % \
                            osmid)
-        contour = cursor.fetchall()
+        data = cursor.fetchall()
         LOG.debug('Got contour.')
-        return self.parse_city_contour(contour)
+        return self.parse_city_contour(data)
 
     # This function creates a map_areas table that contains the list
     # of the squares used to divide the global city map. Each entry of
@@ -647,7 +653,7 @@ class OCitySMap:
 
         return sl
 
-    def get_streets_by_name(self, db, city):
+    def get_streets(self, db, contour=None):
         """Get the list of streets in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         street, the list of squares that it intersects.
@@ -658,15 +664,6 @@ class OCitySMap:
 
         cursor = db.cursor()
         LOG.info("Getting streets...")
-
-        # pgdb.escape_string() doesn't like None strings, and when the
-        # city is not passed, we don't want to match any existing
-        # city. So the empty string doesn't sound like a good
-        # candidate, and the "-1" string is probably better.
-        #
-        # TODO: improve the following request to remove this hack
-        if city is None:
-            city = "-1"
 
         # The inner select query creates the list of (street, square)
         # for all the squares in the temporary map_areas table. The
@@ -693,86 +690,27 @@ class OCitySMap:
         #    database
         #
         # See ocitysmap-init.sql for details
+
+        intersect = 'true'
+        if contour:
+            intersect = """st_intersects(way, st_transform(
+                                GeomFromText('%s', 4002), 900913))""" % contour
+
         cursor.execute("""select name, textcat_all(x || ',' || y || ';')
                           from (select distinct name, x, y
                                 from planet_osm_line
                                 join %s
                                 on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_name on city=%s
                                 where trim(name) != '' and highway is not null
-                                and case when cities_area_by_name.area is null
-                                then
-                                  true
-                                else
-                                  st_intersects(way, cities_area_by_name.area)
-                                end)
+                                and %s)
                           as foo
                           group by name
                           order by name;""" % \
                            (self._map_areas_table_name,
-                            sql_escape_unicode(city)))
+                            intersect))
 
         sl = cursor.fetchall()
-        LOG.debug("Got %d streets." % len(sl))
-        return self.humanize_street_list(sl)
-
-    def get_streets_by_osmid(self, db, osmid):
-        """Get the list of streets in the administrative area if city is
-        defined or in the bounding box otherwise, and for each
-        street, the list of squares that it intersects.
-
-        Returns a list of the form [(street_name, 'A-B1'),
-                                    (street2_name, 'B3')]
-        """
-
-        cursor = db.cursor()
-        LOG.info("Getting streets...")
-
-        # The inner select query creates the list of (street, square)
-        # for all the squares in the temporary map_areas table. The
-        # left_join + the test on cities_area is used to filter out
-        # the streets outside the city administrative boundaries. The
-        # outer select builds an easy to parse list of the squares for
-        # each street.
-        #
-        # A typical result entry is:
-        #  [ "Rue du Moulin", "0,1;1,2;1,3" ]
-        #
-        # REMARKS:
-        #
-        #  * The cities_area view is created once for all at
-        #    installation. It associates the name of a city with the
-        #    area covering it. As of today, only parts of the french
-        #    cities have these administrative boundaries available in
-        #    OSM. When available, this boundary is used to filter out
-        #    the streets that are not inside the selected city but
-        #    still in the bounding box rendered on the map. So these
-        #    streets will be shown but not listed in the street index.
-        #
-        #  * The textcat_all() aggregate must also be installed in the
-        #    database
-        #
-        # See ocitysmap-init.sql for details
-        cursor.execute("""select name, textcat_all(x || ',' || y || ';')
-                          from (select distinct name, x, y
-                                from planet_osm_line
-                                join %s
-                                on st_intersects(way, st_transform(geom, 900913))
-                                left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%d
-                                where trim(name) != '' and highway is not null
-                                and case when cities_area_by_osmid.area is null
-                                then
-                                  true
-                                else
-                                  st_intersects(way, cities_area_by_osmid.area)
-                                end)
-                          as foo
-                          group by name
-                          order by name;""" % \
-                           (self._map_areas_table_name,osmid))
-
-        sl = cursor.fetchall()
-        LOG.debug("Got %d streets." % len(sl))
+        LOG.debug("Got streets (%d)." % len(sl))
         return self.humanize_street_list(sl)
 
     # Given a list of amenities and their corresponding squares, do some
@@ -796,7 +734,7 @@ class OCitySMap:
 
         return am
 
-    def get_amenities_by_name(self, db, city):
+    def get_amenities(self, db, contour=None):
         """Get the list of amenities in the administrative area if city is
         defined or in the bounding box otherwise, and for each
         amenity, the list of squares that it intersects.
@@ -806,15 +744,6 @@ class OCitySMap:
         """
 
         cursor = db.cursor()
-
-        # pgdb.escape_string() doesn't like None strings, and when the
-        # city is not passed, we don't want to match any existing
-        # city. So the empty string doesn't sound like a good
-        # candidate, and the "-1" string is probably better.
-        #
-        # TODO: improve the following request to remove this hack
-        if city is None:
-            city = "-1"
 
         # The inner select query creates the list of (amenity, square)
         # for all the squares in the temporary map_areas table. The
@@ -841,6 +770,11 @@ class OCitySMap:
         #    database
         #
         # See ocitysmap-init.sql for details
+        intersect = 'true'
+        if contour:
+            intersect = """st_intersects(way, st_transform(
+                                GeomFromText('%s', 4002), 900913))""" % contour
+
         al = []
         for cat, amenity, human in self.SELECTED_AMENITIES:
             LOG.info("Getting amenities: %s..." % amenity)
@@ -848,114 +782,23 @@ class OCitySMap:
                               from (select distinct amenity, name, x, y, osm_id
                                     from planet_osm_point join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on city=%(city)s
-                                    where amenity = %(amenity)s and
-                                    case when cities_area_by_name.area is null
-                                    then
-                                      true
-                                    else
-                                      st_intersects(way, cities_area_by_name.area)
-                                    end
+                                    where amenity = %(amenity)s and %(intersect)s
                                   union
                                     select distinct amenity, name, x, y, osm_id
                                     from planet_osm_polygon join %(tmp_tblname)s
                                     on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_name on city=%(city)s
-                                    where amenity = %(amenity)s and
-                                    case when cities_area_by_name.area is null
-                                    then
-                                      true
-                                    else
-                                      st_intersects(way, cities_area_by_name.area)
-                                    end)
+                                    where amenity = %(amenity)s and %(intersect)s)
                               as foo
                               group by amenity, osm_id, name
                               order by amenity, name
                               """ % dict(category=sql_escape_unicode(cat),
                                          tmp_tblname=self._map_areas_table_name,
                                          amenity=sql_escape_unicode(amenity),
-                                         city=sql_escape_unicode(city)))
-            LOG.debug("Got amenities: %s." % amenity)
+                                         intersect=intersect))
             sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
             sub_al = self.humanize_amenity_list(sub_al)
+            LOG.debug("Got amenities: %s (%d)." % (amenity, len(sub_al)))
             al.extend(sub_al)
-        return al
-
-    def get_amenities_by_osmid(self, db, osmid):
-        """Get the list of amenities in the administrative area if city is
-        defined or in the bounding box otherwise, and for each
-        amenity, the list of squares that it intersects.
-
-        Returns a list of the form [(category, name, 'A-B1'),
-                                    (category, name2, 'B3')]
-        """
-
-        cursor = db.cursor()
-
-        # The inner select query creates the list of (amenity, square)
-        # for all the squares in the temporary map_areas table. The
-        # left_join + the test on cities_area is used to filter out
-        # the streets outside the city administrative boundaries. The
-        # outer select builds an easy to parse list of the squares for
-        # each amenity.
-        #
-        # A typical result entry is:
-        #  [ "Place of worship", "Basilique Sainte Germaine", "0,1;1,2;1,3" ]
-        #
-        # REMARKS:
-        #
-        #  * The cities_area view is created once for all at
-        #    installation. It associates the name of a city with the
-        #    area covering it. As of today, only parts of the french
-        #    cities have these administrative boundaries available in
-        #    OSM. When available, this boundary is used to filter out
-        #    the streets that are not inside the selected city but
-        #    still in the bounding box rendered on the map. So these
-        #    streets will be shown but not listed in the street index.
-        #
-        #  * The textcat_all() aggregate must also be installed in the
-        #    database
-        #
-        # See ocitysmap-init.sql for details
-        al = []
-        for cat, amenity, human in self.SELECTED_AMENITIES:
-            LOG.info("Getting amenities: %s..." % amenity)
-            cursor.execute("""select %(category)s, name, textcat_all(x || ',' || y || ';')
-                              from (select distinct amenity, name, x, y, planet_osm_point.osm_id
-                                    from planet_osm_point join %(tmp_tblname)s
-                                    on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
-                                    where amenity = %(amenity)s and
-                                    case when cities_area_by_osmid.area is null
-                                    then
-                                      true
-                                    else
-                                      st_intersects(way, cities_area_by_osmid.area)
-                                    end
-                                  union
-                                    select distinct amenity, name, x, y, planet_osm_polygon.osm_id
-                                    from planet_osm_polygon join %(tmp_tblname)s
-                                    on st_intersects(way, st_transform(geom, 900913))
-                                    left join cities_area_by_osmid on cities_area_by_osmid.osm_id=%(osm_id)d
-                                    where amenity = %(amenity)s and
-                                    case when cities_area_by_osmid.area is null
-                                    then
-                                      true
-                                    else
-                                      st_intersects(way, cities_area_by_osmid.area)
-                                    end)
-                              as foo
-                              group by amenity, osm_id, name
-                              order by amenity, name
-                              """ % dict(category=sql_escape_unicode(cat),
-                                         tmp_tblname=self._map_areas_table_name,
-                                         amenity=sql_escape_unicode(amenity),
-                                         osm_id=osmid))
-            LOG.debug("Got amenities: %s." % amenity)
-            sub_al = sub_al = [(c,a or human,h) for c,a,h in cursor.fetchall()]
-            sub_al = self.humanize_amenity_list(sub_al)
-            al.extend(sub_al)
-
         return al
 
     def _render_one_prefix(self, title, output_prefix, file_type,
@@ -964,7 +807,6 @@ class OCitySMap:
         frame_width = int(max(paperheight / 20., 30))
 
         output_filename = "%s_index.%s" % (output_prefix, file_type)
-        LOG.debug("rendering " + output_filename + "...")
 
         generator = IndexPageGenerator(self.streets + self.amenities, self.i18n)
 
