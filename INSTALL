@@ -132,8 +132,9 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
  9. Install Mapnik
 
-    We used Mapnik 0.6.1, which is not yet available in stable
-    Debian/Ubuntu, so we compiled it from source.
+    We used Mapnik 0.6.1, which was not yet available in stable
+    Debian/Ubuntu at the time we set up MapOSMatic, so we compiled it
+    from source.
 
     a. Install the dependencies
 
@@ -143,7 +144,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
         libtiff4-dev libtiffxx0c2 python-imaging proj libcairo2-dev \
         python-cairo-dev libcairomm-1.0-dev libpixman-1-dev \
         libpthread-stubs0-dev ttf-dejavu ttf-dejavu-core \
-        ttf-dejavu-extra libgdal-dev python-gdal \
+        ttf-dejavu-extra ttf-unifont libgdal-dev python-gdal \
         postgresql-server-dev-8.3 postgresql-contrib-8.3 libxslt1-dev \
         libxml2-dev
 
@@ -151,22 +152,71 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     wget http://download.berlios.de/mapnik/mapnik-0.6.1.tar.bz2
 
-    c. Compile and install Mapnik
+    c. Patch Mapnik
+
+    In order to make Mapnik search recursively for fonts in the
+    SYSTEM_FONTS directory (see below), we had to patch Mapnik. Note
+    that this is because we still use Mapnik 0.6.1. Later versions of
+    Mapnik already search recursively for fonts by default. The patch
+    to apply follows:
+
+===============================================================================
+diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindings/python/mapnik/__init__.py
+--- mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py	2009-07-14 11:09:16.000000000 +0200
++++ mapnik-0.6.1/bindings/python/mapnik/__init__.py	2010-03-20 15:04:27.000000000 +0100
+@@ -41,6 +41,8 @@
+ 
+ """
+ 
++import os
++
+ from sys import getdlopenflags,setdlopenflags
+ try:
+     from dl import RTLD_NOW, RTLD_GLOBAL
+@@ -377,17 +379,18 @@
+     major_version = version / 100000
+     return '%s.%s.%s' % ( major_version, minor_version,patch_level)
+ 
++def register_fonts(path=fontscollectionpath):
++    """Recursively register fonts using path argument as base directory"""
++    for dirpath, _, filenames in os.walk(path):
++        for filename in filenames:
++            if os.path.splitext(filename)[1] == '.ttf':
++                FontEngine.instance().register_font(os.path.join(dirpath, filename))
++
+ #register datasources
+ from mapnik import DatasourceCache
+ DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
+ #register some fonts
+-from mapnik import FontEngine
+-from glob import glob
+-fonts = glob('%s/*.ttf' % fontscollectionpath)
+-if len( fonts ) == 0:
+-    print "### WARNING: No ttf files found in '%s'." % fontscollectionpath
+-else:
+-    map(FontEngine.instance().register_font, fonts)
++register_fonts()
+ 
+ #set dlopen flags back to the original
+ setdlopenflags(flags)
+===============================================================================
+
+    d. Compile and install Mapnik
 
     tar xvjf mapnik-0.6.1.tar.bz2
     cd mapnik-0.6.1
 
     python scons/scons.py configure INPUT_PLUGINS=all \
-      OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/truetype/ttf-dejavu/
+      OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
 
-    (You can also path PREFIX=... and PYTHONPREFIX=.... if you don't
+    (You can also path PREFIX=... and PYTHON_PREFIX=.... if you don't
     want a system-wide installation)
 
     python scons/scons.py
 
     python scons/scons.py install
 
-    d. Check the installation
+    e. Check the installation
 
     Run a Python interpreter, and run "import mapnik". If it doesn't
     work and you didn't do a system-wide installation of Mapnik, don't
@@ -197,7 +247,18 @@ are using (here respectively Lenny and Intrepid or Jaunty).
     wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
     tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
 
-    c. Configuration
+    c. Enabling unifont
+
+    In order to get correct rendering for Korean, Chineese or Japanese
+    character, the unifont font must be used. In order do enable it,
+    edit inc/fontset-settings.xml.inc, and uncomment the following
+    line :
+
+    	  <Font face_name="unifont Medium" />
+
+    in the book-fonts, bold-fonts and oblique-fonts sections.
+
+    d. Configuration
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
