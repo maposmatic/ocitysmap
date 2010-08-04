@@ -68,6 +68,13 @@ class ShapeFile:
         self._layer.CreateFeature(f)
         f.Destroy()
 
+    def add_bounding_rectangle(self):
+        self.add_horiz_line(self._bbox.get_top_left()[0])
+        self.add_horiz_line(self._bbox.get_bottom_right()[0])
+        self.add_vert_line(self._bbox.get_top_left()[1])
+        self.add_vert_line(self._bbox.get_bottom_right()[1])
+        return self
+
     def add_horiz_line(self, y):
         """Add a new latitude line at the given latitude."""
         line = ogr.Geometry(type = ogr.wkbLineString)

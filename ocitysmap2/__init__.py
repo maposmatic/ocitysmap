@@ -28,6 +28,19 @@
 __author__ = 'The MapOSMatic developers'
 __version__ = '0.2'
 
+import cairo
+import ConfigParser
+import logging
+import os
+import psycopg2
+import tempfile
+
+import coords
+import i18n
+import renderers
+
+l = logging.getLogger('ocitysmap')
+
 class RenderingConfiguration:
     """
     The RenderingConfiguration class encapsulate all the information concerning
@@ -39,11 +52,14 @@ class RenderingConfiguration:
     def __init__(self):
         self.title           = None # str
         self.osmid           = None # None / int (shading + city name)
-        self.bounding_box    = None # bbox (always)
+        self.bounding_box    = None # bbox (from osmid if None)
         self.language        = None # str (locale)
+
         self.stylesheet      = None # Obj Stylesheet
-        self.paper_width_cm  = None
-        self.paper_height_cm = None
+
+        self.paper_width_mm  = None
+        self.paper_height_mm = None
+        self.dpi             = None
 
 
 class Stylesheet:
@@ -52,62 +68,86 @@ class Stylesheet:
         self.description = None # str
         self.path        = None # str
 
-class StreetIndex:
-    """
-    The StreetIndex class encapsulate all the logic related to the querying and
-    rendering of the street index.
-    """
+        self.grid_line_color = 'black'
+        self.grid_line_alpha = 0.8
+        self.grid_line_width = 3
 
-    DEFAULT_GRID_SIZE_METERS = 500
-
-    def __init__(self, osmid, bounding_box, language):
-        self._osmid = osmid
-        self._bbox = bounding_box
-        self._language = language
-
-        # TODO: infer a better (smaller) grid size when the bounding box
-        # is smaller.
-        self._grid_size = DEFAULT_GRID_SIZE_METERS
-
-    def get_grid_size(self):
-        """Returns the used grid size."""
-        return self._grid_size
-
-    def render(self, surface, x, y, w, h):
-        """Render the street and amenities index at the given (x,y) coordinates
-        into the provided Cairo surface. The index must not be larger than the
-        provided width and height (in pixels).
-
-        Args:
-            x (int): horizontal origin position, in pixels.
-            y (int): vertical origin position, in pixels.
-            w (int): maximum usable width for the index, in pixels.
-            h (int): maximum usable height for the index, in pixels.
-        """
-        ctx = cairo.Context(surface)
-        ctx.move_to(x, y)
-
-        # TODO: render index into ctx
-
-        return surface
-
-    def as_csv(self, fobj):
-        """Saves the street index as CSV to the provided file object."""
-
-        # TODO: write to CSV
-
-        raise NotImplementedError
-
-    def _get_streets(self):
-        raise NotImplementedError
-
-    def _get_amenities(self):
-        raise NotImplementedError
 
 class OCitySMap:
-    def __init__(self, config_file):
-        # Create the registries from config file
-        pass
+
+    DEFAULT_REQUEST_TIMEOUT_MIN = 15
+
+    DEFAULT_ZOOM_LEVEL = 16
+    DEFAULT_RESOLUTION_DPI = 300.0
+
+    def __init__(self, config_files=['/etc/ocitysmap.conf', '~/.ocitysmap.conf'],
+                 grid_table_prefix=None):
+        """..."""
+
+        config_files = map(os.path.expanduser, config_files)
+        l.info('Reading OCitySMap configuration from %s...' %
+                 ', '.join(config_files))
+
+        self._parser = ConfigParser.RawConfigParser()
+        if not self._parser.read(config_files):
+            raise IOError, 'None of the configuration files could be read!'
+
+        self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
+        self._grid_table_prefix = '%sgrid_squares' % (grid_table_prefix or '')
+
+        # Database connection
+        datasource = dict(self._parser.items('datasource'))
+        l.info('Connecting to database %s on %s as %s...' %
+                 (datasource['dbname'], datasource['host'], datasource['user']))
+        self._db = psycopg2.connect(user=datasource['user'],
+                                    password=datasource['password'],
+                                    host=datasource['host'],
+                                    database=datasource['dbname'])
+
+        # Force everything to be unicode-encoded, in case we run along Django
+        # (which loads the unicode extensions for psycopg2)
+        self._db.set_client_encoding('utf8')
+
+        try:
+            timeout = self._parser.get('datasource', 'request_timeout')
+        except ConfigParser.NoOptionError:
+            timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
+        self._set_request_timeout(timeout)
+
+
+    def _set_request_timeout(self, timeout_minutes=15):
+        """Sets the PostgreSQL request timeout to avoid long-running queries on
+        the database."""
+        cursor = self._db.cursor()
+        cursor.execute('set session statement_timeout=%d;' %
+                       (timeout_minutes * 60 * 1000))
+        cursor.execute('show statement_timeout;')
+        l.debug('Configured statement timeout: %s.' %
+                  cursor.fetchall()[0][0])
+
+    def _get_bounding_box(self, osmid):
+        l.debug('Searching bounding box around OSM ID %d...' % osmid)
+        cursor = self._db.cursor()
+        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
+                              from planet_osm_polygon where osm_id=%d;""" %
+                       osmid)
+        records = cursor.fetchall()
+
+        if not records:
+            raise ValueError, 'OSM ID %d not found in the database!' % osmid
+
+        bbox = coords.BoundingBox.parse_wkt(records[0][0])
+        l.debug('Found bounding box %s.' % bbox)
+        return bbox
+
+    def _cleanup_tempdir(self, tmpdir):
+        l.debug('Cleaning up %s...' % tmpdir)
+        for root, dirs, files in os.walk(tmpdir, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(tmpdir)
 
     def get_all_style_configurations(self):
         """Returns the list of all available stylesheet configurations (list of
@@ -132,7 +172,42 @@ class OCitySMap:
             file_prefix (string): filename prefix for all output files.
         """
 
-        # TODO: instanciate Cairo surface
-        renderer.render(config, surface)
-        # TODO: save surface to all output formats
+        assert config.osmid or config.bbox, \
+                'At least an OSM ID or a bounding box must be provided!'
 
+        self._i18n = i18n.install_translation(config.language, self._locale_path)
+        l.info('Rendering language: %s.' % self._i18n.language_code())
+
+        # Make sure we have a bounding box
+        config.bounding_box = (config.bounding_box or
+                               self._get_bounding_box(config.osmid))
+
+        # Create a temporary directory for all our shape files
+        tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
+        l.debug('Rendering in temporary directory %s' % tmpdir)
+
+        try:
+            surface = cairo.PDFSurface('/tmp/plain.pdf', 2000, 2000)
+            renderer.render(config, surface, None, tmpdir)
+            surface.finish()
+        finally:
+            self._cleanup_tempdir(tmpdir)
+
+if __name__ == '__main__':
+    s = Stylesheet()
+    s.name = 'osm'
+    s.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
+
+    c = RenderingConfiguration()
+    c.title = 'Chevreuse'
+    c.osmid = -943886
+    c.language = 'fr_FR'
+    c.stylesheet = s
+    c.paper_width_mm = 210
+    c.paper_height_mm = 297
+    c.dpi = 300
+
+    logging.basicConfig(level=logging.DEBUG)
+
+    o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
+    o.render(c, renderers.PlainRenderer(), None, None)

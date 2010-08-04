@@ -24,7 +24,9 @@
 
 import logging
 import mapnik
+import os
 
+import grid
 import map_canvas
 
 l = logging.getLogger('ocitysmap')
@@ -35,42 +37,38 @@ class Renderer:
     render it from a given rendering configuration.
     """
 
-    DEFAULT_ZOOM_LEVEL = 16
-    DEFAULT_RESOLUTION_DPI = 300.0
-    DEFAULT_RESOLUTION_DPCM = (DEFAULT_RESOLUTION_DPI / 2.54)
+    # Portrait paper sizes in milimeters
+    PAPER_SIZES = [('A5', 148, 210),
+                   ('A4', 210, 297),
+                   ('A3', 297, 420),
+                   ('A2', 420, 594),
+                   ('A1', 594, 841),
+                   ('A0', 841, 1189),
 
-    # Portrait paper sizes
-    PAPER_SIZES = [('A5', 14.8, 21.0),
-                   ('A4', 21.0, 29.7),
-                   ('A3', 29.7, 42.0),
-                   ('A2', 42.0, 59.4),
-                   ('A1', 59.4, 84.1),
-                   ('A0', 84.1, 118.9),
+                   ('US letter', 216, 279),
 
-                   ('US letter', 21.6, 27.9),
+                   ('100x75cm', 750, 1000),
+                   ('80x60cm', 600, 800),
+                   ('60x45cm', 450, 600),
+                   ('40x30cm', 300, 400),
 
-                   ('100x75cm', 75.0, 100.0),
-                   ('80x60cm', 60.0, 80.0),
-                   ('60x45cm', 45.0, 60.0),
-                   ('40x30cm', 30.0, 40.0),
-
-                   ('60x60cm', 60.0, 60.0),
-                   ('50x50cm', 50.0, 50.0),
-                   ('40x40cm', 40.0, 40.0),
+                   ('60x60cm', 600, 600),
+                   ('50x50cm', 500, 500),
+                   ('40x40cm', 400, 400),
                   ]
 
-    def __init__(self):
-        self.name        = None # str
-        self.description = None # str
+    def _get_dpi_from_dpmm(self, dpmm):
+        return dpmm * 2.54 * 10
+
+    def _get_dpmm_from_dpi(self, dpi):
+        return dpi / 2.54 / 10
 
     def render(self, rendering_configuration, surface,
-               street_index, zoom_level=DEFAULT_ZOOM_LEVEL,
-               resolution_dpcm=DEFAULT_RESOLUTION_DPCM):
+               street_index, tmpdir):
         raise NotImplementedError
 
-    def get_compatible_paper_sizes(self, bounding_box,
-                                   zoom_level=DEFAULT_ZOOM_LEVEL,
-                                   resolution_dpcm=DEFAULT_RESOLUTION_DPCM):
+    def get_compatible_paper_sizes(self, bounding_box, zoom_level,
+                                   resolution_dpmm):
         raise NotImplementedError
 
 class PlainRenderer(Renderer):
@@ -79,27 +77,42 @@ class PlainRenderer(Renderer):
         self.description = 'A basic, full-page layout for the map.'
 
     def render(self, rendering_configuration, surface,
-               street_index, zoom_level=Renderer.DEFAULT_ZOOM_LEVEL,
-               resolution_dpcm=Renderer.DEFAULT_RESOLUTION_DPCM):
+               street_index, tmpdir):
         """..."""
-        canvas = map_canvas.MapCanvas(rendering_configuration.stylesheet,
-                                      rendering_configuration.bounding_box,
-                                      rendering_configuration.width_px,
-                                      rendering_configuration.height_px)
 
-        # TODO: grid (variable granularity)
-        # TODO: scale
-        # TODO: compass rose
+        resolution_dpmm = self._get_dpmm_from_dpi(rendering_configuration.dpi)
+
+        l.info('PlainRenderer rendering on %dx%dmm paper at %d dpi (%dx%dpx)...' %
+               (rendering_configuration.paper_width_mm,
+                rendering_configuration.paper_height_mm,
+                rendering_configuration.dpi,
+                rendering_configuration.paper_width_mm * resolution_dpmm,
+                rendering_configuration.paper_height_mm * resolution_dpmm))
+
+        canvas = map_canvas.MapCanvas(rendering_configuration.stylesheet,
+              rendering_configuration.bounding_box,
+              int(rendering_configuration.paper_width_mm * resolution_dpmm),
+              int(rendering_configuration.paper_height_mm * resolution_dpmm))
+
+        grid_shape = (grid.Grid(rendering_configuration.bounding_box)
+                .generate_shape_file(os.path.join(tmpdir, 'grid.shp')))
+        canvas.add_shape_file(grid_shape,
+                rendering_configuration.stylesheet.grid_line_color,
+                rendering_configuration.stylesheet.grid_line_alpha,
+                rendering_configuration.stylesheet.grid_line_width)
 
         rendered_map = canvas.render()
         ctx = cairo.Context(surface)
         mapnik.render(rendered_map, ctx)
         surface.flush()
+
+        # TODO: scale
+        # TODO: compass rose
+
         return surface
 
-    def get_compatible_paper_sizes(self, bounding_box,
-                                   zoom_level=Renderer.DEFAULT_ZOOM_LEVEL,
-                                   resolution_dpcm=Renderer.DEFAULT_RESOLUTION_DPCM):
+    def get_compatible_paper_sizes(self, bounding_box, zoom_level,
+                                   resolution_dpmm):
         """Returns a list of paper sizes that can accomodate the provided
         bounding box at the given zoom level and print resolution."""
 
@@ -108,13 +121,14 @@ class PlainRenderer(Renderer):
         pw = min(px, py)
         ph = max(px, py)
 
-        l.debug('Map needs %.2fx%.2f cm, filter paper sizes...' %
-                (px / resolution_dpcm,
-                 py / resolution_dpcm))
+        l.debug('Map needs %.2fx%.2f mm for %dx%dpx, filter paper sizes...' %
+                (px / resolution_dpmm,
+                 py / resolution_dpmm,
+                 px, py))
 
         valid_sizes = filter(lambda (name,w,h):
-                pw <= w * resolution_dpcm and
-                ph <= h * resolution_dpcm,
+                pw <= w * resolution_dpmm and
+                ph <= h * resolution_dpmm,
             Renderer.PAPER_SIZES)
         return valid_sizes
 
@@ -130,6 +144,8 @@ class MapWithBottomIndexRenderer(MapWithIndexRenderer):
 class BookletRenderer(Renderer):
     pass
 
+AVAILABLE_RENDERERS = [PlainRenderer()]
+
 
 if __name__ == '__main__':
     import coords
@@ -137,23 +153,34 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
 
-    bbox = coords.BoundingBox(48.8989, 2.2332, 48.8198, 2.4392)
+    bbox = coords.BoundingBox(48.7158, 2.0179, 48.6960, 2.0694)
+    zoom = 17
+    dpmm = 132 / 2.54 / 10
+
     plain = PlainRenderer()
-    print plain.get_compatible_paper_sizes(bbox)
+    print plain.get_compatible_paper_sizes(bbox, zoom, dpmm)
 
     class StylesheetMock:
         def __init__(self):
             self.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
+            self.grid_line_color = 'black'
+            self.grid_line_alpha = 0.9
+            self.grid_line_width = 2
 
     class RenderingConfigurationMock:
         def __init__(self):
             self.stylesheet = StylesheetMock()
             self.bounding_box = bbox
-            self.width_px = 2400
-            self.height_px = 1400
+            self.paper_width_mm = 297
+            self.paper_height_mm = 210
+            self.dpi = 132
 
+    config = RenderingConfigurationMock()
 
-    surface = cairo.PDFSurface('/tmp/plain.pdf', 2000, 2000)
-    plain.render(RenderingConfigurationMock(), surface)
+    surface = cairo.PDFSurface('/tmp/plain.pdf',
+                               config.paper_width_mm * dpmm,
+                               config.paper_height_mm * dpmm)
+    plain.render(config, surface, None, '/tmp')
     surface.finish()
+
 

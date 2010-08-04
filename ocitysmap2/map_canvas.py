@@ -63,7 +63,7 @@ class MapCanvas:
 
         # Keep geographic bounding box, ignoring one dimension of the
         # specified grwidth/grheight constraints
-        self._map.aspect_fix_mode = mapnik.aspect_fix_mode.SHRINK_CANVAS
+        self._map.aspect_fix_mode = mapnik.aspect_fix_mode.GROW_BBOX
 
         # Added shapes to render
         self._shapes = []
