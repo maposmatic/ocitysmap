@@ -29,6 +29,7 @@ import os
 
 import grid
 import map_canvas
+import shapes
 
 l = logging.getLogger('ocitysmap')
 
@@ -63,6 +64,7 @@ class Renderer:
         canvas = map_canvas.MapCanvas(rc.stylesheet, rc.bounding_box,
                                       graphical_ratio)
 
+        # Add the grid
         _grid = grid.Grid(canvas.get_actual_bounding_box())
         grid_shape = _grid.generate_shape_file(os.path.join(tmpdir, 'grid.shp'))
         canvas.add_shape_file(grid_shape,
@@ -71,6 +73,15 @@ class Renderer:
                 rc.stylesheet.grid_line_width)
 
         return canvas, _grid
+
+    def render_shade(self, rc, shade_wkt, canvas, tmpdir):
+        # Add the grey shade
+        shade_shape = shapes.PolyShapeFile(canvas.get_actual_bounding_box(),
+                                           os.path.join(tmpdir, 'shade.shp'),
+                                           'shade')
+        shade_shape.add_shade_from_wkt(shade_wkt)
+        canvas.add_shape_file(shade_shape, rc.stylesheet.shade_color,
+                              rc.stylesheet.shade_alpha)
 
     def create_map_canvas(self, rc, tmpdir):
         """Returns the map canvas object and the grid object that has been
@@ -102,7 +113,7 @@ class PlainRenderer(Renderer):
         return self._create_map_canvas(rc, (float(rc.paper_width_mm) /
                                        rc.paper_height_mm), tmpdir)
 
-    def render(self, rc, canvas, surface, street_index):
+    def render(self, rc, canvas, surface, street_index, tmpdir):
         """..."""
 
         l.info('PlainRenderer rendering on %dx%dmm paper.' %

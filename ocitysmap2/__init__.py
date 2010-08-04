@@ -34,6 +34,7 @@ import gzip
 import logging
 import os
 import psycopg2
+import re
 import tempfile
 
 import coords
@@ -71,8 +72,11 @@ class Stylesheet:
         self.path        = None # str
 
         self.grid_line_color = 'black'
-        self.grid_line_alpha = 0.8
+        self.grid_line_alpha = 0.5
         self.grid_line_width = 3
+
+        self.shade_color = 'black'
+        self.shade_alpha = 0.1
 
         self.zoom_level = 16
 
@@ -152,6 +156,42 @@ class OCitySMap:
                 os.rmdir(os.path.join(root, name))
         os.rmdir(tmpdir)
 
+
+    _regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
+
+    def _get_shade_wkt(self, bounding_box, osmid):
+        l.info('Looking for contour around OSM ID %d...' % osmid)
+        cursor = self._db.cursor()
+        cursor.execute("""select st_astext(st_transform(st_buildarea(way), 4002))
+                                   as polygon
+                              from planet_osm_polygon
+                              where osm_id=%d;""" % osmid)
+        data = cursor.fetchall()
+
+        try:
+            polygon = data[0][0].strip()
+        except (KeyError, IndexError, AttributeError):
+            l.error('Invalid database structure!')
+            return None
+
+        if not polygon:
+            return None
+
+        matches = self._regexp_polygon.match(polygon)
+        if not matches:
+            l.error('Administrative boundary looks invalid!')
+            return None
+        inside = matches.groups()[0]
+
+        bounding_box = bounding_box.create_expanded(0.05, 0.05)
+        xmax, ymin = bounding_box.get_top_left()
+        xmin, ymax = bounding_box.get_bottom_right()
+
+        poly = "MULTIPOLYGON(((%f %f, %f %f, %f %f, %f %f, %f %f)),((%s)))" % \
+                (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
+                 inside)
+        return poly
+
     def get_all_style_configurations(self):
         """Returns the list of all available stylesheet configurations (list of
         Stylesheet objects)."""
@@ -192,8 +232,12 @@ class OCitySMap:
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
         canvas, grid = renderer.create_map_canvas(config, tmpdir)
-        canvas.render()
 
+        if config.osmid:
+            shade_wkt = self._get_shade_wkt(config.bounding_box, config.osmid)
+            renderer.render_shade(config, shade_wkt, canvas, tmpdir)
+
+        canvas.render()
         street_index = index.StreetIndex(config.osmid,
                                          canvas.get_actual_bounding_box(),
                                          config.language, grid)
@@ -202,15 +246,14 @@ class OCitySMap:
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 self._render_one(config, canvas, renderer, street_index,
-                                 output_filename, output_format)
+                                 output_filename, output_format, tmpdir)
 
             # TODO: street_index.as_csv()
         finally:
             self._cleanup_tempdir(tmpdir)
 
-
     def _render_one(self, config, canvas, renderer, street_index,
-                    filename, output_format):
+                    filename, output_format, tmpdir):
         l.info('Rendering %s...' % filename)
 
         factory = None
@@ -236,7 +279,7 @@ class OCitySMap:
         surface = factory(renderers.Renderer.convert_mm_to_pt(config.paper_width_mm),
                           renderers.Renderer.convert_mm_to_pt(config.paper_height_mm))
 
-        renderer.render(config, canvas, surface, street_index)
+        renderer.render(config, canvas, surface, street_index, tmpdir)
         surface.finish()
 
 if __name__ == '__main__':
@@ -249,9 +292,9 @@ if __name__ == '__main__':
     c.osmid = -943886
     c.language = 'fr_FR'
     c.stylesheet = s
-    c.paper_width_mm = 210
-    c.paper_height_mm = 297
-    c.min_kmpmm = 150
+    c.paper_width_mm = 297
+    c.paper_height_mm = 420
+    c.min_kmpmm = 100
 
     logging.basicConfig(level=logging.DEBUG)
 
