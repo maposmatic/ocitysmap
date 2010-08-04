@@ -57,18 +57,11 @@ class Renderer:
                    ('40x40cm', 400, 400),
                   ]
 
-    def _get_dpi_from_dpmm(self, dpmm):
-        return dpmm * 2.54 * 10
-
-    def _get_dpmm_from_dpi(self, dpi):
-        return dpi / 2.54 / 10
-
-    def render(self, rendering_configuration, surface,
-               street_index, tmpdir):
+    def render(self, rc, surface, street_index, zoom_level, tmpdir):
         raise NotImplementedError
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
-                                   resolution_dpmm):
+                                   resolution_km_in_mm):
         raise NotImplementedError
 
 class PlainRenderer(Renderer):
@@ -76,33 +69,33 @@ class PlainRenderer(Renderer):
         self.name = 'plain'
         self.description = 'A basic, full-page layout for the map.'
 
-    def render(self, rendering_configuration, surface,
-               street_index, tmpdir):
+    def render(self, rc, surface, street_index, zoom_level, tmpdir):
         """..."""
 
-        resolution_dpmm = self._get_dpmm_from_dpi(rendering_configuration.dpi)
+        l.info('PlainRenderer rendering on %dx%dmm paper.' %
+               (rc.paper_width_mm, rc.paper_height_mm))
 
-        l.info('PlainRenderer rendering on %dx%dmm paper at %d dpi (%dx%dpx)...' %
-               (rendering_configuration.paper_width_mm,
-                rendering_configuration.paper_height_mm,
-                rendering_configuration.dpi,
-                rendering_configuration.paper_width_mm * resolution_dpmm,
-                rendering_configuration.paper_height_mm * resolution_dpmm))
+        canvas = map_canvas.MapCanvas(rc.stylesheet, rc.bounding_box,
+                                      (float(rc.paper_width_mm) /
+                                       rc.paper_height_mm),
+                                      zoom_level)
 
-        canvas = map_canvas.MapCanvas(rendering_configuration.stylesheet,
-              rendering_configuration.bounding_box,
-              int(rendering_configuration.paper_width_mm * resolution_dpmm),
-              int(rendering_configuration.paper_height_mm * resolution_dpmm))
-
-        grid_shape = (grid.Grid(rendering_configuration.bounding_box)
+        grid_shape = (grid.Grid(canvas.get_actual_bounding_box())
                 .generate_shape_file(os.path.join(tmpdir, 'grid.shp')))
         canvas.add_shape_file(grid_shape,
-                rendering_configuration.stylesheet.grid_line_color,
-                rendering_configuration.stylesheet.grid_line_alpha,
-                rendering_configuration.stylesheet.grid_line_width)
+                rc.stylesheet.grid_line_color,
+                rc.stylesheet.grid_line_alpha,
+                rc.stylesheet.grid_line_width)
 
         rendered_map = canvas.render()
         ctx = cairo.Context(surface)
+
+        def mm_to_pt(mm):
+            return ((mm/10.0) / 2.54) * 72
+
+        ctx.scale(mm_to_pt(rc.paper_width_mm) / rendered_map.width,
+                  mm_to_pt(rc.paper_height_mm) / rendered_map.height)
+
         mapnik.render(rendered_map, ctx)
         surface.flush()
 
@@ -112,23 +105,20 @@ class PlainRenderer(Renderer):
         return surface
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
-                                   resolution_dpmm):
+                                   resolution_km_in_mm):
         """Returns a list of paper sizes that can accomodate the provided
         bounding box at the given zoom level and print resolution."""
 
-        px, py = bounding_box.get_pixel_size_for_zoom_factor(zoom_level)
+        geo_width_m, geo_height_m = bounding_box.spheric_sizes()
+        paper_width_mm = geo_width_m/1000.0 * resolution_km_in_mm
+        paper_height_mm = geo_height_m/1000.0 * resolution_km_in_mm
 
-        pw = min(px, py)
-        ph = max(px, py)
-
-        l.debug('Map needs %.2fx%.2f mm for %dx%dpx, filter paper sizes...' %
-                (px / resolution_dpmm,
-                 py / resolution_dpmm,
-                 px, py))
+        l.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
+                'on paper.' % (geo_width_m, geo_height_m,
+                 paper_width_mm/10, paper_height_mm/10))
 
         valid_sizes = filter(lambda (name,w,h):
-                pw <= w * resolution_dpmm and
-                ph <= h * resolution_dpmm,
+                paper_width_mm <= w and paper_height_mm <= h,
             Renderer.PAPER_SIZES)
         return valid_sizes
 
@@ -154,11 +144,15 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     bbox = coords.BoundingBox(48.7158, 2.0179, 48.6960, 2.0694)
-    zoom = 17
-    dpmm = 132 / 2.54 / 10
+    zoom = 16
 
     plain = PlainRenderer()
-    print plain.get_compatible_paper_sizes(bbox, zoom, dpmm)
+
+    papers = plain.get_compatible_paper_sizes(bbox, zoom, resolution_km_in_mm=150)
+    print 'Compatible paper sizes:'
+    for p in papers:
+        print '  * %s (%.1fx%.1fcm)' % (p[0], p[1]/10.0, p[2]/10.0)
+    print 'Using first available:', papers[0]
 
     class StylesheetMock:
         def __init__(self):
@@ -171,16 +165,19 @@ if __name__ == '__main__':
         def __init__(self):
             self.stylesheet = StylesheetMock()
             self.bounding_box = bbox
-            self.paper_width_mm = 297
-            self.paper_height_mm = 210
-            self.dpi = 132
+            self.paper_width_mm = papers[0][2]
+            self.paper_height_mm = papers[0][1]
+            self.min_km_in_mm = 110
 
     config = RenderingConfigurationMock()
 
+    def mm_to_pt(mm):
+        return ((mm/10.0) / 2.54) * 72
+
     surface = cairo.PDFSurface('/tmp/plain.pdf',
-                               config.paper_width_mm * dpmm,
-                               config.paper_height_mm * dpmm)
-    plain.render(config, surface, None, '/tmp')
+                               mm_to_pt(config.paper_width_mm),
+                               mm_to_pt(config.paper_height_mm))
+    plain.render(config, surface, None, zoom, '/tmp')
     surface.finish()
 
 

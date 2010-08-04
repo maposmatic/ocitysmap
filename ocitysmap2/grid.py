@@ -76,7 +76,10 @@ class Grid:
         Returns the ShapeFile object.
         """
 
-        g = shapes.ShapeFile(self._bbox, filename, 'grid')
+        # Use a slightly larger bounding box for the shape file to accomodate
+        # for the small imprecisions of re-projecting.
+        g = shapes.ShapeFile(self._bbox.create_expanded(0.05, 0.05),
+                             filename, 'grid')
         map(g.add_vert_line, self._vertical_lines)
         map(g.add_horiz_line, self._horizontal_lines)
         return g

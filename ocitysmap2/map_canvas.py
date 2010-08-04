@@ -42,34 +42,61 @@ class MapCanvas:
     their respective alpha levels.
     """
 
-    def __init__(self, stylesheet, bounding_box, width_px, height_px):
+    def __init__(self, stylesheet, bounding_box, graphical_ratio,
+                 zoom_level):
         """Initialize the map canvas for rendering.
 
         Args:
             stylesheet (Stylesheet): map stylesheet.
             bounding_box (coords.BoundingBox): geographic bounding box.
-            width_px (int): width in pixels of the rendering surface.
-            height_px (int): height in pixels of the rendering surface.
         """
 
-        self._geo_bbox = bounding_box
         self._proj = mapnik.Projection(_MAIN_PROJECTION)
 
-        # TODO: if (width_px, height_px) is large enough compared to
-        # bounding_box.get_pixel_size_for_zoom_factor(), try higher zooms.
+        # TODO: document!
+        orig_envelope = self._project_envelope(bounding_box)
 
-        self._map = mapnik.Map(width_px, height_px, _MAIN_PROJECTION)
+        off_x, off_y, width, height = self._fix_bbox_ratio(
+                orig_envelope.minx, orig_envelope.miny,
+                orig_envelope.width(), orig_envelope.height(),
+                graphical_ratio)
+
+        envelope = mapnik.Envelope(off_x, off_y,
+                off_x+width, off_y+height)
+
+        self._geo_bbox = self._inverse_envelope(envelope)
+        g_width, g_height = self._geo_bbox.get_pixel_size_for_zoom_factor(zoom_level)
+
+        l.debug('Corrected bounding box from %s to %s (ratio: %.2f).' %
+                (bounding_box, self._geo_bbox, graphical_ratio))
+
+        # Create the Mapnik map with the corrected width and height and zoom to
+        # the corrected bounding box ('envelope' in the Mapnik jargon)
+        self._map = mapnik.Map(g_width, g_height, _MAIN_PROJECTION)
         mapnik.load_map(self._map, stylesheet.path)
 
-        # Keep geographic bounding box, ignoring one dimension of the
-        # specified grwidth/grheight constraints
-        self._map.aspect_fix_mode = mapnik.aspect_fix_mode.GROW_BBOX
+        print self._map.envelope()
+        self._map.zoom_to_box(envelope)
+        print self._map.envelope()
 
         # Added shapes to render
         self._shapes = []
 
-        l.debug('MapCanvas %dx%d pixels for %s.' % (width_px, height_px,
-                                                    bounding_box))
+        l.info('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
+
+    def _fix_bbox_ratio(self, off_x, off_y, width, height, dest_ratio):
+        cur_ratio = float(width)/height
+
+        if cur_ratio < dest_ratio:
+            w = width
+            width *= float(dest_ratio)/cur_ratio
+            off_x -= (width - w)/2.0
+        else:
+            h = height
+            height *= float(cur_ratio)/dest_ratio
+            off_y -= (height - h)/2.0
+
+        return map(int, (off_x, off_y, width, height))
 
     def add_shape_file(self, shape_file, str_color='grey', alpha=0.5,
                        line_width=1.0):
@@ -89,19 +116,17 @@ class MapCanvas:
     def render(self):
         """Render the map in memory with all the added shapes. Returns the
         corresponding mapnik.Map object."""
-        envelope = self._project_envelope(
-                mapnik.Envelope(self._geo_bbox.get_top_left()[1],
-                                self._geo_bbox.get_top_left()[0],
-                                self._geo_bbox.get_bottom_right()[1],
-                                self._geo_bbox.get_bottom_right()[0]))
 
         # Add all shapes to the map
         for shape in self._shapes:
             self._render_shape_file(**shape)
 
-        self._map.zoom_to_box(envelope)
-
         return self._map
+
+    def get_actual_bounding_box(self):
+        """Returns the actual greographic bounding box that will be rendered by
+        Mapnik."""
+        return self._geo_bbox
 
     def _render_shape_file(self, shape_file, color, line_width):
         shape_file.flush()
@@ -119,12 +144,22 @@ class MapCanvas:
 
         self._map.layers.append(layer)
 
-    def _project_envelope(self, envelope):
+    def _project_envelope(self, bbox):
         """Project the given bounding box into the rendering projection."""
+        envelope = mapnik.Envelope(bbox.get_top_left()[1],
+                                   bbox.get_top_left()[0],
+                                   bbox.get_bottom_right()[1],
+                                   bbox.get_bottom_right()[0])
         c0 = self._proj.forward(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.forward(mapnik.Coord(envelope.maxx, envelope.maxy))
         return mapnik.Envelope(c0.x, c0.y, c1.x, c1.y)
 
+    def _inverse_envelope(self, envelope):
+        """Inverse the given cartesian envelope (in 900913) back to a 4002
+        bounding box."""
+        c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
+        c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
+        return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
 if __name__ == '__main__':
     class StylesheetMock:
@@ -136,17 +171,18 @@ if __name__ == '__main__':
     # Basic unit test
     bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
 
-    px, py = bbox.get_pixel_size_for_zoom_factor(16)
-    canvas = MapCanvas(StylesheetMock(), bbox, px, py)
+    canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210, 16)
+
+    new_bbox = canvas.get_actual_bounding_box()
 
     canvas.add_shape_file(
-        shapes.ShapeFile(bbox, '/tmp/mygrid.shp', 'grid')
+        shapes.ShapeFile(new_bbox, '/tmp/mygrid.shp', 'grid')
             .add_vert_line(2.04)
             .add_horiz_line(48.7),
         'red', 0.3, 10.0)
 
     canvas.add_shape_file(
-        shapes.ShapeFile(bbox, '/tmp/mypoly.shp', 'shade')
+        shapes.ShapeFile(new_bbox, '/tmp/mypoly.shp', 'shade')
             .add_shade_from_wkt('POLYGON((2.04537559754772 48.702794853359,2.0456929723376 48.7033682610593,2.0457757970068 48.7037022715908,2.04577876144723 48.7043963708738,2.04589724923321 48.7043963708738,2.04589428479277 48.704519562418,2.04746445007788 48.7044706533954,2.04723043894637 48.7024665875529,2.04674876229103 48.7024238422904,2.04615641319268 48.702500973452,2.04537559754772 48.702794853359))'),
         'blue', 0.3)
 

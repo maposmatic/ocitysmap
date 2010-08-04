@@ -59,7 +59,7 @@ class RenderingConfiguration:
 
         self.paper_width_mm  = None
         self.paper_height_mm = None
-        self.dpi             = None
+        self.min_km_in_mm    = None
 
 
 class Stylesheet:
@@ -78,7 +78,7 @@ class OCitySMap:
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
 
     DEFAULT_ZOOM_LEVEL = 16
-    DEFAULT_RESOLUTION_DPI = 300.0
+    DEFAULT_RESOLUTION_KM_IN_MM = 150
 
     def __init__(self, config_files=['/etc/ocitysmap.conf', '~/.ocitysmap.conf'],
                  grid_table_prefix=None):
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     c.stylesheet = s
     c.paper_width_mm = 210
     c.paper_height_mm = 297
-    c.dpi = 300
+    c.min_kmpmm = 150
 
     logging.basicConfig(level=logging.DEBUG)
 
