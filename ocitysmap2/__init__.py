@@ -30,6 +30,7 @@ __version__ = '0.2'
 
 import cairo
 import ConfigParser
+import gzip
 import logging
 import os
 import psycopg2
@@ -37,6 +38,7 @@ import tempfile
 
 import coords
 import i18n
+import index
 import renderers
 
 l = logging.getLogger('ocitysmap')
@@ -71,6 +73,8 @@ class Stylesheet:
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.8
         self.grid_line_width = 3
+
+        self.zoom_level = 16
 
 
 class OCitySMap:
@@ -113,7 +117,6 @@ class OCitySMap:
         except ConfigParser.NoOptionError:
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(timeout)
-
 
     def _set_request_timeout(self, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
@@ -175,7 +178,9 @@ class OCitySMap:
         assert config.osmid or config.bbox, \
                 'At least an OSM ID or a bounding box must be provided!'
 
-        self._i18n = i18n.install_translation(config.language, self._locale_path)
+        output_formats = map(lambda x: x.lower(), output_formats)
+        self._i18n = i18n.install_translation(config.language,
+                                              self._locale_path)
         l.info('Rendering language: %s.' % self._i18n.language_code())
 
         # Make sure we have a bounding box
@@ -186,12 +191,53 @@ class OCitySMap:
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
+        canvas, grid = renderer.create_map_canvas(config, tmpdir)
+        canvas.render()
+
+        street_index = index.StreetIndex(config.osmid,
+                                         canvas.get_actual_bounding_box(),
+                                         config.language, grid)
+
         try:
-            surface = cairo.PDFSurface('/tmp/plain.pdf', 2000, 2000)
-            renderer.render(config, surface, None, tmpdir)
-            surface.finish()
+            for output_format in output_formats:
+                output_filename = '%s.%s' % (file_prefix, output_format)
+                self._render_one(config, canvas, renderer, street_index,
+                                 output_filename, output_format)
+
+            # TODO: street_index.as_csv()
         finally:
             self._cleanup_tempdir(tmpdir)
+
+
+    def _render_one(self, config, canvas, renderer, street_index,
+                    filename, output_format):
+        l.info('Rendering %s...' % filename)
+
+        factory = None
+
+        if output_format == 'png':
+            raise NotImplementedError
+
+        elif output_format == 'svg':
+            factory = lambda w,h: cairo.SVGSurface(filename, w, h)
+        elif output_format == 'svgz':
+            factory = lambda w,h: cairo.SVGSurface(
+                    gzip.GzipFile(filename, 'wb'), w, h)
+        elif output_format == 'pdf':
+            factory = lambda w,h: cairo.PDFSurface(filename, w, h)
+
+        elif output_format == 'ps':
+            factory = lambda w,h: cairo.PDFSurface(filename, w, h)
+
+        else:
+            raise ValueError, \
+                'Unsupported output format: %s!' % output_format.upper()
+
+        surface = factory(renderers.Renderer.convert_mm_to_pt(config.paper_width_mm),
+                          renderers.Renderer.convert_mm_to_pt(config.paper_height_mm))
+
+        renderer.render(config, canvas, surface, street_index)
+        surface.finish()
 
 if __name__ == '__main__':
     s = Stylesheet()
@@ -210,4 +256,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
-    o.render(c, renderers.PlainRenderer(), None, None)
+    o.render(c, renderers.PlainRenderer(), ['pdf', 'svgz'], '/tmp/mymap')

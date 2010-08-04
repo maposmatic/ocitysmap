@@ -36,12 +36,15 @@ class StreetIndex:
         self._language = language
         self._grid = grid
 
+        # TODO: seed index data from bounding box or osmid
+
     def render(self, surface, x, y, w, h):
         """Render the street and amenities index at the given (x,y) coordinates
         into the provided Cairo surface. The index must not be larger than the
         provided width and height (in pixels).
 
         Args:
+            surface (cairo.Surface): the cairo surface to render into.
             x (int): horizontal origin position, in pixels.
             y (int): vertical origin position, in pixels.
             w (int): maximum usable width for the index, in pixels.

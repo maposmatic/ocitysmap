@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import cairo
 import logging
 import mapnik
 import os
@@ -57,51 +58,69 @@ class Renderer:
                    ('40x40cm', 400, 400),
                   ]
 
-    def render(self, rc, surface, street_index, zoom_level, tmpdir):
+
+    def _create_map_canvas(self, rc, graphical_ratio, tmpdir):
+        canvas = map_canvas.MapCanvas(rc.stylesheet, rc.bounding_box,
+                                      graphical_ratio)
+
+        _grid = grid.Grid(canvas.get_actual_bounding_box())
+        grid_shape = _grid.generate_shape_file(os.path.join(tmpdir, 'grid.shp'))
+        canvas.add_shape_file(grid_shape,
+                rc.stylesheet.grid_line_color,
+                rc.stylesheet.grid_line_alpha,
+                rc.stylesheet.grid_line_width)
+
+        return canvas, _grid
+
+    def create_map_canvas(self, rc, tmpdir):
+        """Returns the map canvas object and the grid object that has been
+        overlayed on the created map.
+
+        Args:
+            rc (RenderingConfiguration): the rendering configuration.
+            tmpdir (path): path to a directory for temporary shape files.
+        """
+        raise NotImplementedError
+
+    def render(self, rc, canvas, surface, street_index):
         raise NotImplementedError
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
                                    resolution_km_in_mm):
         raise NotImplementedError
 
+    @staticmethod
+    def convert_mm_to_pt(mm):
+        return ((mm/10.0) / 2.54) * 72
+
 class PlainRenderer(Renderer):
     def __init__(self):
         self.name = 'plain'
         self.description = 'A basic, full-page layout for the map.'
 
-    def render(self, rc, surface, street_index, zoom_level, tmpdir):
+    def create_map_canvas(self, rc, tmpdir):
+        return self._create_map_canvas(rc, (float(rc.paper_width_mm) /
+                                       rc.paper_height_mm), tmpdir)
+
+    def render(self, rc, canvas, surface, street_index):
         """..."""
 
         l.info('PlainRenderer rendering on %dx%dmm paper.' %
                (rc.paper_width_mm, rc.paper_height_mm))
 
-        canvas = map_canvas.MapCanvas(rc.stylesheet, rc.bounding_box,
-                                      (float(rc.paper_width_mm) /
-                                       rc.paper_height_mm),
-                                      zoom_level)
+        rendered_map = canvas.get_rendered_map()
 
-        grid_shape = (grid.Grid(canvas.get_actual_bounding_box())
-                .generate_shape_file(os.path.join(tmpdir, 'grid.shp')))
-        canvas.add_shape_file(grid_shape,
-                rc.stylesheet.grid_line_color,
-                rc.stylesheet.grid_line_alpha,
-                rc.stylesheet.grid_line_width)
-
-        rendered_map = canvas.render()
         ctx = cairo.Context(surface)
-
-        def mm_to_pt(mm):
-            return ((mm/10.0) / 2.54) * 72
-
-        ctx.scale(mm_to_pt(rc.paper_width_mm) / rendered_map.width,
-                  mm_to_pt(rc.paper_height_mm) / rendered_map.height)
-
-        mapnik.render(rendered_map, ctx)
-        surface.flush()
+        ctx.scale(Renderer.convert_mm_to_pt(rc.paper_width_mm) /
+                    rendered_map.width,
+                  Renderer.convert_mm_to_pt(rc.paper_height_mm) /
+                    rendered_map.height)
 
         # TODO: scale
         # TODO: compass rose
 
+        mapnik.render(rendered_map, ctx)
+        surface.flush()
         return surface
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
@@ -148,7 +167,8 @@ if __name__ == '__main__':
 
     plain = PlainRenderer()
 
-    papers = plain.get_compatible_paper_sizes(bbox, zoom, resolution_km_in_mm=150)
+    papers = plain.get_compatible_paper_sizes(bbox, zoom,
+                                              resolution_km_in_mm=110)
     print 'Compatible paper sizes:'
     for p in papers:
         print '  * %s (%.1fx%.1fcm)' % (p[0], p[1]/10.0, p[2]/10.0)
@@ -160,6 +180,7 @@ if __name__ == '__main__':
             self.grid_line_color = 'black'
             self.grid_line_alpha = 0.9
             self.grid_line_width = 2
+            self.zoom_level = 16
 
     class RenderingConfigurationMock:
         def __init__(self):
@@ -171,13 +192,13 @@ if __name__ == '__main__':
 
     config = RenderingConfigurationMock()
 
-    def mm_to_pt(mm):
-        return ((mm/10.0) / 2.54) * 72
-
     surface = cairo.PDFSurface('/tmp/plain.pdf',
-                               mm_to_pt(config.paper_width_mm),
-                               mm_to_pt(config.paper_height_mm))
-    plain.render(config, surface, None, zoom, '/tmp')
+                   Renderer.convert_mm_to_pt(config.paper_width_mm),
+                   Renderer.convert_mm_to_pt(config.paper_height_mm))
+
+    canvas, _ = plain.create_map_canvas(config, '/tmp')
+    canvas.render()
+    plain.render(config, canvas, surface, None)
     surface.finish()
 
 

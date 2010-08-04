@@ -42,13 +42,13 @@ class MapCanvas:
     their respective alpha levels.
     """
 
-    def __init__(self, stylesheet, bounding_box, graphical_ratio,
-                 zoom_level):
+    def __init__(self, stylesheet, bounding_box, graphical_ratio):
         """Initialize the map canvas for rendering.
 
         Args:
             stylesheet (Stylesheet): map stylesheet.
             bounding_box (coords.BoundingBox): geographic bounding box.
+            graphical_ratio (float): ratio of the map area (width/height).
         """
 
         self._proj = mapnik.Projection(_MAIN_PROJECTION)
@@ -65,7 +65,8 @@ class MapCanvas:
                 off_x+width, off_y+height)
 
         self._geo_bbox = self._inverse_envelope(envelope)
-        g_width, g_height = self._geo_bbox.get_pixel_size_for_zoom_factor(zoom_level)
+        g_width, g_height = self._geo_bbox.get_pixel_size_for_zoom_factor(
+                stylesheet.zoom_level)
 
         l.debug('Corrected bounding box from %s to %s (ratio: %.2f).' %
                 (bounding_box, self._geo_bbox, graphical_ratio))
@@ -121,6 +122,7 @@ class MapCanvas:
         for shape in self._shapes:
             self._render_shape_file(**shape)
 
+    def get_rendered_map(self):
         return self._map
 
     def get_actual_bounding_box(self):
@@ -165,13 +167,14 @@ if __name__ == '__main__':
     class StylesheetMock:
         def __init__(self):
             self.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
+            self.zoom_level = 16
 
     logging.basicConfig(level=logging.DEBUG)
 
     # Basic unit test
     bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
 
-    canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210, 16)
+    canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210)
 
     new_bbox = canvas.get_actual_bounding_box()
 
