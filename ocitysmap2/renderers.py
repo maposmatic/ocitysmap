@@ -115,7 +115,8 @@ class Renderer:
     def render(self, surface, street_index):
         raise NotImplementedError
 
-    def get_compatible_paper_sizes(self, bounding_box, zoom_level,
+    @staticmethod
+    def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm):
         raise NotImplementedError
 
@@ -237,7 +238,8 @@ class PlainRenderer(Renderer):
 
         ctx.restore()
 
-    def get_compatible_paper_sizes(self, bounding_box, zoom_level,
+    @staticmethod
+    def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm):
         """Returns a list of paper sizes that can accomodate the provided
         bounding box at the given zoom level and print resolution."""
@@ -255,18 +257,19 @@ class PlainRenderer(Renderer):
             Renderer.PAPER_SIZES)
         return valid_sizes
 
-class MapWithIndexRenderer(Renderer):
-    pass
+# The renderers registry
+_RENDERERS = [PlainRenderer]
 
-class MapWithRightIndexRenderer(MapWithIndexRenderer):
-    pass
+def get_renderer_class_by_name(name):
+    """Retrieves a renderer class, by name."""
+    for renderer in _RENDERERS:
+        if renderer.name == name:
+            return renderer
+    raise LookupError, 'The requested renderer %s was not found!' % name
 
-class MapWithBottomIndexRenderer(MapWithIndexRenderer):
-    pass
-
-class BookletRenderer(Renderer):
-    pass
-
+def get_renderers():
+    """Returns the list of available renderers' names."""
+    return [cls.name for cls in _RENDERERS]
 
 if __name__ == '__main__':
     import coords
@@ -277,10 +280,11 @@ if __name__ == '__main__':
     bbox = coords.BoundingBox(48.7158, 2.0179, 48.6960, 2.0694)
     zoom = 16
 
-    plain = PlainRenderer()
+    renderer_cls = get_renderer_class_by_name('plain')
 
-    papers = plain.get_compatible_paper_sizes(bbox, zoom,
-                                              resolution_km_in_mm=110)
+    papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom,
+                resolution_km_in_mm=110)
+
     print 'Compatible paper sizes:'
     for p in papers:
         print '  * %s (%.1fx%.1fcm)' % (p[0], p[1]/10.0, p[2]/10.0)
@@ -298,19 +302,19 @@ if __name__ == '__main__':
         def __init__(self):
             self.stylesheet = StylesheetMock()
             self.bounding_box = bbox
-            self.paper_width_mm = papers[0][2]
-            self.paper_height_mm = papers[0][1]
-            self.min_km_in_mm = 110
+            self.paper_width_mm = papers[0][1]
+            self.paper_height_mm = papers[0][2]
 
     config = RenderingConfigurationMock()
 
+    plain = renderer_cls(config, '/tmp')
     surface = cairo.PDFSurface('/tmp/plain.pdf',
                    Renderer.convert_mm_to_pt(config.paper_width_mm),
                    Renderer.convert_mm_to_pt(config.paper_height_mm))
 
-    canvas, _ = plain.create_map_canvas(config, '/tmp')
-    canvas.render()
-    plain.render(config, canvas, surface, None)
+    plain.create_map_canvas()
+    plain.canvas.render()
+    plain.render(surface, None)
     surface.finish()
 
 

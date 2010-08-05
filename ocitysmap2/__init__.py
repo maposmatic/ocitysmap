@@ -232,7 +232,8 @@ class OCitySMap:
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
         # TODO: For now, hardcode plain renderer
-        renderer = renderers.PlainRenderer(config, tmpdir)
+        renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
+        renderer = renderer_cls(config, tmpdir)
         renderer.create_map_canvas()
 
         if config.osmid:
