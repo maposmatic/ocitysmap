@@ -62,14 +62,19 @@ class RenderingConfiguration:
 
         self.paper_width_mm  = None
         self.paper_height_mm = None
-        self.min_km_in_mm    = None
-
 
 class Stylesheet:
+    """
+    A Stylesheet object defines how the map features will be rendered. It
+    contains information pointing to the Mapnik stylesheet and other styling
+    parameters.
+    """
+
     def __init__(self):
         self.name        = None # str
-        self.description = None # str
         self.path        = None # str
+        self.description = '' # str
+        self.zoom_level = 16
 
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
@@ -78,8 +83,44 @@ class Stylesheet:
         self.shade_color = 'black'
         self.shade_alpha = 0.1
 
-        self.zoom_level = 16
+    @staticmethod
+    def create_from_config_section(parser, section_name):
+        """Creates a Stylesheet object from the OCitySMap configuration.
 
+        Args:
+            parser (ConfigParser.ConfigParser): the configuration parser
+                object.
+            section_name (string): the stylesheet section name in the
+                configuration.
+        """
+        s = Stylesheet()
+
+        def assign_if_present(key, cast_fn=str):
+            if parser.has_option(section_name, key):
+                setattr(s, key, cast_fn(parser.get(section_name, key)))
+
+        s.name = parser.get(section_name, 'name')
+        s.path = parser.get(section_name, 'path')
+        assign_if_present('description')
+        assign_if_present('zoom_level', int)
+
+        assign_if_present('grid_line_color')
+        assign_if_present('grid_line_alpha', float)
+        assign_if_present('grid_line_width', int)
+
+        assign_if_present('shade_color')
+        assign_if_present('shade_alpha', float)
+        return s
+
+    @staticmethod
+    def create_all_from_config(parser):
+        styles = parser.get('rendering', 'available_stylesheets')
+        if not styles:
+            raise ValueError, \
+                    'OCitySMap configuration does not contain any stylesheet!'
+
+        return [Stylesheet.create_from_config_section(parser, name)
+                for name in styles.split(',')]
 
 class OCitySMap:
 
@@ -87,6 +128,8 @@ class OCitySMap:
 
     DEFAULT_ZOOM_LEVEL = 16
     DEFAULT_RESOLUTION_KM_IN_MM = 150
+
+    STYLESHEET_REGISTRY = []
 
     def __init__(self, config_files=['/etc/ocitysmap.conf', '~/.ocitysmap.conf'],
                  grid_table_prefix=None):
@@ -121,6 +164,9 @@ class OCitySMap:
         except ConfigParser.NoOptionError:
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(timeout)
+
+        # Read stylesheet configuration
+        self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
 
     def _set_request_timeout(self, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
@@ -195,7 +241,14 @@ class OCitySMap:
     def get_all_style_configurations(self):
         """Returns the list of all available stylesheet configurations (list of
         Stylesheet objects)."""
-        pass
+        return self.STYLESHEET_REGISTRY
+
+    def get_stylesheet_by_name(self, name):
+        """Returns a stylesheet by its key name."""
+        for style in self.STYLESHEET_REGISTRY:
+            if style.name == name:
+                return style
+        raise LookupError, 'The requested stylesheet %s was not found!' % name
 
     def get_all_renderers(self):
         """Returns the list of all available layout renderers (list of Renderer
@@ -285,21 +338,16 @@ class OCitySMap:
         surface.finish()
 
 if __name__ == '__main__':
-    s = Stylesheet()
-    s.name = 'osm'
-    s.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
-    s.shade_alpha = 0.2
+    logging.basicConfig(level=logging.DEBUG)
+
+    o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
 
     c = RenderingConfiguration()
     c.title = 'Chevreuse'
     c.osmid = -943886 # -7444 (Paris)
     c.language = 'fr_FR'
-    c.stylesheet = s
     c.paper_width_mm = 594
     c.paper_height_mm = 420
-    c.min_kmpmm = 100
+    c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    logging.basicConfig(level=logging.DEBUG)
-
-    o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
     o.render(c, 'plain', ['pdf'], '/tmp/mymap')

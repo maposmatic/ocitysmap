@@ -63,6 +63,10 @@ class Renderer:
     PRINT_SAFE_MARGIN_PT = 15
     GRID_LEGEND_MARGIN_RATIO = .02
 
+    # The DEFAULT_KM_IN_MM represents the minimum acceptable size in milimeters
+    # on the rendered map of a kilometer
+    DEFAULT_KM_IN_MM = 110
+
     def __init__(self, rc, tmpdir):
         self.rc = rc
         self.tmpdir = tmpdir
@@ -240,7 +244,7 @@ class PlainRenderer(Renderer):
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
-                                   resolution_km_in_mm):
+                                   resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
         """Returns a list of paper sizes that can accomodate the provided
         bounding box at the given zoom level and print resolution."""
 
@@ -282,8 +286,7 @@ if __name__ == '__main__':
 
     renderer_cls = get_renderer_class_by_name('plain')
 
-    papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom,
-                resolution_km_in_mm=110)
+    papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom)
 
     print 'Compatible paper sizes:'
     for p in papers:
