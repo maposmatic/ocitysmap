@@ -259,6 +259,11 @@ class PlainRenderer(Renderer):
         valid_sizes = filter(lambda (name,w,h):
                 paper_width_mm <= w and paper_height_mm <= h,
             Renderer.PAPER_SIZES)
+
+        # Add a 'Custom' paper format to the list that perfectly matches the
+        # bounding box.
+        valid_sizes.append(('Custom', paper_width_mm, paper_height_mm))
+
         return valid_sizes
 
 # The renderers registry
