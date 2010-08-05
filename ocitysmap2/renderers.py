@@ -58,6 +58,8 @@ class Renderer:
                    ('60x60cm', 600, 600),
                    ('50x50cm', 500, 500),
                    ('40x40cm', 400, 400),
+
+                   ('Best fit', 0, 0),
                   ]
 
     # The PRINT_SAFE_MARGIN_PT is a small margin we leave on all page borders
@@ -69,7 +71,7 @@ class Renderer:
 
     # The DEFAULT_KM_IN_MM represents the minimum acceptable size in milimeters
     # on the rendered map of a kilometer
-    DEFAULT_KM_IN_MM = 110
+    DEFAULT_KM_IN_MM = 80
 
     def __init__(self, rc, tmpdir):
         self.rc = rc
@@ -314,7 +316,7 @@ def get_renderer_class_by_name(name):
 
 def get_renderers():
     """Returns the list of available renderers' names."""
-    return [cls.name for cls in _RENDERERS]
+    return _RENDERERS
 
 if __name__ == '__main__':
     import coords
@@ -322,7 +324,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
 
-    bbox = coords.BoundingBox(48.7158, 2.0179, 48.6960, 2.0694)
+    bbox = coords.BoundingBox(48.7269,2.0019, 48.6801,2.0669)
     zoom = 16
 
     renderer_cls = get_renderer_class_by_name('plain')
@@ -346,8 +348,9 @@ if __name__ == '__main__':
         def __init__(self):
             self.stylesheet = StylesheetMock()
             self.bounding_box = bbox
-            self.paper_width_mm = papers[0][1]
-            self.paper_height_mm = papers[0][2]
+            self.paper_width_mm = papers[0][2]
+            self.paper_height_mm = papers[0][1]
+            self.rtl = False
 
     config = RenderingConfigurationMock()
 

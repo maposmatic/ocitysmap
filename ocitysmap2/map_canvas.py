@@ -75,10 +75,7 @@ class MapCanvas:
         # the corrected bounding box ('envelope' in the Mapnik jargon)
         self._map = mapnik.Map(g_width, g_height, _MAIN_PROJECTION)
         mapnik.load_map(self._map, stylesheet.path)
-
-        print self._map.envelope()
         self._map.zoom_to_box(envelope)
-        print self._map.envelope()
 
         # Added shapes to render
         self._shapes = []

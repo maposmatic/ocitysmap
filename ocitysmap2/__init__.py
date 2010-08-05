@@ -145,33 +145,44 @@ class OCitySMap:
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self._grid_table_prefix = '%sgrid_squares' % (grid_table_prefix or '')
+        self.__db = None
+
+        # Read stylesheet configuration
+        self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
+
+    def _get_db(self):
+        if self.__db:
+            return self.__db
 
         # Database connection
         datasource = dict(self._parser.items('datasource'))
         l.info('Connecting to database %s on %s as %s...' %
                  (datasource['dbname'], datasource['host'], datasource['user']))
-        self._db = psycopg2.connect(user=datasource['user'],
-                                    password=datasource['password'],
-                                    host=datasource['host'],
-                                    database=datasource['dbname'])
+
+        db = psycopg2.connect(user=datasource['user'],
+                              password=datasource['password'],
+                              host=datasource['host'],
+                              database=datasource['dbname'])
 
         # Force everything to be unicode-encoded, in case we run along Django
         # (which loads the unicode extensions for psycopg2)
-        self._db.set_client_encoding('utf8')
+        db.set_client_encoding('utf8')
 
         try:
             timeout = self._parser.get('datasource', 'request_timeout')
         except ConfigParser.NoOptionError:
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
-        self._set_request_timeout(timeout)
+        self._set_request_timeout(db, timeout)
 
-        # Read stylesheet configuration
-        self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
+        self.__db = db
+        return self.__db
 
-    def _set_request_timeout(self, timeout_minutes=15):
+    _db = property(_get_db)
+
+    def _set_request_timeout(self, db, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
         the database."""
-        cursor = self._db.cursor()
+        cursor = db.cursor()
         cursor.execute('set session statement_timeout=%d;' %
                        (timeout_minutes * 60 * 1000))
         cursor.execute('show statement_timeout;')
@@ -268,7 +279,7 @@ class OCitySMap:
             file_prefix (string): filename prefix for all output files.
         """
 
-        assert config.osmid or config.bbox, \
+        assert config.osmid or config.bounding_box, \
                 'At least an OSM ID or a bounding box must be provided!'
 
         output_formats = map(lambda x: x.lower(), output_formats)
@@ -287,7 +298,6 @@ class OCitySMap:
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
-        # TODO: For now, hardcode plain renderer
         renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
         renderer = renderer_cls(config, tmpdir)
         renderer.create_map_canvas()
@@ -332,6 +342,10 @@ class OCitySMap:
         elif output_format == 'ps':
             factory = lambda w,h: cairo.PDFSurface(filename, w, h)
 
+        elif output_format == 'csv':
+            # We don't render maps into CSV.
+            return
+
         else:
             raise ValueError, \
                 'Unsupported output format: %s!' % output_format.upper()
@@ -349,8 +363,8 @@ if __name__ == '__main__':
     c.title = 'Chevreuse'
     c.osmid = -943886 # -7444 (Paris)
     c.language = 'fr_FR'
-    c.paper_width_mm = 594
-    c.paper_height_mm = 420
+    c.paper_width_mm = 210
+    c.paper_height_mm = 297
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
     o.render(c, 'plain', ['pdf'], '/tmp/mymap')
