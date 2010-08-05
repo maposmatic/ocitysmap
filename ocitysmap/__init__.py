@@ -28,3 +28,5 @@ Provide documentation here.
 
 __author__ = 'The Hackfest2009 team'
 __version__ = '0.1'
+
+raise DeprecationWarning, 'OCitysmap v%s will soon disappear!' % __version__
