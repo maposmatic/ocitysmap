@@ -25,6 +25,7 @@
 import cairo
 import logging
 import mapnik
+import math
 import os
 
 import grid
@@ -59,41 +60,59 @@ class Renderer:
                    ('40x40cm', 400, 400),
                   ]
 
+    PRINT_SAFE_MARGIN_PT = 15
+    GRID_LEGEND_MARGIN_RATIO = .02
 
-    def _create_map_canvas(self, rc, graphical_ratio, tmpdir):
-        canvas = map_canvas.MapCanvas(rc.stylesheet, rc.bounding_box,
-                                      graphical_ratio)
+    def __init__(self, rc, tmpdir):
+        self.rc = rc
+        self.tmpdir = tmpdir
+        self.canvas = None
+        self.grid = None
+
+        self.paper_width_pt = Renderer.convert_mm_to_pt(rc.paper_width_mm)
+        self.paper_height_pt = Renderer.convert_mm_to_pt(rc.paper_height_mm)
+
+    def _create_map_canvas(self, graphical_ratio):
+        self.canvas = map_canvas.MapCanvas(self.rc.stylesheet,
+                                           self.rc.bounding_box,
+                                           graphical_ratio)
 
         # Add the grid
-        _grid = grid.Grid(canvas.get_actual_bounding_box())
-        grid_shape = _grid.generate_shape_file(os.path.join(tmpdir, 'grid.shp'))
-        canvas.add_shape_file(grid_shape,
-                rc.stylesheet.grid_line_color,
-                rc.stylesheet.grid_line_alpha,
-                rc.stylesheet.grid_line_width)
+        self.grid = grid.Grid(self.canvas.get_actual_bounding_box())
+        grid_shape = self.grid.generate_shape_file(
+                os.path.join(self.tmpdir, 'grid.shp'))
+        self.canvas.add_shape_file(grid_shape,
+                                   self.rc.stylesheet.grid_line_color,
+                                   self.rc.stylesheet.grid_line_alpha,
+                                   self.rc.stylesheet.grid_line_width)
 
-        return canvas, _grid
+    def _draw_rectangle(self, ctx, x, y, width, height, line_width):
+        ctx.save()
+        ctx.set_line_width(line_width)
+        ctx.move_to(x, y)
+        ctx.rel_line_to(0, height)
+        ctx.rel_line_to(width, 0)
+        ctx.rel_line_to(0, - height)
+        ctx.close_path()
+        ctx.stroke()
+        ctx.restore()
 
-    def render_shade(self, rc, shade_wkt, canvas, tmpdir):
+    def render_shade(self, shade_wkt):
         # Add the grey shade
-        shade_shape = shapes.PolyShapeFile(canvas.get_actual_bounding_box(),
-                                           os.path.join(tmpdir, 'shade.shp'),
-                                           'shade')
+        shade_shape = shapes.PolyShapeFile(
+                self.canvas.get_actual_bounding_box(),
+                os.path.join(self.tmpdir, 'shade.shp'),
+                'shade')
         shade_shape.add_shade_from_wkt(shade_wkt)
-        canvas.add_shape_file(shade_shape, rc.stylesheet.shade_color,
-                              rc.stylesheet.shade_alpha)
+        self.canvas.add_shape_file(shade_shape, self.rc.stylesheet.shade_color,
+                                   self.rc.stylesheet.shade_alpha)
 
-    def create_map_canvas(self, rc, tmpdir):
+    def create_map_canvas(self):
         """Returns the map canvas object and the grid object that has been
-        overlayed on the created map.
-
-        Args:
-            rc (RenderingConfiguration): the rendering configuration.
-            tmpdir (path): path to a directory for temporary shape files.
-        """
+        overlayed on the created map."""
         raise NotImplementedError
 
-    def render(self, rc, canvas, surface, street_index):
+    def render(self, surface, street_index):
         raise NotImplementedError
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
@@ -105,34 +124,118 @@ class Renderer:
         return ((mm/10.0) / 2.54) * 72
 
 class PlainRenderer(Renderer):
-    def __init__(self):
-        self.name = 'plain'
-        self.description = 'A basic, full-page layout for the map.'
 
-    def create_map_canvas(self, rc, tmpdir):
-        return self._create_map_canvas(rc, (float(rc.paper_width_mm) /
-                                       rc.paper_height_mm), tmpdir)
+    name = 'plain'
+    description = 'A basic, full-page layout for the map.'
 
-    def render(self, rc, canvas, surface, street_index, tmpdir):
+    def __init__(self, rc, tmpdir):
+        Renderer.__init__(self, rc, tmpdir)
+
+        self.grid_legend_margin_pt = \
+                min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
+                    Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
+
+        self.map_area_width_pt = (self.paper_width_pt -
+                                  2 * (Renderer.PRINT_SAFE_MARGIN_PT +
+                                       self.grid_legend_margin_pt))
+        self.map_area_height_pt = (self.paper_height_pt -
+                                   2 * (Renderer.PRINT_SAFE_MARGIN_PT +
+                                        self.grid_legend_margin_pt))
+
+    def create_map_canvas(self):
+        self._create_map_canvas(float(self.map_area_width_pt) /
+                                float(self.map_area_height_pt))
+
+    def render(self, surface, street_index):
         """..."""
 
         l.info('PlainRenderer rendering on %dx%dmm paper.' %
-               (rc.paper_width_mm, rc.paper_height_mm))
+               (self.rc.paper_width_mm, self.rc.paper_height_mm))
 
-        rendered_map = canvas.get_rendered_map()
+        rendered_map = self.canvas.get_rendered_map()
 
         ctx = cairo.Context(surface)
-        ctx.scale(Renderer.convert_mm_to_pt(rc.paper_width_mm) /
-                    rendered_map.width,
-                  Renderer.convert_mm_to_pt(rc.paper_height_mm) /
-                    rendered_map.height)
 
-        # TODO: scale
+        ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
+                      Renderer.PRINT_SAFE_MARGIN_PT)
+
+        ctx.save()
+        ctx.translate(self.grid_legend_margin_pt,
+                      self.grid_legend_margin_pt)
+
+        ctx.scale(self.map_area_width_pt / rendered_map.width,
+                  self.map_area_height_pt / rendered_map.height)
+
+        # Render the map canvas to the Cairo surface
+        mapnik.render(rendered_map, ctx)
+
+        # Draw a rectangle around the map
+        self._draw_rectangle(ctx, 0, 0, rendered_map.width, rendered_map.height,
+                             self.rc.stylesheet.grid_line_width)
+        ctx.restore()
+
+        # Place the vertical and horizontal square labels
+        self._draw_labels(ctx)
+
+        # TODO: map scale
         # TODO: compass rose
 
-        mapnik.render(rendered_map, ctx)
         surface.flush()
         return surface
+
+    def _draw_centered_text(self, ctx, text, x, y):
+        ctx.save()
+        xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+        ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+        ctx.show_text(text)
+        ctx.stroke()
+        ctx.restore()
+
+    def _draw_labels(self, ctx):
+        ctx.save()
+
+        step_horiz = self.map_area_width_pt / self.grid.horiz_count
+        last_horiz_portion = math.modf(self.grid.horiz_count)[0]
+
+        step_vert = self.map_area_height_pt / self.grid.vert_count
+        last_vert_portion = math.modf(self.grid.vert_count)[0]
+
+        ctx.set_font_size(min(0.75 * self.grid_legend_margin_pt,
+                              0.5 * step_horiz))
+
+        for i, label in enumerate(self.grid.horizontal_labels):
+            x = self.grid_legend_margin_pt + i * step_horiz
+
+            if i < len(self.grid.horizontal_labels) - 1:
+                x += step_horiz/2.0
+            elif last_horiz_portion >= 0.25:
+                x += step_horiz * last_horiz_portion/2.0
+            else:
+                continue
+
+            self._draw_centered_text(ctx, label,
+                                     x, self.grid_legend_margin_pt/2.0)
+            self._draw_centered_text(ctx, label,
+                                     x, self.map_area_height_pt +
+                                        3*self.grid_legend_margin_pt/2.0)
+
+        for i, label in enumerate(self.grid.vertical_labels):
+            y = self.grid_legend_margin_pt + i * step_vert
+
+            if i < len(self.grid.vertical_labels) - 1:
+                y += step_vert/2.0
+            elif last_vert_portion >= 0.25:
+                y += step_vert * last_vert_portion/2.0
+            else:
+                continue
+
+            self._draw_centered_text(ctx, label,
+                                     self.grid_legend_margin_pt/2.0, y)
+            self._draw_centered_text(ctx, label,
+                                     self.map_area_width_pt +
+                                     3*self.grid_legend_margin_pt/2.0, y)
+
+        ctx.restore()
 
     def get_compatible_paper_sizes(self, bounding_box, zoom_level,
                                    resolution_km_in_mm):
@@ -163,8 +266,6 @@ class MapWithBottomIndexRenderer(MapWithIndexRenderer):
 
 class BookletRenderer(Renderer):
     pass
-
-AVAILABLE_RENDERERS = [PlainRenderer()]
 
 
 if __name__ == '__main__':

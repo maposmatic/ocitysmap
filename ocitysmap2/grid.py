@@ -34,37 +34,44 @@ class Grid:
     AVAILABLE_GRID_SIZES_METERS = [50, 100, 250, 750, 500]
     GRID_COUNT_TRESHOLD = 4
 
-    def __init__(self, boundingbox):
+    def __init__(self, boundingbox, rtl=False):
         self._bbox = boundingbox
         self._height_m, self._width_m = boundingbox.spheric_sizes()
 
         for size in sorted(Grid.AVAILABLE_GRID_SIZES_METERS, reverse=True):
-            self._grid_size = size
-            self._horiz_count = self._width_m / size
-            self._vert_count = self._height_m / size
+            self.grid_size_m = size
+            self.horiz_count = self._width_m / size
+            self.vert_count = self._height_m / size
 
-            if (min(self._horiz_count, self._vert_count) >
+            if (min(self.horiz_count, self.vert_count) >
                 Grid.GRID_COUNT_TRESHOLD):
                 break
 
-        l.info('Using %dx%dm grid (%dx%d squares).' % (self._grid_size,
-                                                       self._grid_size,
-                                                       self._horiz_count,
-                                                       self._vert_count))
+        l.info('Using %dx%dm grid (%dx%d squares).' % (self.grid_size_m,
+                                                       self.grid_size_m,
+                                                       self.horiz_count,
+                                                       self.vert_count))
 
         self._horiz_angle = (abs(self._bbox.get_top_left()[1] -
                                  self._bbox.get_bottom_right()[1]) /
-                             self._horiz_count)
+                             self.horiz_count)
         self._vert_angle  = (abs(self._bbox.get_top_left()[0] -
                                  self._bbox.get_bottom_right()[0]) /
-                             self._vert_count)
+                             self.vert_count)
 
         self._horizontal_lines = [self._bbox.get_top_left()[0] -
                                   (x+1) * self._vert_angle for x in xrange(
-                                      int(math.floor(self._vert_count)))]
+                                      int(math.floor(self.vert_count)))]
         self._vertical_lines   = [self._bbox.get_top_left()[1] +
                                   (x+1) * self._horiz_angle for x in xrange(
-                                      int(math.floor(self._horiz_count)))]
+                                      int(math.floor(self.horiz_count)))]
+
+        self.horizontal_labels = map(self._gen_horizontal_square_label,
+                                      xrange(int(math.ceil(self.horiz_count))))
+        if rtl:
+            self.horizontal_labels.reverse()
+        self.vertical_labels = map(self._gen_vertical_square_label,
+                                   xrange(int(math.ceil(self.vert_count))))
 
     def generate_shape_file(self, filename):
         """Generates the grid shapefile with all the horizontal and
@@ -78,11 +85,21 @@ class Grid:
 
         # Use a slightly larger bounding box for the shape file to accomodate
         # for the small imprecisions of re-projecting.
-        g = shapes.LineShapeFile(self._bbox.create_expanded(0.05, 0.05),
+        g = shapes.LineShapeFile(self._bbox.create_expanded(0.001, 0.001),
                                  filename, 'grid')
         map(g.add_vert_line, self._vertical_lines)
         map(g.add_horiz_line, self._horizontal_lines)
         return g
+
+    def _gen_horizontal_square_label(self, x):
+        label = ''
+        while x != -1:
+            label = chr(ord('A') + x % 26) + label
+            x = x/26 - 1
+        return label
+
+    def _gen_vertical_square_label(self, x):
+        return str(x + 1)
 
 if __name__ == "__main__":
     # Basic unit test

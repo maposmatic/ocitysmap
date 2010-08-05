@@ -202,14 +202,14 @@ class OCitySMap:
         objects)."""
         pass
 
-    def render(self, config, renderer, output_formats, file_prefix):
+    def render(self, config, renderer_name, output_formats, file_prefix):
         """Renders a job with the given rendering configuration, using the
         provided renderer, to the given output formats.
 
         Args:
             config (RenderingConfiguration): the rendering configuration
                 object.
-            renderer (Renderer): the layout renderer to use for this rendering.
+            renderer_name (string): the layout renderer to use for this rendering.
             output_formats (list): a list of output formats to render to, from
                 the list of supported output formats (pdf, svgz, etc.).
             file_prefix (string): filename prefix for all output files.
@@ -231,29 +231,32 @@ class OCitySMap:
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
-        canvas, grid = renderer.create_map_canvas(config, tmpdir)
+        # TODO: For now, hardcode plain renderer
+        renderer = renderers.PlainRenderer(config, tmpdir)
+        renderer.create_map_canvas()
 
         if config.osmid:
-            shade_wkt = self._get_shade_wkt(config.bounding_box, config.osmid)
-            renderer.render_shade(config, shade_wkt, canvas, tmpdir)
+            shade_wkt = self._get_shade_wkt(
+                    renderer.canvas.get_actual_bounding_box(),
+                    config.osmid)
+            renderer.render_shade(shade_wkt)
 
-        canvas.render()
+        renderer.canvas.render()
         street_index = index.StreetIndex(config.osmid,
-                                         canvas.get_actual_bounding_box(),
-                                         config.language, grid)
+                                         renderer.canvas.get_actual_bounding_box(),
+                                         config.language, renderer.grid)
 
         try:
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
-                self._render_one(config, canvas, renderer, street_index,
-                                 output_filename, output_format, tmpdir)
+                self._render_one(renderer, street_index, output_filename,
+                                 output_format)
 
             # TODO: street_index.as_csv()
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, config, canvas, renderer, street_index,
-                    filename, output_format, tmpdir):
+    def _render_one(self, renderer, street_index, filename, output_format):
         l.info('Rendering %s...' % filename)
 
         factory = None
@@ -276,27 +279,26 @@ class OCitySMap:
             raise ValueError, \
                 'Unsupported output format: %s!' % output_format.upper()
 
-        surface = factory(renderers.Renderer.convert_mm_to_pt(config.paper_width_mm),
-                          renderers.Renderer.convert_mm_to_pt(config.paper_height_mm))
-
-        renderer.render(config, canvas, surface, street_index, tmpdir)
+        surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
+        renderer.render(surface, street_index)
         surface.finish()
 
 if __name__ == '__main__':
     s = Stylesheet()
     s.name = 'osm'
     s.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
+    s.shade_alpha = 0.2
 
     c = RenderingConfiguration()
     c.title = 'Chevreuse'
-    c.osmid = -943886
+    c.osmid = -943886 # -7444 (Paris)
     c.language = 'fr_FR'
     c.stylesheet = s
-    c.paper_width_mm = 297
+    c.paper_width_mm = 594
     c.paper_height_mm = 420
     c.min_kmpmm = 100
 
     logging.basicConfig(level=logging.DEBUG)
 
     o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
-    o.render(c, renderers.PlainRenderer(), ['pdf', 'svgz'], '/tmp/mymap')
+    o.render(c, 'plain', ['pdf'], '/tmp/mymap')
