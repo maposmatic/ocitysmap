@@ -26,8 +26,13 @@ import math
 
 EARTH_RADIUS = 6370986 # meters
 
-
 class BoundingBox:
+    """
+    The BoundingBox class defines a geographic rectangle area specified by the
+    coordinates of the top left and bottom right corners, in latitude and
+    longitude (4002 projection).
+    """
+
     def __init__(self, lat1, long1, lat2, long2):
         (self._lat1, self._long1) = float(lat1), float(long1)
         (self._lat2, self._long2) = float(lat2), float(long2)
@@ -38,8 +43,14 @@ class BoundingBox:
         if (self._long1 > self._long2):
             self._long1, self._long2 = self._long2, self._long1
 
+    def __str__(self):
+        return '(%s %s)' % (self.ptstr(self.get_top_left()),
+                            self.ptstr(self.get_bottom_right()))
+
     @staticmethod
     def parse_wkt(wkt):
+        """Returns a BoundingBox object created from the coordinates of a
+        polygon given in WKT format."""
         coords = [p.split(' ') for p in wkt[9:].split(',')]
         return BoundingBox(coords[1][1], coords[1][0],
                            coords[3][1], coords[3][0])
@@ -58,10 +69,6 @@ class BoundingBox:
 
     def ptstr(self, point):
         return '%.4f,%.4f' % (point[0], point[1])
-
-    def __str__(self):
-        return '(%s %s)' % (self.ptstr(self.get_top_left()),
-                            self.ptstr(self.get_bottom_right()))
 
     def spheric_sizes(self):
         """Metric distances at the bounding box top latitude.

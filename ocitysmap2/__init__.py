@@ -274,7 +274,10 @@ class OCitySMap:
         output_formats = map(lambda x: x.lower(), output_formats)
         self._i18n = i18n.install_translation(config.language,
                                               self._locale_path)
-        l.info('Rendering language: %s.' % self._i18n.language_code())
+        config.rtl = self._i18n.isrtl()
+
+        l.info('Rendering language: %s (rtl: %s).' %
+               (self._i18n.language_code(), config.rtl))
 
         # Make sure we have a bounding box
         config.bounding_box = (config.bounding_box or

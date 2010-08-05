@@ -136,11 +136,9 @@ class PolyShapeFile(_ShapeFile):
         self._add_feature(poly)
         return self
 
-
 if __name__ == "__main__":
-    # Basic unit test
-    g = LineShapeFile(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637),
-                  '/tmp/mygrid.shp', 'test')
-    g.add_horiz_line(44.48)
-    g.add_vert_line(-1.08)
-    g.flush()
+    (LineShapeFile(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637),
+                   '/tmp/mygrid.shp', 'test')
+        .add_horiz_line(44.48)
+        .add_vert_line(-1.08)
+        .flush())

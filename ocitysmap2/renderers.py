@@ -60,7 +60,11 @@ class Renderer:
                    ('40x40cm', 400, 400),
                   ]
 
+    # The PRINT_SAFE_MARGIN_PT is a small margin we leave on all page borders
+    # to ease printing as printers often eat up margins with misaligned paper,
+    # etc.
     PRINT_SAFE_MARGIN_PT = 15
+
     GRID_LEGEND_MARGIN_RATIO = .02
 
     # The DEFAULT_KM_IN_MM represents the minimum acceptable size in milimeters
@@ -82,7 +86,8 @@ class Renderer:
                                            graphical_ratio)
 
         # Add the grid
-        self.grid = grid.Grid(self.canvas.get_actual_bounding_box())
+        self.grid = grid.Grid(self.canvas.get_actual_bounding_box(),
+                              self.rc.rtl)
         grid_shape = self.grid.generate_shape_file(
                 os.path.join(self.tmpdir, 'grid.shp'))
         self.canvas.add_shape_file(grid_shape,
@@ -111,24 +116,55 @@ class Renderer:
         self.canvas.add_shape_file(shade_shape, self.rc.stylesheet.shade_color,
                                    self.rc.stylesheet.shade_alpha)
 
+    @staticmethod
+    def convert_mm_to_pt(mm):
+        return ((mm/10.0) / 2.54) * 72
+
+    # The next three methods are to be overloaded by the actual renderer.
+
     def create_map_canvas(self):
-        """Returns the map canvas object and the grid object that has been
-        overlayed on the created map."""
+        """Creates the Mapnik map canvas to the appropriate graphical ratio so
+        it can be scaled and fitted into the zone on the page dedicated to the
+        map."""
         raise NotImplementedError
 
     def render(self, surface, street_index):
+        """Renders the map, the index and all other visual map features on the
+        given Cairo surface.
+
+        Args:
+            surface (cairo.Surface): the Cairo surface to render into.
+            street_index (index.StreetIndex): the street index, that would be
+                rendered by a renderer that supports it.
+        """
         raise NotImplementedError
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm):
+        """Returns a list of the compatible paper sizes for the given bounding
+        box. The list is sorted, smaller papers first, and a "custom" paper
+        matching the dimensions of the bounding box is added at the end.
+
+        Args:
+            bounding_box (coords.BoundingBox): the map geographic bounding box.
+            zoom_level (int): the Mapnik zoom level to use, generally 16.
+            resolution_km_in_mm (int): size of a geographic kilometer in
+                milimeters on the rendered map.
+
+        Returns a list of tuples (paper name, width in mm, height in mm). Paper
+        sizes are represented in portrait mode.
+        """
+
         raise NotImplementedError
 
-    @staticmethod
-    def convert_mm_to_pt(mm):
-        return ((mm/10.0) / 2.54) * 72
 
 class PlainRenderer(Renderer):
+    """
+    The PlainRenderer is the simplest renderer we have. It creates a full-page
+    map, with the overlayed features like the grid, grid labels, scale and
+    compass rose but no index.
+    """
 
     name = 'plain'
     description = 'A basic, full-page layout for the map.'
@@ -262,7 +298,7 @@ class PlainRenderer(Renderer):
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
-        valid_sizes.append(('Custom', paper_width_mm, paper_height_mm))
+        valid_sizes.append(('Best fit', paper_width_mm, paper_height_mm))
 
         return valid_sizes
 
@@ -324,5 +360,3 @@ if __name__ == '__main__':
     plain.canvas.render()
     plain.render(surface, None)
     surface.finish()
-
-

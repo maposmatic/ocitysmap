@@ -59,9 +59,7 @@ class StreetIndex:
 
     def as_csv(self, fobj):
         """Saves the street index as CSV to the provided file object."""
-
         # TODO: write to CSV
-
         raise NotImplementedError
 
     def _get_streets(self):

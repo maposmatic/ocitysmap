@@ -164,30 +164,30 @@ class MapCanvas:
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+
     class StylesheetMock:
         def __init__(self):
             self.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
             self.zoom_level = 16
 
-    logging.basicConfig(level=logging.DEBUG)
-
-    # Basic unit test
     bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
-
     canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210)
-
     new_bbox = canvas.get_actual_bounding_box()
 
+    print bbox
+    print new_bbox
+
     canvas.add_shape_file(
-        shapes.ShapeFile(new_bbox, '/tmp/mygrid.shp', 'grid')
+        shapes.LineShapeFile(new_bbox, '/tmp/mygrid.shp', 'grid')
             .add_vert_line(2.04)
             .add_horiz_line(48.7),
         'red', 0.3, 10.0)
 
     canvas.add_shape_file(
-        shapes.ShapeFile(new_bbox, '/tmp/mypoly.shp', 'shade')
+        shapes.PolyShapeFile(new_bbox, '/tmp/mypoly.shp', 'shade')
             .add_shade_from_wkt('POLYGON((2.04537559754772 48.702794853359,2.0456929723376 48.7033682610593,2.0457757970068 48.7037022715908,2.04577876144723 48.7043963708738,2.04589724923321 48.7043963708738,2.04589428479277 48.704519562418,2.04746445007788 48.7044706533954,2.04723043894637 48.7024665875529,2.04674876229103 48.7024238422904,2.04615641319268 48.702500973452,2.04537559754772 48.702794853359))'),
         'blue', 0.3)
 
-    my_map = canvas.render()
-    mapnik.render_to_file(my_map, '/tmp/mymap.png', 'png')
+    canvas.render()
+    mapnik.render_to_file(canvas.get_rendered_map(), '/tmp/mymap.png', 'png')

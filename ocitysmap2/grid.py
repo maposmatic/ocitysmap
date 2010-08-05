@@ -25,18 +25,35 @@
 import logging
 import math
 
+import coords
 import shapes
 
 l = logging.getLogger('ocitysmap')
 
 class Grid:
+    """
+    The Grid class defines the grid overlayed on a rendered map. It controls
+    the grid size, nuber and size of squares, etc.
+    """
 
-    AVAILABLE_GRID_SIZES_METERS = [50, 100, 250, 750, 500]
+    # Available and supported grid sizes, in meters.
+    AVAILABLE_GRID_SIZES_METERS = [50, 100, 250, 500]
+
+    # Number of squares under which a smaller grid size is used (until no
+    # smaller size is available).
     GRID_COUNT_TRESHOLD = 4
 
-    def __init__(self, boundingbox, rtl=False):
-        self._bbox = boundingbox
-        self._height_m, self._width_m = boundingbox.spheric_sizes()
+    def __init__(self, bounding_box, rtl=False):
+        """Creates a new grid for the given bounding box.
+
+        Args:
+            bounding_box (coords.BoundingBox): the map bounding box.
+            rtl (boolean): whether the map is rendered in right-to-left mode or
+                not. Defaults to False.
+        """
+
+        self._bbox = bounding_box
+        self._height_m, self._width_m = bounding_box.spheric_sizes()
 
         for size in sorted(Grid.AVAILABLE_GRID_SIZES_METERS, reverse=True):
             self.grid_size_m = size
@@ -102,10 +119,6 @@ class Grid:
         return str(x + 1)
 
 if __name__ == "__main__":
-    # Basic unit test
-    import coords
-
     logging.basicConfig(level=logging.DEBUG)
-
     grid = Grid(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637))
     shape = grid.generate_shape_file('/tmp/mygrid.shp')
