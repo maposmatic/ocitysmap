@@ -77,7 +77,7 @@ class Renderer:
                    ('50x50cm', 500, 500),
                    ('40x40cm', 400, 400),
 
-                   ('Best fit', 0, 0),
+                   ('Best fit', None, None),
                   ]
 
     # The PRINT_SAFE_MARGIN_PT is a small margin we leave on all page borders
@@ -349,8 +349,11 @@ class PlainRenderer(Renderer):
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
-        valid_sizes.append(('Best fit', paper_width_mm, paper_height_mm,
-                            True, False))
+        valid_sizes.append(('Best fit',
+                            min(paper_width_mm, paper_height_mm),
+                            max(paper_width_mm, paper_height_mm),
+                            paper_width_mm < paper_height_mm,
+                            paper_width_mm > paper_height_mm))
 
         return valid_sizes
 
