@@ -132,9 +132,14 @@ class OCitySMap:
 
     STYLESHEET_REGISTRY = []
 
-    def __init__(self, config_files=['/etc/ocitysmap.conf', '~/.ocitysmap.conf'],
+    def __init__(self, config_files=None,
                  grid_table_prefix=None):
         """..."""
+
+        if config_files is None:
+            config_files = ['/etc/ocitysmap.conf', '~/.ocitysmap.conf']
+        elif not isinstance(config_files, list):
+            config_files = [config_files]
 
         config_files = map(os.path.expanduser, config_files)
         l.info('Reading OCitySMap configuration from %s...' %
