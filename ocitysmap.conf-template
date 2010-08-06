@@ -19,18 +19,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# PostGIS datasource.
 [datasource]
-host=localhost
-user=maposmatic
-password=ereiamjh
-dbname=maposmatic
-
+host: localhost
+user: maposmatic
+password: ereiamjh
+dbname: maposmatic
 # SQL request timeout, in minutes. Defaults to 15min.
-# request_timeout = 10
+# request_timeout: 10
 
-[mapnik]
-map=/path/to/mapnik-osm/osm.xml
+[rendering]
+# List of available stylesheets, each needs to be described by an eponymous
+# configuration section in this file.
+available_stylesheets: stylesheet_osm
 
-[ocitysmap]
-copyright_logo=/path/to/ocitysmap/Openstreetmap_logo.png
-locale_path=/path/to/ocitysmap/locale
+# The default Mapnik stylesheet.
+[stylesheet_osm]
+name: Default
+description: The default OSM style
+path: /path/to/mapnik/osm.xml
