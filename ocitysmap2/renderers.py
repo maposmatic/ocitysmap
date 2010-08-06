@@ -97,18 +97,14 @@ class Renderer:
         self.canvas = None
         self.grid = None
 
-        # Switch to landscape mode if the geographic bounding box is wider than
-        # tall.
-        geo_height_m, geo_width_m = rc.bounding_box.spheric_sizes()
-        if geo_width_m > geo_height_m:
-            self.rc.paper_width_mm, self.rc.paper_height_mm = \
-                    self.rc.paper_height_mm, self.rc.paper_width_mm
-            l.debug('Switching to landscape mode (%.1fx%.1fcm)' %
-                    (self.rc.paper_width_mm/10.0,
-                     self.rc.paper_height_mm/10.0))
+        self.paper_width_pt = \
+                Renderer.convert_mm_to_pt(self.rc.paper_width_mm)
+        self.paper_height_pt = \
+                Renderer.convert_mm_to_pt(self.rc.paper_height_mm)
 
-        self.paper_width_pt = Renderer.convert_mm_to_pt(self.rc.paper_width_mm)
-        self.paper_height_pt = Renderer.convert_mm_to_pt(self.rc.paper_height_mm)
+    @staticmethod
+    def convert_mm_to_pt(mm):
+        return ((mm/10.0) / 2.54) * 72
 
     def _create_map_canvas(self, graphical_ratio):
         self.canvas = map_canvas.MapCanvas(self.rc.stylesheet,
@@ -200,10 +196,6 @@ class Renderer:
         shade_shape.add_shade_from_wkt(shade_wkt)
         self.canvas.add_shape_file(shade_shape, self.rc.stylesheet.shade_color,
                                    self.rc.stylesheet.shade_alpha)
-
-    @staticmethod
-    def convert_mm_to_pt(mm):
-        return ((mm/10.0) / 2.54) * 72
 
     # The next three methods are to be overloaded by the actual renderer.
 
@@ -330,7 +322,12 @@ class PlainRenderer(Renderer):
     def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
         """Returns a list of paper sizes that can accomodate the provided
-        bounding box at the given zoom level and print resolution."""
+        bounding box at the given zoom level and print resolution.
+
+        The compatible paper sizes is a list of 5-uples (name, width in
+        millimeters, height in millimeters, portrait capable, landscape
+        capable).
+        """
 
         geo_width_m, geo_height_m = bounding_box.spheric_sizes()
         paper_width_mm = geo_width_m/1000.0 * resolution_km_in_mm
@@ -342,14 +339,18 @@ class PlainRenderer(Renderer):
 
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
-        valid_sizes = filter(lambda (name,w,h):
-                (paper_width_mm <= w and paper_height_mm <= h) or
-                (paper_width_mm <= h and paper_height_mm <= w),
-            Renderer.PAPER_SIZES)
+        valid_sizes = []
+        for name, w, h in Renderer.PAPER_SIZES:
+            portrait_ok = paper_width_mm <= w and paper_height_mm <= h
+            landscape_ok = paper_width_mm <= h and paper_height_mm <= w
+
+            if portrait_ok or landscape_ok:
+                valid_sizes.append((name, w, h, portrait_ok, landscape_ok))
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
-        valid_sizes.append(('Best fit', paper_width_mm, paper_height_mm))
+        valid_sizes.append(('Best fit', paper_width_mm, paper_height_mm,
+                            True, False))
 
         return valid_sizes
 
