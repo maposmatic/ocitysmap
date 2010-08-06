@@ -128,6 +128,7 @@ class OCitySMap:
 
     DEFAULT_ZOOM_LEVEL = 16
     DEFAULT_RESOLUTION_KM_IN_MM = 150
+    DEFAULT_RENDERING_PNG_DPI = 300
 
     STYLESHEET_REGISTRY = []
 
@@ -169,8 +170,8 @@ class OCitySMap:
         db.set_client_encoding('utf8')
 
         try:
-            timeout = self._parser.get('datasource', 'request_timeout')
-        except ConfigParser.NoOptionError:
+            timeout = int(self._parser.get('datasource', 'request_timeout'))
+        except (ConfigParser.NoOptionError, ValueError):
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(db, timeout)
 
@@ -327,10 +328,17 @@ class OCitySMap:
         l.info('Rendering %s...' % filename)
 
         factory = None
+        dpi = renderers.RenderingSession.PT_PER_INCH
 
         if output_format == 'png':
-            factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+            try:
+                dpi = int(self._parser.get('rendering', 'png_dpi'))
+            except ConfigParser.NoOptionError:
+                dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
+            factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32,
+                int(renderers.RenderingSession.pt_to_dots_with_dpi(w, dpi)),
+                int(renderers.RenderingSession.pt_to_dots_with_dpi(h, dpi)))
         elif output_format == 'svg':
             factory = lambda w,h: cairo.SVGSurface(filename, w, h)
         elif output_format == 'svgz':
@@ -338,10 +346,8 @@ class OCitySMap:
                     gzip.GzipFile(filename, 'wb'), w, h)
         elif output_format == 'pdf':
             factory = lambda w,h: cairo.PDFSurface(filename, w, h)
-
         elif output_format == 'ps':
             factory = lambda w,h: cairo.PSSurface(filename, w, h)
-
         elif output_format == 'csv':
             # We don't render maps into CSV.
             return
@@ -351,7 +357,12 @@ class OCitySMap:
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-        renderer.render(surface, street_index)
+        rs = renderer.create_rendering_session(surface, street_index, dpi)
+        renderer.render(rs)
+
+        if output_format == 'png':
+            surface.write_to_png(filename)
+
         surface.finish()
 
 if __name__ == '__main__':
@@ -363,7 +374,7 @@ if __name__ == '__main__':
     c.title = 'Chevreuse'
     c.osmid = -943886 # -7444 (Paris)
     c.language = 'fr_FR'
-    c.paper_width_mm = 210
+    c.paper_width_mm = 420
     c.paper_height_mm = 297
     c.stylesheet = o.get_stylesheet_by_name('Default')
 

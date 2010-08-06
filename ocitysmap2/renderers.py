@@ -34,6 +34,24 @@ import shapes
 
 l = logging.getLogger('ocitysmap')
 
+class RenderingSession:
+
+    PT_PER_INCH = 72.0
+
+    def __init__(self, surface, street_index,
+                 dpi=PT_PER_INCH):
+        self.surface = surface
+        self.street_index = street_index
+        self.dpi = dpi
+
+    def pt_to_dots(self, pt):
+        return RenderingSession.pt_to_dots_with_dpi(pt, self.dpi)
+
+    @staticmethod
+    def pt_to_dots_with_dpi(pt, dpi):
+        return float(pt * dpi) / RenderingSession.PT_PER_INCH
+
+
 class Renderer:
     """
     The job of an OCitySMap layout renderer is to lay out the resulting map and
@@ -86,8 +104,8 @@ class Renderer:
             self.rc.paper_width_mm, self.rc.paper_height_mm = \
                     self.rc.paper_height_mm, self.rc.paper_width_mm
             l.debug('Switching to landscape mode (%.1fx%.1fcm)' %
-                    self.rc.paper_width_mm/10.0,
-                    self.rc.paper_height_mm/10.0)
+                    (self.rc.paper_width_mm/10.0,
+                     self.rc.paper_height_mm/10.0))
 
         self.paper_width_pt = Renderer.convert_mm_to_pt(self.rc.paper_width_mm)
         self.paper_height_pt = Renderer.convert_mm_to_pt(self.rc.paper_height_mm)
@@ -118,6 +136,61 @@ class Renderer:
         ctx.stroke()
         ctx.restore()
 
+    def _draw_centered_text(self, ctx, text, x, y):
+        ctx.save()
+        xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+        ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+        ctx.show_text(text)
+        ctx.stroke()
+        ctx.restore()
+
+    def _draw_labels(self, ctx, map_area_width_dots, map_area_height_dots,
+                     grid_legend_margin_dots):
+        ctx.save()
+
+        step_horiz = map_area_width_dots / self.grid.horiz_count
+        last_horiz_portion = math.modf(self.grid.horiz_count)[0]
+
+        step_vert = map_area_height_dots / self.grid.vert_count
+        last_vert_portion = math.modf(self.grid.vert_count)[0]
+
+        ctx.set_font_size(min(0.75 * grid_legend_margin_dots,
+                              0.5 * step_horiz))
+
+        for i, label in enumerate(self.grid.horizontal_labels):
+            x = grid_legend_margin_dots + i * step_horiz
+
+            if i < len(self.grid.horizontal_labels) - 1:
+                x += step_horiz/2.0
+            elif last_horiz_portion >= 0.25:
+                x += step_horiz * last_horiz_portion/2.0
+            else:
+                continue
+
+            self._draw_centered_text(ctx, label,
+                                     x, grid_legend_margin_dots/2.0)
+            self._draw_centered_text(ctx, label,
+                                     x, map_area_height_dots +
+                                        3*grid_legend_margin_dots/2.0)
+
+        for i, label in enumerate(self.grid.vertical_labels):
+            y = grid_legend_margin_dots + i * step_vert
+
+            if i < len(self.grid.vertical_labels) - 1:
+                y += step_vert/2.0
+            elif last_vert_portion >= 0.25:
+                y += step_vert * last_vert_portion/2.0
+            else:
+                continue
+
+            self._draw_centered_text(ctx, label,
+                                     grid_legend_margin_dots/2.0, y)
+            self._draw_centered_text(ctx, label,
+                                     map_area_width_dots +
+                                     3*grid_legend_margin_dots/2.0, y)
+
+        ctx.restore()
+
     def render_shade(self, shade_wkt):
         # Add the grey shade
         shade_shape = shapes.PolyShapeFile(
@@ -140,7 +213,13 @@ class Renderer:
         map."""
         raise NotImplementedError
 
-    def render(self, surface, street_index):
+    def create_rendering_session(self, surface, street_index,
+                                 dpi=RenderingSession.PT_PER_INCH):
+        """
+        """
+        return RenderingSession(surface, street_index, dpi)
+
+    def render(self, rs):
         """Renders the map, the index and all other visual map features on the
         given Cairo surface.
 
@@ -195,29 +274,40 @@ class PlainRenderer(Renderer):
                                    2 * (Renderer.PRINT_SAFE_MARGIN_PT +
                                         self.grid_legend_margin_pt))
 
+    def create_rendering_session(self, surface, street_index,
+                                 dpi=RenderingSession.PT_PER_INCH):
+        rs = Renderer.create_rendering_session(self, surface, street_index, dpi)
+        rs.safe_margin_dots = rs.pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT)
+        rs.grid_legend_margin_dots = rs.pt_to_dots(self.grid_legend_margin_pt)
+        rs.map_area_width_dots = rs.pt_to_dots(self.map_area_width_pt)
+        rs.map_area_height_dots = rs.pt_to_dots(self.map_area_height_pt)
+        return rs
+
     def create_map_canvas(self):
         self._create_map_canvas(float(self.map_area_width_pt) /
                                 float(self.map_area_height_pt))
 
-    def render(self, surface, street_index):
-        """..."""
+    def render(self, rs):
+        """
+        Args:
+            rs (RenderingSession): ...
+        """
 
-        l.info('PlainRenderer rendering on %dx%dmm paper.' %
-               (self.rc.paper_width_mm, self.rc.paper_height_mm))
+        l.info('PlainRenderer rendering on %dx%dmm paper at %d dpi.' %
+               (self.rc.paper_width_mm, self.rc.paper_height_mm, rs.dpi))
+
 
         rendered_map = self.canvas.get_rendered_map()
+        ctx = cairo.Context(rs.surface)
 
-        ctx = cairo.Context(surface)
-
-        ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
-                      Renderer.PRINT_SAFE_MARGIN_PT)
+        # Print margin
+        ctx.translate(rs.safe_margin_dots, rs.safe_margin_dots)
 
         ctx.save()
-        ctx.translate(self.grid_legend_margin_pt,
-                      self.grid_legend_margin_pt)
+        ctx.translate(rs.grid_legend_margin_dots, rs.grid_legend_margin_dots)
 
-        ctx.scale(self.map_area_width_pt / rendered_map.width,
-                  self.map_area_height_pt / rendered_map.height)
+        ctx.scale(rs.map_area_width_dots / rendered_map.width,
+                  rs.map_area_height_dots / rendered_map.height)
 
         # Render the map canvas to the Cairo surface
         mapnik.render(rendered_map, ctx)
@@ -228,67 +318,13 @@ class PlainRenderer(Renderer):
         ctx.restore()
 
         # Place the vertical and horizontal square labels
-        self._draw_labels(ctx)
+        self._draw_labels(ctx, rs.map_area_width_dots, rs.map_area_height_dots,
+                          rs.grid_legend_margin_dots)
 
         # TODO: map scale
         # TODO: compass rose
 
-        surface.flush()
-        return surface
-
-    def _draw_centered_text(self, ctx, text, x, y):
-        ctx.save()
-        xb, yb, tw, th, xa, ya = ctx.text_extents(text)
-        ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
-        ctx.show_text(text)
-        ctx.stroke()
-        ctx.restore()
-
-    def _draw_labels(self, ctx):
-        ctx.save()
-
-        step_horiz = self.map_area_width_pt / self.grid.horiz_count
-        last_horiz_portion = math.modf(self.grid.horiz_count)[0]
-
-        step_vert = self.map_area_height_pt / self.grid.vert_count
-        last_vert_portion = math.modf(self.grid.vert_count)[0]
-
-        ctx.set_font_size(min(0.75 * self.grid_legend_margin_pt,
-                              0.5 * step_horiz))
-
-        for i, label in enumerate(self.grid.horizontal_labels):
-            x = self.grid_legend_margin_pt + i * step_horiz
-
-            if i < len(self.grid.horizontal_labels) - 1:
-                x += step_horiz/2.0
-            elif last_horiz_portion >= 0.25:
-                x += step_horiz * last_horiz_portion/2.0
-            else:
-                continue
-
-            self._draw_centered_text(ctx, label,
-                                     x, self.grid_legend_margin_pt/2.0)
-            self._draw_centered_text(ctx, label,
-                                     x, self.map_area_height_pt +
-                                        3*self.grid_legend_margin_pt/2.0)
-
-        for i, label in enumerate(self.grid.vertical_labels):
-            y = self.grid_legend_margin_pt + i * step_vert
-
-            if i < len(self.grid.vertical_labels) - 1:
-                y += step_vert/2.0
-            elif last_vert_portion >= 0.25:
-                y += step_vert * last_vert_portion/2.0
-            else:
-                continue
-
-            self._draw_centered_text(ctx, label,
-                                     self.grid_legend_margin_pt/2.0, y)
-            self._draw_centered_text(ctx, label,
-                                     self.map_area_width_pt +
-                                     3*self.grid_legend_margin_pt/2.0, y)
-
-        ctx.restore()
+        rs.surface.flush()
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
