@@ -312,7 +312,7 @@ class OCitySMap:
         renderer.canvas.render()
         street_index = index.StreetIndex(config.osmid,
                                          renderer.canvas.get_actual_bounding_box(),
-                                         config.language, renderer.grid)
+                                         self._i18n, renderer.grid)
 
         try:
             for output_format in output_formats:
