@@ -79,8 +79,18 @@ class Renderer:
         self.canvas = None
         self.grid = None
 
-        self.paper_width_pt = Renderer.convert_mm_to_pt(rc.paper_width_mm)
-        self.paper_height_pt = Renderer.convert_mm_to_pt(rc.paper_height_mm)
+        # Switch to landscape mode if the geographic bounding box is wider than
+        # tall.
+        geo_height_m, geo_width_m = rc.bounding_box.spheric_sizes()
+        if geo_width_m > geo_height_m:
+            self.rc.paper_width_mm, self.rc.paper_height_mm = \
+                    self.rc.paper_height_mm, self.rc.paper_width_mm
+            l.debug('Switching to landscape mode (%.1fx%.1fcm)' %
+                    self.rc.paper_width_mm/10.0,
+                    self.rc.paper_height_mm/10.0)
+
+        self.paper_width_pt = Renderer.convert_mm_to_pt(self.rc.paper_width_mm)
+        self.paper_height_pt = Renderer.convert_mm_to_pt(self.rc.paper_height_mm)
 
     def _create_map_canvas(self, graphical_ratio):
         self.canvas = map_canvas.MapCanvas(self.rc.stylesheet,
@@ -294,8 +304,11 @@ class PlainRenderer(Renderer):
                 'on paper.' % (geo_width_m, geo_height_m,
                  paper_width_mm/10, paper_height_mm/10))
 
+        # Test both portrait and landscape orientations when checking for paper
+        # sizes.
         valid_sizes = filter(lambda (name,w,h):
-                paper_width_mm <= w and paper_height_mm <= h,
+                (paper_width_mm <= w and paper_height_mm <= h) or
+                (paper_width_mm <= h and paper_height_mm <= w),
             Renderer.PAPER_SIZES)
 
         # Add a 'Custom' paper format to the list that perfectly matches the
@@ -324,7 +337,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
 
-    bbox = coords.BoundingBox(48.7269,2.0019, 48.6801,2.0669)
+    bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
     zoom = 16
 
     renderer_cls = get_renderer_class_by_name('plain')
@@ -348,8 +361,8 @@ if __name__ == '__main__':
         def __init__(self):
             self.stylesheet = StylesheetMock()
             self.bounding_box = bbox
-            self.paper_width_mm = papers[0][2]
-            self.paper_height_mm = papers[0][1]
+            self.paper_width_mm = papers[0][1]
+            self.paper_height_mm = papers[0][2]
             self.rtl = False
 
     config = RenderingConfigurationMock()

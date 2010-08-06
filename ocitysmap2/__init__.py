@@ -329,7 +329,7 @@ class OCitySMap:
         factory = None
 
         if output_format == 'png':
-            raise NotImplementedError
+            factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
 
         elif output_format == 'svg':
             factory = lambda w,h: cairo.SVGSurface(filename, w, h)
@@ -340,7 +340,7 @@ class OCitySMap:
             factory = lambda w,h: cairo.PDFSurface(filename, w, h)
 
         elif output_format == 'ps':
-            factory = lambda w,h: cairo.PDFSurface(filename, w, h)
+            factory = lambda w,h: cairo.PSSurface(filename, w, h)
 
         elif output_format == 'csv':
             # We don't render maps into CSV.
@@ -367,4 +367,4 @@ if __name__ == '__main__':
     c.paper_height_mm = 297
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain', ['pdf'], '/tmp/mymap')
+    o.render(c, 'plain', ['png', 'pdf'], '/tmp/mymap')
