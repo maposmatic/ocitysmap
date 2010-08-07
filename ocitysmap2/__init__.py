@@ -269,12 +269,8 @@ class OCitySMap:
         inside = matches.groups()[0]
 
         bounding_box = bounding_box.create_expanded(0.05, 0.05)
-        xmax, ymin = bounding_box.get_top_left()
-        xmin, ymax = bounding_box.get_bottom_right()
-
-        poly = "MULTIPOLYGON(((%f %f, %f %f, %f %f, %f %f, %f %f)),((%s)))" % \
-                (ymin, xmin, ymin, xmax, ymax, xmax, ymax, xmin, ymin, xmin,
-                 inside)
+        poly = "MULTIPOLYGON(((%s)),((%s)))" % \
+                (bounding_box.as_wkt(with_polygon_statement = False), inside)
         return poly
 
     def get_all_style_configurations(self):
