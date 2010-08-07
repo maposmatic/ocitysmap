@@ -46,11 +46,16 @@ class IndexCategory:
     name = None
     items = None
 
-    def __init__(self, name, items):
-        self.name, self.items = name, items
+    def __init__(self, name, items = None):
+        self.name  = name
+        self.items = items or list()
 
     def __str__(self):
         return '<%s (%s)>' % (self.name, map(str, self.items))
+
+    def __repr__(self):
+        return 'IndexCategory(%s, %s)' % (repr(self.name),
+                                          repr(self.items))
 
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
@@ -90,14 +95,25 @@ class IndexItem:
     contains the item label (street name, POI name or description) and the
     humanized squares description.
     """
-    label = None
-    squares = None
+    __slots__ = ['label', 'db_table', 'osm_id', 'squares']
+    label    = None
+    db_table = None
+    osm_id   = None
+    squares  = None
 
-    def __init__(self, label, squares):
-        self.label, self.squares = label, squares
+    def __init__(self, label, db_table = None, osm_id = None, squares = None):
+        self.label    = label
+        self.db_table = db_table
+        self.osm_id   = osm_id
+        self.squares  = squares
 
     def __str__(self):
         return '%s...%s' % (self.label, self.squares)
+
+    def __repr__(self):
+        return ('IndexItem(%s, %s, %s, %s)'
+                % (repr(self.label), repr(self.db_table), repr(self.osm_id),
+                   repr(self.squares)))
 
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
@@ -127,12 +143,12 @@ class IndexItem:
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
-                                                        self.squares)
+                                                        self.squares or '???')
         else:
             _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
                                                          fascent, fheight,
                                                          baseline_x, baseline_y,
-                                                         self.squares)
+                                                         self.squares or '???')
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,

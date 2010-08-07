@@ -38,9 +38,9 @@ class StreetIndexRenderer:
     rendering of the street index.
     """
 
-    def __init__(self, i18n, streets, amenities):
+    def __init__(self, i18n, index_categories):
         self._i18n = i18n
-        self._data = streets + amenities
+        self._index_categories = index_categories
 
         self._label_fd = pango.FontDescription('DejaVu')
         self._header_fd = pango.FontDescription('Georgia Bold')
@@ -72,7 +72,7 @@ class StreetIndexRenderer:
              alignment not in ('left', 'right'))):
             raise ValueError, 'Incompatible freedom direction and alignment!'
 
-        if not self._data:
+        if not self._index_categories:
             raise commons.IndexEmptyError
 
         ctx = cairo.Context(surface)
@@ -127,7 +127,7 @@ class StreetIndexRenderer:
             offset_x = index_width + delta_x
 
         offset_y = 0
-        for category in self._data:
+        for category in self._index_categories:
             if offset_y + header_fheight + label_fheight > index_height:
                 offset_y = 0
                 offset_x += delta_x
@@ -214,18 +214,18 @@ class StreetIndexRenderer:
         self._label_fd.set_size(label_font_size * pango.SCALE)
         self._header_fd.set_size(header_font_size * pango.SCALE)
 
-        label_block = self._compute_lines_occupation(pc, self._label_fd, 3,
-                reduce(lambda x,y: x+y.get_all_item_labels(), self._data, []))
-        squares_block = self._compute_lines_occupation(pc, self._label_fd, 3,
-                reduce(lambda x,y: x+y.get_all_item_squares(), self._data, []))
-        headers_block = self._compute_lines_occupation(pc, self._header_fd, 2,
-                [x.name for x in self._data])
+        # Account for maximum square width (at worst "Z99-Z99")
+        label_block = self._compute_lines_occupation(pc, self._label_fd, 1+7,
+                reduce(lambda x,y: x+y.get_all_item_labels(),
+                       self._index_categories, []))
 
-        column_width = max(label_block['column_width'] +
-                           squares_block['column_width'],
+        # Reserve a small margin around the category headers
+        headers_block = self._compute_lines_occupation(pc, self._header_fd, 2,
+                [x.name for x in self._index_categories])
+
+        column_width = max(label_block['column_width'],
                            headers_block['column_width'])
-        column_height = max(label_block['column_height'],
-                            squares_block['column_height']) + \
+        column_height = label_block['column_height'] + \
                         headers_block['column_height']
 
         return column_width, column_height, \
@@ -284,3 +284,54 @@ class StreetIndexRenderer:
             return int(n_cols), min_required_width
 
         raise ValueError, 'Invalid freedom direction!'
+
+
+if __name__ == '__main__':
+    import random
+    import string
+    from ocitysmap2 import coords
+    from ocitysmap2.index import commons
+
+    import render
+
+    random.seed(42)
+
+    bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
+
+    surface = cairo.PDFSurface('/tmp/index_render.pdf', 1000, 1000)
+
+    class i18nMock:
+        def __init__(self, rtl):
+            self.rtl = rtl
+        def isrtl(self):
+            return self.rtl
+
+    margin = 50
+    width = 800
+    height = 500
+
+    streets = []
+    for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
+         streets.append(commons.IndexCategory(i, [commons.IndexItem(l,squares=s) for l,s in
+                    [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
+
+    index = render.StreetIndexRenderer(i18nMock(False), streets)
+    index.render(surface, 50, 50, width, height, 'height', 'top')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'height', 'bottom')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'left')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'right')
+    surface.show_page()
+
+    index = render.StreetIndexRenderer(i18nMock(True), streets)
+    index.render(surface, 50, 50, width, height, 'height', 'top')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'height', 'bottom')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'left')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'right')
+
+    surface.finish()

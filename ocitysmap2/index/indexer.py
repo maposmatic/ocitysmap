@@ -25,42 +25,72 @@
 
 import logging
 import locale
+import psycopg2
 
 from ocitysmap2.index import commons
+
+import psycopg2.extensions
+# compatibility with django: see http://code.djangoproject.com/ticket/5996
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+# SQL string escaping routine
+_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
 
 l = logging.getLogger('ocitysmap')
 
 
 class StreetIndex:
-    def __init__(self, db, osmid, bounding_box, i18n, grid, polygon):
+
+    def __init__(self, db, osmid, bounding_box, i18n, grid, polygon_wkt):
         self._db = db
         self._osmid = osmid
         self._bounding_box = bounding_box
         self._i18n = i18n
         self._grid = grid
-        self._polygon = polygon
+        self._polygon_wkt = polygon_wkt
 
-    def _humanize_street_label(self, street):
-        return (self._i18n.user_readable_street(street[0]),
-                self._i18n.user_readable_label(street[1]))
+        # Build the contents of the index
+        self._categories = \
+            (self._build_street_index_nogrid()
+             + self._build_amenities_index_nogrid())
 
-    def _humanize_street_list(self, sl):
-        """Given a list of street and their corresponding squares, do some
-        cleanup and pass it through the internationalization layer to
-        get proper sorting, filtering of common prefixes, etc.
+        if not self._categories:
+            raise IndexEmptyError("Nothing to index")
+
+    @property
+    def categories(self):
+        return self._categories
+
+    def _get_selected_amenities(self):
+        # Amenities to retrieve from DB, a list of string tuples:
+        #  1. Category, displayed headers in the final index
+        #  2. db_amenity, description string stored in the DB
+        #  3. Label, text to display in the index for this amenity
+        selected_amenities = [
+            (_(u"Places of worship"), "place_of_worship", _(u"Place of worship")),
+            (_(u"Education"), "kindergarten", _(u"Kindergarten")),
+            (_(u"Education"), "school", _(u"School")),
+            (_(u"Education"), "college", _(u"College")),
+            (_(u"Education"), "university", _(u"University")),
+            (_(u"Education"), "library", _(u"Library")),
+            (_(u"Public buildings"), "townhall", _(u"Town hall")),
+            (_(u"Public buildings"), "post_office", _(u"Post office")),
+            (_(u"Public buildings"), "public_building", _(u"Public building")),
+            (_(u"Public buildings"), "police", _(u"Police"))]
+
+        return selected_amenities
+
+    def _convert_street_index(self, sl):
+        """Given a list of street names, do some cleanup and pass it
+        through the internationalization layer to get proper sorting,
+        filtering of common prefixes, etc.
 
         Args:
-            sl (list): list of streets, each in the form [(name, squares)].
+            sl (list of strings): list of street names
 
-        Returns the humanized street list.
+        Returns the list of IndexCategory objects. Each IndexItem will
+        have its square location still undefined at that point
         """
-
-        # We transform the string representing the squares list into a
-        # Python list
-        sl = [(street[0],
-               [map(int, x.split(',')) for x in street[1].split(';')[:-1]])
-              for street in sl]
 
         # Street prefixes are postfixed, a human readable label is
         # built to represent the list of squares, and the list is
@@ -68,115 +98,124 @@ class StreetIndex:
         prev_locale = locale.getlocale(locale.LC_COLLATE)
         locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
         try:
-            sl = sorted(map(self._humanize_street_label, sl),
-                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+            sorted_sl = sorted(map(self._i18n.user_readable_street, sl),
+                               lambda x,y: locale.strcoll(x.lower(), y.lower()))
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 
         result = []
-        first_letter = None
         current_category = None
-        for street in sl:
-            if not self._i18n.first_letter_equal(street[0][0], first_letter):
+        for street in sorted_sl:
+            if (not current_category
+                or not self._i18n.first_letter_equal(street[0],
+                                                     current_category.name)):
                 current_category = commons.IndexCategory(street[0])
                 result.append(current_category)
-            current_category.items.append(commons.IndexItem(street[0],
-                                                            street[1]))
+            current_category.items.append(commons.IndexItem(street))
 
         return result
 
-    def get_streets_nogrid(self):
+    def _build_street_index_nogrid(self):
         """Get the list of streets in the administrative area if city
         is defined or in the bounding box otherwise. Don't try to map
         these streets onto the grid of squares.
 
         Returns a list of commons.IndexCategory objects, with their IndexItems
-        having no specific grid location
+        having no specific grid square location
         """
 
         cursor = self._db.cursor()
-        l.info("Getting streets...")
-
-        intersect = 'true'
-        if self._polygon:
-            # Limit to the polygon
-            intersect = """st_intersects(way, st_transform(
-                                GeomFromText('%s', 4002), 900913))""" \
-                % self._polygon
-        elif self._bounding_box:
-            # Limit to the bounding box
-            intersect = """st_intersects(way, st_transform(
-                                GeomFromText('%s', 4002), 900913))""" \
-                % self._bounding_box.as_wkt()
-        else:
-            raise ValueError("No suitable bounding box provided")
+        l.info("Getting streets (no grid)...")
 
         query = """select distinct name
                           from planet_osm_line
                           where trim(name) != ''
                                 and highway is not null
-                                and %s
+                                and st_intersects(way, st_transform(
+                                         GeomFromText('%s', 4002), 900913))
                           group by name
-                          order by name;""" % intersect
+                          order by name;""" \
+            % (self._polygon_wkt or self._bounding_box.as_wkt())
+
         cursor.execute(query)
         sl = cursor.fetchall()
 
-        l.debug("Got streets (%d)." % len(sl))
+        l.debug("Got %d streets (no grid)." % len(sl))
 
-        return sl
+        return self._convert_street_index([name for (name,) in sl])
 
-
-    def get_streets(self):
-        """Get the list of streets in the administrative area if city is
-        defined or in the bounding box otherwise, and for each
-        street, the list of squares that it intersects.
-
-        Returns a list of the form [(street_name, 'A-B1'),
-                                    (street2_name, 'B3')]
-        """
-
+    def _build_amenities_index_nogrid(self):
         cursor = self._db.cursor()
-        l.info("Getting streets...")
 
-        intersect = 'true'
-        if self._polygon:
-            intersect = """st_intersects(way, st_transform(
-                                GeomFromText('%s', 4002), 900913))""" % self._polygon
+        intersect = ("""st_intersects(way, st_transform(
+                                     GeomFromText('%s', 4002), 900913))"""
+                     % (self._polygon_wkt or self._bounding_box.as_wkt()))
 
-        cursor.execute("""select name, textcat_all(x || ',' || y || ';')
-                          from (select distinct name, x, y
-                                from planet_osm_line
-                                join %s
-                                on st_intersects(way, st_transform(geom, 900913))
-                                where trim(name) != '' and highway is not null
-                                and %s)
-                          as foo
-                          group by name
-                          order by name;""" % \
-                           (self._map_areas_table_name,
-                            intersect))
 
-        sl = cursor.fetchall()
-        l.debug("Got streets (%d)." % len(sl))
-        return self._humanize_street_list(sl)
+        result = []
+        for catname, db_amenity, label in self._get_selected_amenities():
+            l.info("Getting amenities for %s/%s..." % (catname, db_amenity))
 
+            # Get the current IndexCategory object, or create one if
+            # different than previous
+            if (not result or result[-1].name != catname):
+                current_category = commons.IndexCategory(catname)
+                result.append(current_category)
+            else:
+                current_category = result[-1]
+
+            query = """select name, db_table, osm_id
+                       from (select distinct amenity, name,
+                                             'point' as db_table,
+                                             osm_id
+                                    from planet_osm_point
+                                    where amenity = %(amenity)s
+                                          and %(intersect)s
+                             union
+                             select distinct amenity, name,
+                                             'polygon' as db_table,
+                                             osm_id
+                                    from planet_osm_polygon
+                                    where amenity = %(amenity)s
+                                          and %(intersect)s)
+                        as foo
+                        group by amenity, osm_id, db_table, name
+                        order by amenity, name""" \
+                % dict(amenity   = _sql_escape_unicode(db_amenity),
+                       intersect = intersect)
+
+            cursor.execute(query)
+            items = [commons.IndexItem(name or label, db_table = db_table,
+                                       osm_id = osm_id) \
+                         for name,db_table,osm_id in cursor.fetchall()]
+
+            l.debug("Got %d amenities for %s/%s."
+                    % (len(items), catname, db_amenity))
+            current_category.items.extend(items)
+
+        return [category for category in result if category.items]
+
+    def build_data_nogrid(self):
+        return self._categories
 
 if __name__ == "__main__":
     import os
     import psycopg2
     from ocitysmap2 import i18n, coords
 
+    logging.basicConfig(level=logging.DEBUG)
+
     db = psycopg2.connect(user='maposmatic',
                           password='waeleephoo3Aew3u',
                           host='localhost',
                           database='maposmatic')
 
-    i18n = i18n.install_translation("fr_FR",
+    i18n = i18n.install_translation("fr_FR.UTF-8",
                                     os.path.join(os.path.dirname(__file__),
                                                  "..", "..", "locale"))
 
     idx_polygon = coords.BoundingBox(48.7097, 2.0333, 48.7048, 2.0462)
+
     street_index = StreetIndex(db, None, None, i18n, None,
                                idx_polygon.as_wkt())
-    sl = street_index.get_streets_nogrid()
-    ### print sl
+    print street_index.categories
