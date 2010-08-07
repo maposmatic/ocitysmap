@@ -751,6 +751,7 @@ language_class_map = {
     'en_US.UTF-8': i18n_generic,
     'en_ZA.UTF-8': i18n_generic,
     'en_ZW.UTF-8': i18n_generic,
+    'nb_NO.UTF-8': i18n_generic,
     'nl_BE.UTF-8': i18n_nl_generic,
     'nl_NL.UTF-8': i18n_nl_generic,
     'it_IT.UTF-8': i18n_it_generic,
