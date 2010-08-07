@@ -24,7 +24,9 @@
 
 import pango
 
-from ocitysmap2 import draw_utils
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import draw_utils
 
 class IndexEmptyError(Exception):
     """This exception is raised when no data is to be rendered in the index."""

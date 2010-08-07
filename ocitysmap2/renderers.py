@@ -23,10 +23,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
+import datetime
 import logging
 import mapnik
 import math
 import os
+import pango
+import pangocairo
 
 import grid
 import map_canvas
@@ -38,10 +41,10 @@ class RenderingSession:
 
     PT_PER_INCH = 72.0
 
-    def __init__(self, surface, street_index,
+    def __init__(self, surface, street_index_renderer,
                  dpi=PT_PER_INCH):
         self.surface = surface
-        self.street_index = street_index
+        self.street_index_renderer = street_index_renderer
         self.dpi = dpi
 
     def pt_to_dots(self, pt):
@@ -140,6 +143,27 @@ class Renderer:
         ctx.stroke()
         ctx.restore()
 
+    def _get_osm_logo(self, ctx, rs, height):
+        logo_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', 'images', 'osm-logo.png'))
+        try:
+            with open(logo_path, 'rb') as f:
+                png = cairo.ImageSurface.create_from_png(f)
+                l.debug('Using copyright logo: %s.' % logo_path)
+        except IOError:
+            l.warning('Cannot open logo from %s.' % logo_path)
+            return None
+
+        ctx.push_group()
+        ctx.save()
+        ctx.move_to(0, 0)
+        factor = height / png.get_height()
+        ctx.scale(factor, factor)
+        ctx.set_source_surface(png)
+        ctx.paint()
+        ctx.restore()
+        return ctx.pop_group(), png.get_width()*factor
+
     def _draw_labels(self, ctx, map_area_width_dots, map_area_height_dots,
                      grid_legend_margin_dots):
         ctx.save()
@@ -154,11 +178,11 @@ class Renderer:
                               0.5 * step_horiz))
 
         for i, label in enumerate(self.grid.horizontal_labels):
-            x = grid_legend_margin_dots + i * step_horiz
+            x = i * step_horiz
 
             if i < len(self.grid.horizontal_labels) - 1:
                 x += step_horiz/2.0
-            elif last_horiz_portion >= 0.25:
+            elif last_horiz_portion >= 0.3:
                 x += step_horiz * last_horiz_portion/2.0
             else:
                 continue
@@ -166,15 +190,15 @@ class Renderer:
             self._draw_centered_text(ctx, label,
                                      x, grid_legend_margin_dots/2.0)
             self._draw_centered_text(ctx, label,
-                                     x, map_area_height_dots +
-                                        3*grid_legend_margin_dots/2.0)
+                                     x, map_area_height_dots -
+                                        grid_legend_margin_dots/2.0)
 
         for i, label in enumerate(self.grid.vertical_labels):
-            y = grid_legend_margin_dots + i * step_vert
+            y = i * step_vert
 
             if i < len(self.grid.vertical_labels) - 1:
                 y += step_vert/2.0
-            elif last_vert_portion >= 0.25:
+            elif last_vert_portion >= 0.3:
                 y += step_vert * last_vert_portion/2.0
             else:
                 continue
@@ -182,8 +206,8 @@ class Renderer:
             self._draw_centered_text(ctx, label,
                                      grid_legend_margin_dots/2.0, y)
             self._draw_centered_text(ctx, label,
-                                     map_area_width_dots +
-                                     3*grid_legend_margin_dots/2.0, y)
+                                     map_area_width_dots -
+                                     grid_legend_margin_dots/2.0, y)
 
         ctx.restore()
 
@@ -205,20 +229,19 @@ class Renderer:
         map."""
         raise NotImplementedError
 
-    def create_rendering_session(self, surface, street_index,
+    def create_rendering_session(self, surface, street_index_renderer,
                                  dpi=RenderingSession.PT_PER_INCH):
         """
         """
-        return RenderingSession(surface, street_index, dpi)
+        return RenderingSession(surface, street_index_renderer, dpi)
 
     def render(self, rs):
         """Renders the map, the index and all other visual map features on the
         given Cairo surface.
 
         Args:
-            surface (cairo.Surface): the Cairo surface to render into.
-            street_index (index.StreetIndex): the street index, that would be
-                rendered by a renderer that supports it.
+            rs (RenderingSession): the rendering session (containing the
+                surface, street index renderer, etc.)
         """
         raise NotImplementedError
 
@@ -258,19 +281,29 @@ class PlainRenderer(Renderer):
         self.grid_legend_margin_pt = \
                 min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                     Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
+        self.title_margin_pt = 0.05 * self.paper_height_pt
+        self.copyright_margin_pt = 0.01 * self.paper_height_pt
 
         self.map_area_width_pt = (self.paper_width_pt -
-                                  2 * (Renderer.PRINT_SAFE_MARGIN_PT +
-                                       self.grid_legend_margin_pt))
+                                  2 * Renderer.PRINT_SAFE_MARGIN_PT)
         self.map_area_height_pt = (self.paper_height_pt -
-                                   2 * (Renderer.PRINT_SAFE_MARGIN_PT +
-                                        self.grid_legend_margin_pt))
+                                   (2 * Renderer.PRINT_SAFE_MARGIN_PT +
+                                    self.title_margin_pt +
+                                    self.copyright_margin_pt))
 
-    def create_rendering_session(self, surface, street_index,
+    def create_rendering_session(self, surface, street_index_renderer,
                                  dpi=RenderingSession.PT_PER_INCH):
-        rs = Renderer.create_rendering_session(self, surface, street_index, dpi)
+        rs = Renderer.create_rendering_session(self, surface,
+                                               street_index_renderer,
+                                               dpi)
+        rs.paper_width_dots = rs.pt_to_dots(self.paper_width_pt)
+        rs.paper_height_dots = rs.pt_to_dots(self.paper_height_pt)
+
         rs.safe_margin_dots = rs.pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT)
         rs.grid_legend_margin_dots = rs.pt_to_dots(self.grid_legend_margin_pt)
+        rs.title_margin_dots = rs.pt_to_dots(self.title_margin_pt)
+        rs.copyright_margin_dots = rs.pt_to_dots(self.copyright_margin_pt)
+
         rs.map_area_width_dots = rs.pt_to_dots(self.map_area_width_pt)
         rs.map_area_height_dots = rs.pt_to_dots(self.map_area_height_pt)
         return rs
@@ -278,6 +311,92 @@ class PlainRenderer(Renderer):
     def create_map_canvas(self):
         self._create_map_canvas(float(self.map_area_width_pt) /
                                 float(self.map_area_height_pt))
+
+    def _draw_copyright_notice(self, ctx, rs, notice=None):
+        today = datetime.date.today()
+        notice = notice or \
+            (u' © %(year)d MapOSMatic/OCitySMap developers.'
+             u'Map data © %(year)d OpenStreetMap.org '
+             u'and contributors (cc-by-sa).\n'
+             u'This map has been rendered on %(date)s and may be '
+             u'incomplete or innacurate. '
+             u'You can contribute to improve this map. '
+             u'See http://wiki.openstreetmap.org' %
+             {'year': today.year,
+              'date': today.strftime('%d %b %Y')})
+
+        width = rs.paper_width_dots - 2*rs.safe_margin_dots
+
+        pc = pangocairo.CairoContext(ctx)
+        fd = pango.FontDescription('DejaVu')
+        fd.set_size(5*pango.SCALE)
+        layout = pc.create_layout()
+        layout.set_font_description(fd)
+        layout.set_text(notice)
+
+        print layout.get_size(), width*pango.SCALE, fd.get_size()/pango.SCALE
+        while layout.get_size()[0] / pango.SCALE < width:
+            print layout.get_size(), width*pango.SCALE, fd.get_size()/pango.SCALE
+            fd.set_size(int(fd.get_size()*1.2))
+            layout.set_font_description(fd)
+
+        ctx.save()
+        ctx.translate(0, rs.title_margin_dots + rs.map_area_height_dots)
+        ctx.set_source_rgb(0.0, 0.0, 0.0)
+        #ctx.rectangle(0, 0, 100, 100)
+        #ctx.fill()
+        pc.show_layout(layout)
+        ctx.restore()
+
+    def _draw_title(self, ctx, rs, font_face):
+        # Title background
+        ctx.save()
+        ctx.set_source_rgb(0.8, 0.9, 0.96)
+        ctx.rectangle(0, 0, rs.paper_width_dots - 2*rs.safe_margin_dots,
+                      rs.title_margin_dots)
+        ctx.fill()
+        ctx.restore()
+
+        # Retrieve and paint the OSM logo
+        ctx.save()
+        grp, logo_width = self._get_osm_logo(ctx, rs, 0.8*rs.title_margin_dots)
+        ctx.translate(rs.paper_width_dots -
+                      2.0 * rs.safe_margin_dots - \
+                      logo_width - 0.1 * rs.title_margin_dots,
+                      0.1 * rs.title_margin_dots)
+        ctx.set_source(grp)
+        ctx.paint_with_alpha(0.5)
+        ctx.restore()
+
+        pc = pangocairo.CairoContext(ctx)
+        layout = pc.create_layout()
+        layout.set_width(int((rs.paper_width_dots -
+                              2.0 * rs.safe_margin_dots -
+                              logo_width) * pango.SCALE))
+        layout.set_alignment(pango.ALIGN_LEFT)
+        title_fd = pango.FontDescription(font_face)
+        title_fd.set_size(pango.SCALE)
+        layout.set_font_description(title_fd)
+        layout.set_text(self.rc.title)
+
+        if not self.rc.rtl: layout.set_alignment(pango.ALIGN_LEFT)
+        else:               layout.set_alignment(pango.ALIGN_RIGHT)
+
+        # Find the appropriate font size for the title
+        while (layout.get_size()[0] / pango.SCALE < layout.get_width() and
+               layout.get_size()[1] / pango.SCALE < 0.6 * rs.title_margin_dots):
+            title_fd.set_size(int(title_fd.get_size()*1.2))
+            layout.set_font_description(title_fd)
+
+        ctx.save()
+        self._draw_rectangle(ctx, 0, 0,
+                rs.paper_width_dots - 2*rs.safe_margin_dots,
+                rs.title_margin_dots, 1)
+        ctx.translate(0.2 * rs.title_margin_dots,
+                      (rs.title_margin_dots -
+                       (layout.get_size()[1] / pango.SCALE)) / 2.0)
+        pc.show_layout(layout)
+        ctx.restore()
 
     def render(self, rs):
         """
@@ -288,30 +407,34 @@ class PlainRenderer(Renderer):
         l.info('PlainRenderer rendering on %dx%dmm paper at %d dpi.' %
                (self.rc.paper_width_mm, self.rc.paper_height_mm, rs.dpi))
 
-
-        rendered_map = self.canvas.get_rendered_map()
         ctx = cairo.Context(rs.surface)
+        rendered_map = self.canvas.get_rendered_map()
 
         # Print margin
         ctx.translate(rs.safe_margin_dots, rs.safe_margin_dots)
 
-        ctx.save()
-        ctx.translate(rs.grid_legend_margin_dots, rs.grid_legend_margin_dots)
+        self._draw_title(ctx, rs, 'Georgia Bold')
 
+        # Skip title height
+        ctx.translate(0, rs.title_margin_dots)
+
+        # Draw the map, scaled to fit the designated area
+        ctx.save()
         ctx.scale(rs.map_area_width_dots / rendered_map.width,
                   rs.map_area_height_dots / rendered_map.height)
-
-        # Render the map canvas to the Cairo surface
         mapnik.render(rendered_map, ctx)
-
-        # Draw a rectangle around the map
-        self._draw_rectangle(ctx, 0, 0, rendered_map.width, rendered_map.height,
-                             self.rc.stylesheet.grid_line_width)
         ctx.restore()
 
+        # Draw a rectangle around the map
+        self._draw_rectangle(ctx, 0, 0, rs.map_area_width_dots,
+                             rs.map_area_height_dots, 1)
         # Place the vertical and horizontal square labels
-        self._draw_labels(ctx, rs.map_area_width_dots, rs.map_area_height_dots,
-                          rs.grid_legend_margin_dots)
+        self._draw_labels(ctx,
+                rs.map_area_width_dots,
+                rs.map_area_height_dots,
+                rs.grid_legend_margin_dots)
+
+        self._draw_copyright_notice(ctx, rs)
 
         # TODO: map scale
         # TODO: compass rose
@@ -404,6 +527,7 @@ if __name__ == '__main__':
             self.paper_width_mm = papers[0][1]
             self.paper_height_mm = papers[0][2]
             self.rtl = False
+            self.title = 'Au Kremlin-Bycêtre'
 
     config = RenderingConfigurationMock()
 
@@ -414,5 +538,5 @@ if __name__ == '__main__':
 
     plain.create_map_canvas()
     plain.canvas.render()
-    plain.render(surface, None)
+    plain.render(plain.create_rendering_session(surface, None))
     surface.finish()

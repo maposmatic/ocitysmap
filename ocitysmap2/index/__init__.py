@@ -28,7 +28,10 @@ import math
 import pango
 import pangocairo
 
-from ocitysmap2 import coords, draw_utils, grid
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import coords, draw_utils, grid
+
 import commons
 import indexer
 import render

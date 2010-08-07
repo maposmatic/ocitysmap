@@ -341,7 +341,7 @@ class OCitySMap:
             polygon = None
 
         renderer.canvas.render()
-        street_index = index.StreetIndex(self._db, config.osmid,
+        street_index = index.indexer.StreetIndex(self._db, config.osmid,
                 renderer.canvas.get_actual_bounding_box(),
                 self._i18n, renderer.grid, polygon)
 
@@ -393,7 +393,8 @@ class OCitySMap:
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-        rs = renderer.create_rendering_session(surface, street_index, dpi)
+        rs = renderer.create_rendering_session(surface, street_index_renderer,
+                                               dpi)
         renderer.render(rs)
 #        street_index_renderer.render(surface, 50, 50, 1000, 1000, 'height', 'top')
 
@@ -408,11 +409,11 @@ if __name__ == '__main__':
     o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
 
     c = RenderingConfiguration()
-    c.title = 'Chevreuse'
+    c.title = 'Chevreuse, Yvelines, Île-de-France, France'
     c.osmid = -943886 # -7444 (Paris)
     c.language = 'fr_FR'
-    c.paper_width_mm = 420
-    c.paper_height_mm = 297
+    c.paper_width_mm = 297
+    c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
     o.render(c, 'plain', ['pdf'], '/tmp/mymap')
