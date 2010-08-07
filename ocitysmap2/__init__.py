@@ -361,7 +361,7 @@ class OCitySMap:
 
     def _render_one(self, renderer, street_index_renderer, filename,
                     output_format):
-        l.info('Rendering %s...' % filename)
+        l.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
         dpi = renderers.RenderingSession.PT_PER_INCH
@@ -398,6 +398,7 @@ class OCitySMap:
         renderer.render(rs)
 #        street_index_renderer.render(surface, 50, 50, 1000, 1000, 'height', 'top')
 
+        l.debug('Writing %s...' % filename)
         if output_format == 'png':
             surface.write_to_png(filename)
 

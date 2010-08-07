@@ -110,6 +110,9 @@ class Renderer:
         return ((mm/10.0) / 2.54) * 72
 
     def _create_map_canvas(self, graphical_ratio):
+        """Creates a map canvas of the given graphical ratio and lays out the
+        grid on top of it with the canvas's corrected goegraphical bounding
+        box."""
         self.canvas = map_canvas.MapCanvas(self.rc.stylesheet,
                                            self.rc.bounding_box,
                                            graphical_ratio)
@@ -124,17 +127,6 @@ class Renderer:
                                    self.rc.stylesheet.grid_line_alpha,
                                    self.rc.stylesheet.grid_line_width)
 
-    def _draw_rectangle(self, ctx, x, y, width, height, line_width):
-        ctx.save()
-        ctx.set_line_width(line_width)
-        ctx.move_to(x, y)
-        ctx.rel_line_to(0, height)
-        ctx.rel_line_to(width, 0)
-        ctx.rel_line_to(0, - height)
-        ctx.close_path()
-        ctx.stroke()
-        ctx.restore()
-
     def _draw_centered_text(self, ctx, text, x, y):
         ctx.save()
         xb, yb, tw, th, xa, ya = ctx.text_extents(text)
@@ -142,6 +134,14 @@ class Renderer:
         ctx.show_text(text)
         ctx.stroke()
         ctx.restore()
+
+    def _adjust_font_size(self, layout, fd, constraint_x, constraint_y):
+        while (layout.get_size()[0] / pango.SCALE < constraint_x and
+               layout.get_size()[1] / pango.SCALE < constraint_y):
+            fd.set_size(int(fd.get_size()*1.2))
+            layout.set_font_description(fd)
+        fd.set_size(int(fd.get_size()/1.2))
+        layout.set_font_description(fd)
 
     def _get_osm_logo(self, ctx, rs, height):
         logo_path = os.path.abspath(os.path.join(
@@ -336,13 +336,7 @@ class PlainRenderer(Renderer):
         layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(notice)
-
-        while layout.get_size()[0] / pango.SCALE < width:
-            fd.set_size(int(fd.get_size()*1.2))
-            layout.set_font_description(fd)
-        fd.set_size(int(fd.get_size()/1.2))
-        layout.set_font_description(fd)
-
+        self._adjust_font_size(layout, fd, width, rs.copyright_margin_dots)
         pc.show_layout(layout)
         ctx.restore()
 
@@ -372,27 +366,19 @@ class PlainRenderer(Renderer):
                               2.0 * rs.safe_margin_dots -
                               0.1 * rs.title_margin_dots -
                               logo_width) * pango.SCALE))
-        layout.set_alignment(pango.ALIGN_LEFT)
-        title_fd = pango.FontDescription(font_face)
-        title_fd.set_size(pango.SCALE)
-        layout.set_font_description(title_fd)
-        layout.set_text(self.rc.title)
-
         if not self.rc.rtl: layout.set_alignment(pango.ALIGN_LEFT)
         else:               layout.set_alignment(pango.ALIGN_RIGHT)
-
-        # Find the appropriate font size for the title
-        while (layout.get_size()[0] / pango.SCALE < layout.get_width() and
-               layout.get_size()[1] / pango.SCALE < 0.8 * rs.title_margin_dots):
-            title_fd.set_size(int(title_fd.get_size()*1.2))
-            layout.set_font_description(title_fd)
-        title_fd.set_size(int(title_fd.get_size()/1.2))
-        layout.set_font_description(title_fd)
+        fd = pango.FontDescription(font_face)
+        fd.set_size(pango.SCALE)
+        layout.set_font_description(fd)
+        layout.set_text(self.rc.title)
+        self._adjust_font_size(layout, fd, layout.get_width(),
+                               0.8 * rs.title_margin_dots)
 
         ctx.save()
-        self._draw_rectangle(ctx, 0, 0,
-                rs.paper_width_dots - 2.0 * rs.safe_margin_dots,
-                rs.title_margin_dots, 1)
+        ctx.rectangle(0, 0, rs.paper_width_dots - 2.0 * rs.safe_margin_dots,
+                      rs.title_margin_dots)
+        ctx.stroke()
         ctx.translate(0.1 * rs.title_margin_dots,
                       (rs.title_margin_dots -
                        (layout.get_size()[1] / pango.SCALE)) / 2.0)
@@ -427,8 +413,9 @@ class PlainRenderer(Renderer):
         ctx.restore()
 
         # Draw a rectangle around the map
-        self._draw_rectangle(ctx, 0, 0, rs.map_area_width_dots,
-                             rs.map_area_height_dots, 1)
+        ctx.rectangle(0, 0, rs.map_area_width_dots, rs.map_area_height_dots)
+        ctx.stroke()
+
         # Place the vertical and horizontal square labels
         self._draw_labels(ctx,
                 rs.map_area_width_dots,
