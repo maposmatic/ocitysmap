@@ -43,7 +43,7 @@ def draw_text(ctx, pc, layout, fascent, fheight,
     Results:
         A 3-uple text_width, text_height (cairo units)
     """
-
+    layout.set_auto_dir(False) # Make sure ALIGN_RIGHT is independent on RTL...
     layout.set_alignment(pango_alignment)
     layout.set_text(text)
     width, height = [x/pango.SCALE for x in layout.get_size()]
