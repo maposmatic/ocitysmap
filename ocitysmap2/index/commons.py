@@ -59,11 +59,8 @@ class IndexCategory:
         ctx.fill()
 
         ctx.set_source_rgb(0.0, 0.0, 0.0)
-        ctx.move_to(baseline_x,
-                    baseline_y - fascent)
-        layout.set_alignment(pango.ALIGN_CENTER)
-        layout.set_text(self.name)
-        pc.show_layout(layout)
+        draw_utils.draw_text_center(ctx, pc, layout, fascent, fheight,
+                                    baseline_x, baseline_y, self.name)
         ctx.restore()
 
     def get_all_item_labels(self):
@@ -104,23 +101,23 @@ class IndexItem:
 
         ctx.save()
         if not rtl:
-            line_start, _ = draw_utils.draw_text_left(ctx, pc, layout,
-                                                      fascent, fheight,
-                                                      baseline_x, baseline_y,
-                                                      self.label)
-            line_end, _ = draw_utils.draw_text_right(ctx, pc, layout,
-                                                     fascent, fheight,
-                                                     baseline_x, baseline_y,
-                                                     self.squares)
+            _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
+                                                         fascent, fheight,
+                                                         baseline_x, baseline_y,
+                                                         self.label)
+            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
+                                                        fascent, fheight,
+                                                        baseline_x, baseline_y,
+                                                        self.squares)
         else:
-            line_start, _ = draw_utils.draw_text_left(ctx, pc, layout,
-                                                      fascent, fheight,
-                                                      baseline_x, baseline_y,
-                                                      self.squares)
-            line_end, _ = draw_utils.draw_text_right(ctx, pc, layout,
-                                                     fascent, fheight,
-                                                     baseline_x, baseline_y,
-                                                     self.label)
+            _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
+                                                         fascent, fheight,
+                                                         baseline_x, baseline_y,
+                                                         self.squares)
+            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
+                                                        fascent, fheight,
+                                                        baseline_x, baseline_y,
+                                                        self.label)
 
         draw_utils.draw_dotted_line(ctx, max(fheight/12, 1),
                                     line_start + fheight/4, baseline_y,

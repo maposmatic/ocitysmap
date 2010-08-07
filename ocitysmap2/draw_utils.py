@@ -25,39 +25,104 @@
 import cairo
 import pango
 
+def draw_text(ctx, pc, layout, fascent, fheight,
+              baseline_x, baseline_y, text, pango_alignment):
+    """Draws the given text into the provided Cairo
+    context through the Pango layout (get_width() expected to be
+    correct in order to position the text correctly) with the
+    specified pango.ALIGN_x alignment.
+
+    Args:
+        ctx (cairo.Context): cairo context to use
+        pc (pangocairo.CairoContext): pango context
+        layout (pango.Layout): pango layout to draw into (get_with() important)
+        fascent, fheight (int): current font ascent/height metrics
+        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
+        pango_alignment (enum): pango.ALIGN_ constant value
+
+    Results:
+        A 3-uple text_width, text_height (cairo units)
+    """
+
+    layout.set_alignment(pango_alignment)
+    layout.set_text(text)
+    width, height = [x/pango.SCALE for x in layout.get_size()]
+
+    ctx.move_to(baseline_x, baseline_y - fascent)
+    pc.show_layout(layout)
+    return width, height
+
+
 def draw_text_left(ctx, pc, layout, fascent, fheight,
                     baseline_x, baseline_y, text):
-    """Draws the given text left aligned into the provided Cairo context
-    through the Pango layout.
+    """Draws the given text left aligned into the provided Cairo
+    context through the Pango layout (get_width() expected to be
+    correct in order to position the text correctly).
 
     Args:
-        pc (pangocairo.CairoContext): ...
+        ctx (cairo.Context): cairo context to use
+        pc (pangocairo.CairoContext): pango context
+        layout (pango.Layout): pango layout to draw into (get_with() important)
+        fascent, fheight (int): current font ascent/height metrics
+        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
+        pango_alignment (enum): pango.ALIGN_ constant value
+
+    Results:
+        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
     """
+    w,h = draw_text(ctx, pc, layout, fascent, fheight,
+                    baseline_x, baseline_y, text, pango.ALIGN_LEFT)
+    return baseline_x, baseline_y, baseline_x + w
 
-    layout.set_alignment(pango.ALIGN_LEFT)
-    layout.set_text(text)
-    width, height = [x/pango.SCALE for x in layout.get_size()]
+def draw_text_center(ctx, pc, layout, fascent, fheight,
+                     baseline_x, baseline_y, text):
+    """Draws the given text centered inside the provided Cairo
+    context through the Pango layout (get_width() expected to be
+    correct in order to position the text correctly).
 
-    ctx.move_to(baseline_x, baseline_y - fascent)
-    pc.show_layout(layout)
-    return baseline_x + width, baseline_y
+    Args:
+        ctx (cairo.Context): cairo context to use
+        pc (pangocairo.CairoContext): pango context
+        layout (pango.Layout): pango layout to draw into (get_with() important)
+        fascent, fheight (int): current font ascent/height metrics
+        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
+        pango_alignment (enum): pango.ALIGN_ constant value
+
+    Results:
+        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
+    """
+    txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
+                                      baseline_x, baseline_y, text,
+                                      pango.ALIGN_CENTER)
+    layout_width = layout.get_width() / pango.SCALE
+    return ( baseline_x + (layout_width - txt_width) / 2.,
+             baseline_y,
+             baseline_x + (layout_width + txt_width) / 2. )
 
 def draw_text_right(ctx, pc, layout, fascent, fheight,
-                     baseline_x, baseline_y, text):
-    """Draws the given text right aligned into the provided Cairo context
-    through the Pango layout.
+                    baseline_x, baseline_y, text):
+    """Draws the given text right aligned into the provided Cairo
+    context through the Pango layout (get_width() expected to be
+    correct in order to position the text correctly).
 
     Args:
-        pc (pangocairo.CairoContext): ...
+        ctx (cairo.Context): cairo context to use
+        pc (pangocairo.CairoContext): pango context
+        layout (pango.Layout): pango layout to draw into (get_with() important)
+        fascent, fheight (int): current font ascent/height metrics
+        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
+        pango_alignment (enum): pango.ALIGN_ constant value
+
+    Results:
+        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
     """
-
-    layout.set_alignment(pango.ALIGN_RIGHT)
-    layout.set_text(text)
-    width, height = [x/pango.SCALE for x in layout.get_size()]
-
-    ctx.move_to(baseline_x, baseline_y - fascent)
-    pc.show_layout(layout)
-    return baseline_x + layout.get_width() / pango.SCALE - width, baseline_y
+    txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
+                                      baseline_x, baseline_y,
+                                      text, pango.ALIGN_RIGHT)
+    layout_width = layout.get_width() / pango.SCALE
+    return (baseline_x + layout_width - txt_width,
+            baseline_y,
+            baseline_x + layout_width)
 
 def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.set_line_width(line_width)
