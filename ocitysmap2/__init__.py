@@ -409,11 +409,11 @@ if __name__ == '__main__':
     o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
 
     c = RenderingConfiguration()
-    c.title = 'Chevreuse, Yvelines, Île-de-France, France'
+    c.title = 'Chevreuse, Yvelines, Île-de-France, France, Europe, Monde'
     c.osmid = -943886 # -7444 (Paris)
-    c.language = 'fr_FR'
     c.paper_width_mm = 297
     c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
+    c.language = 'fr_FR.UTF-8'
 
     o.render(c, 'plain', ['pdf'], '/tmp/mymap')

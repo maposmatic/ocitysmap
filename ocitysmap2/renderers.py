@@ -282,7 +282,7 @@ class PlainRenderer(Renderer):
                 min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                     Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
         self.title_margin_pt = 0.05 * self.paper_height_pt
-        self.copyright_margin_pt = 0.01 * self.paper_height_pt
+        self.copyright_margin_pt = 0.02 * self.paper_height_pt
 
         self.map_area_width_pt = (self.paper_width_pt -
                                   2 * Renderer.PRINT_SAFE_MARGIN_PT)
@@ -315,36 +315,34 @@ class PlainRenderer(Renderer):
     def _draw_copyright_notice(self, ctx, rs, notice=None):
         today = datetime.date.today()
         notice = notice or \
-            (u' © %(year)d MapOSMatic/OCitySMap developers.'
-             u'Map data © %(year)d OpenStreetMap.org '
-             u'and contributors (cc-by-sa).\n'
-             u'This map has been rendered on %(date)s and may be '
-             u'incomplete or innacurate. '
-             u'You can contribute to improve this map. '
-             u'See http://wiki.openstreetmap.org' %
-             {'year': today.year,
-              'date': today.strftime('%d %b %Y')})
+            _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
+              u'Map data © %(year)d OpenStreetMap.org '
+              u'and contributors (cc-by-sa).\n'
+              u'This map has been rendered on %(date)s and may be '
+              u'incomplete or innacurate. '
+              u'You can contribute to improve this map. '
+              u'See http://wiki.openstreetmap.org')
+
+        notice = notice % {'year': today.year, 'date': today.strftime("%d %B %Y")}
+
+        ctx.save()
+        ctx.translate(0, rs.map_area_height_dots + 0.005 * rs.paper_height_dots)
 
         width = rs.paper_width_dots - 2*rs.safe_margin_dots
 
         pc = pangocairo.CairoContext(ctx)
         fd = pango.FontDescription('DejaVu')
-        fd.set_size(5*pango.SCALE)
+        fd.set_size(pango.SCALE)
         layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(notice)
 
-        print layout.get_size(), width*pango.SCALE, fd.get_size()/pango.SCALE
         while layout.get_size()[0] / pango.SCALE < width:
-            print layout.get_size(), width*pango.SCALE, fd.get_size()/pango.SCALE
             fd.set_size(int(fd.get_size()*1.2))
             layout.set_font_description(fd)
+        fd.set_size(int(fd.get_size()/1.2))
+        layout.set_font_description(fd)
 
-        ctx.save()
-        ctx.translate(0, rs.title_margin_dots + rs.map_area_height_dots)
-        ctx.set_source_rgb(0.0, 0.0, 0.0)
-        #ctx.rectangle(0, 0, 100, 100)
-        #ctx.fill()
         pc.show_layout(layout)
         ctx.restore()
 
@@ -372,6 +370,7 @@ class PlainRenderer(Renderer):
         layout = pc.create_layout()
         layout.set_width(int((rs.paper_width_dots -
                               2.0 * rs.safe_margin_dots -
+                              0.1 * rs.title_margin_dots -
                               logo_width) * pango.SCALE))
         layout.set_alignment(pango.ALIGN_LEFT)
         title_fd = pango.FontDescription(font_face)
@@ -384,15 +383,17 @@ class PlainRenderer(Renderer):
 
         # Find the appropriate font size for the title
         while (layout.get_size()[0] / pango.SCALE < layout.get_width() and
-               layout.get_size()[1] / pango.SCALE < 0.6 * rs.title_margin_dots):
+               layout.get_size()[1] / pango.SCALE < 0.8 * rs.title_margin_dots):
             title_fd.set_size(int(title_fd.get_size()*1.2))
             layout.set_font_description(title_fd)
+        title_fd.set_size(int(title_fd.get_size()/1.2))
+        layout.set_font_description(title_fd)
 
         ctx.save()
         self._draw_rectangle(ctx, 0, 0,
-                rs.paper_width_dots - 2*rs.safe_margin_dots,
+                rs.paper_width_dots - 2.0 * rs.safe_margin_dots,
                 rs.title_margin_dots, 1)
-        ctx.translate(0.2 * rs.title_margin_dots,
+        ctx.translate(0.1 * rs.title_margin_dots,
                       (rs.title_margin_dots -
                        (layout.get_size()[1] / pango.SCALE)) / 2.0)
         pc.show_layout(layout)
