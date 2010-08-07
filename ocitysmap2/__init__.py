@@ -405,7 +405,6 @@ class OCitySMap:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    ## o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
     o = OCitySMap([os.path.join(os.path.dirname(__file__)), '..',
                    'ocitysmap.conf.mine'])
 
