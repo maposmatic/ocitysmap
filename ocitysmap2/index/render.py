@@ -28,6 +28,8 @@ import math
 import pango
 import pangocairo
 
+from ocitysmap2.index import commons
+
 l = logging.getLogger('ocitysmap')
 
 class StreetIndexRenderer:
@@ -71,7 +73,7 @@ class StreetIndexRenderer:
             raise ValueError, 'Incompatible freedom direction and alignment!'
 
         if not self._data:
-            raise IndexEmptyError
+            raise commons.IndexEmptyError
 
         ctx = cairo.Context(surface)
         ctx.move_to(x, y)
@@ -80,7 +82,8 @@ class StreetIndexRenderer:
         pc = pangocairo.CairoContext(ctx)
 
         n_cols, min_dimension = self._compute_columns_split(pc,
-                w, h, 12, 16, freedom_direction)
+                                                            w, h, 12, 16,
+                                                            freedom_direction)
 
         self._label_fd.set_size(12 * pango.SCALE)
         self._header_fd.set_size(16 * pango.SCALE)
@@ -236,7 +239,7 @@ class StreetIndexRenderer:
         dedicated to the index on the Cairo surface.
 
         If the columns split does not fit on the index zone,
-        IndexDoesNotFitError is raised.
+        commons.IndexDoesNotFitError is raised.
 
         Args:
             pc (pangocairo.CairoContext): the PangoCairo context.
@@ -266,7 +269,7 @@ class StreetIndexRenderer:
 
             if (n_cols <= 0 or n_cols * tall_width > zone_width_dots or
                 min_required_height > zone_height_dots):
-                raise IndexDoesNotFitError
+                raise commons.IndexDoesNotFitError
 
             return int(n_cols), min_required_height
         elif freedom_direction == 'width':
@@ -276,7 +279,7 @@ class StreetIndexRenderer:
 
             if (min_required_width > zone_width_dots or
                 tall_height + extra > n_cols * zone_height_dots):
-                raise IndexDoesNotFitError
+                raise commons.IndexDoesNotFitError
 
             return int(n_cols), min_required_width
 

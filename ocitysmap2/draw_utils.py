@@ -25,7 +25,7 @@
 import cairo
 import pango
 
-def _draw_text_left(ctx, pc, layout, fascent, fheight,
+def draw_text_left(ctx, pc, layout, fascent, fheight,
                     baseline_x, baseline_y, text):
     """Draws the given text left aligned into the provided Cairo context
     through the Pango layout.
@@ -42,7 +42,7 @@ def _draw_text_left(ctx, pc, layout, fascent, fheight,
     pc.show_layout(layout)
     return baseline_x + width, baseline_y
 
-def _draw_text_right(ctx, pc, layout, fascent, fheight,
+def draw_text_right(ctx, pc, layout, fascent, fheight,
                      baseline_x, baseline_y, text):
     """Draws the given text right aligned into the provided Cairo context
     through the Pango layout.
@@ -59,7 +59,7 @@ def _draw_text_right(ctx, pc, layout, fascent, fheight,
     pc.show_layout(layout)
     return baseline_x + layout.get_width() / pango.SCALE - width, baseline_y
 
-def _draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
+def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.set_line_width(line_width)
     ctx.set_dash([line_width, line_width*2])
     ctx.move_to(baseline_x, baseline_y)
