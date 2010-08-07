@@ -7,79 +7,66 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-11 22:31+0100\n"
+"POT-Creation-Date: 2010-08-07 20:40+CEST\n"
 "PO-Revision-Date: 2010-01-12 09:24-0300\n"
 "Last-Translator: Rodrigo de Avila <rodrigo@avila.net.br>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ocitysmap/street_index.py:282
-msgid "Places of worship"
-msgstr "Locais de adoração"
+#: ocitysmap2/renderers.py:318
+#, fuzzy
+msgid ""
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. "
+"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+"Você pode contribuir para melhorar este mapa. Veja como em http://wiki."
+"openstreetmap.org"
 
-#: ocitysmap/street_index.py:282
-msgid "Place of worship"
-msgstr "Local de adoração"
+#~ msgid "Places of worship"
+#~ msgstr "Locais de adoração"
 
-#: ocitysmap/street_index.py:283
-#: ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285
-#: ocitysmap/street_index.py:286
-#: ocitysmap/street_index.py:287
-msgid "Education"
-msgstr "Educação"
+#~ msgid "Place of worship"
+#~ msgstr "Local de adoração"
 
-#: ocitysmap/street_index.py:283
-msgid "Kindergarten"
-msgstr "Creche"
+#~ msgid "Education"
+#~ msgstr "Educação"
 
-#: ocitysmap/street_index.py:284
-msgid "School"
-msgstr "Escola"
+#~ msgid "Kindergarten"
+#~ msgstr "Creche"
 
-#: ocitysmap/street_index.py:285
-msgid "College"
-msgstr "Colégio"
+#~ msgid "School"
+#~ msgstr "Escola"
 
-#: ocitysmap/street_index.py:286
-msgid "University"
-msgstr "Universidade"
+#~ msgid "College"
+#~ msgstr "Colégio"
 
-#: ocitysmap/street_index.py:287
-msgid "Library"
-msgstr "Biblioteca"
+#~ msgid "University"
+#~ msgstr "Universidade"
 
-#: ocitysmap/street_index.py:288
-#: ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290
-#: ocitysmap/street_index.py:291
-msgid "Public buildings"
-msgstr "Prédios públicos"
+#~ msgid "Library"
+#~ msgstr "Biblioteca"
 
-#: ocitysmap/street_index.py:288
-msgid "Town hall"
-msgstr "Prefeitura Municipal"
+#~ msgid "Public buildings"
+#~ msgstr "Prédios públicos"
 
-#: ocitysmap/street_index.py:289
-msgid "Post office"
-msgstr "Correios"
+#~ msgid "Town hall"
+#~ msgstr "Prefeitura Municipal"
 
-#: ocitysmap/street_index.py:290
-msgid "Public building"
-msgstr "Prédio público"
+#~ msgid "Post office"
+#~ msgstr "Correios"
 
-#: ocitysmap/street_index.py:291
-msgid "Police"
-msgstr "Polícia"
+#~ msgid "Public building"
+#~ msgstr "Prédio público"
 
-#: ocitysmap/draw_utils.py:150
-#, python-format
-msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr "Este mapa foi renderizado em %s e pode estar incompleto ou incorreto."
+#~ msgid "Police"
+#~ msgstr "Polícia"
 
-#: ocitysmap/draw_utils.py:155
-msgid "You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr "Você pode contribuir para melhorar este mapa. Veja como em http://wiki.openstreetmap.org"
-
+#~ msgid ""
+#~ "This map has been rendered on %s and may be incomplete or inaccurate."
+#~ msgstr ""
+#~ "Este mapa foi renderizado em %s e pode estar incompleto ou incorreto."
