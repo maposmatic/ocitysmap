@@ -222,7 +222,7 @@ class OCitySMap:
 
     _regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
 
-    def _get_shade_wkt(self, bounding_box, osmid):
+    def _get_osmid_area(self, osmid):
         l.info('Looking for contour around OSM ID %d...' % osmid)
         cursor = self._db.cursor()
         cursor.execute("""select st_astext(st_transform(st_buildarea(way), 4002))
@@ -237,9 +237,10 @@ class OCitySMap:
             l.error('Invalid database structure!')
             return None
 
-        if not polygon:
-            return None
+        return polygon
 
+    def _get_shade_wkt(self, bounding_box, polygon):
+        """..."""
         matches = self._regexp_polygon.match(polygon)
         if not matches:
             l.error('Administrative boundary looks invalid!')
@@ -309,27 +310,34 @@ class OCitySMap:
         renderer.create_map_canvas()
 
         if config.osmid:
-            shade_wkt = self._get_shade_wkt(
-                    renderer.canvas.get_actual_bounding_box(),
-                    config.osmid)
-            renderer.render_shade(shade_wkt)
+            polygon = self._get_osmid_area(config.osmid)
+            if polygon:
+                shade_wkt = self._get_shade_wkt(
+                        renderer.canvas.get_actual_bounding_box(),
+                        polygon)
+                renderer.render_shade(shade_wkt)
+        else:
+            polygon = None
 
         renderer.canvas.render()
-        street_index = index.StreetIndex(config.osmid,
+        street_index = index.StreetIndex(self._db, config.osmid,
                                          renderer.canvas.get_actual_bounding_box(),
-                                         self._i18n, renderer.grid)
+                                         self._i18n, renderer.grid,
+                                         polygon)
+
+        street_index_renderer = index.StreetIndexRenderer(self._i18n, [], [])
 
         try:
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
-                self._render_one(renderer, street_index, output_filename,
-                                 output_format)
+                self._render_one(renderer, street_index_renderer,
+                                 output_filename, output_format)
 
             # TODO: street_index.as_csv()
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, renderer, street_index, filename, output_format):
+    def _render_one(self, renderer, street_index_renderer, filename, output_format):
         l.info('Rendering %s...' % filename)
 
         factory = None
@@ -362,8 +370,9 @@ class OCitySMap:
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-        rs = renderer.create_rendering_session(surface, street_index, dpi)
-        renderer.render(rs)
+#        rs = renderer.create_rendering_session(surface, street_index, dpi)
+#        renderer.render(rs)
+        street_index_renderer.render(surface, 50, 50, 1000, 1000, 'height', 'top')
 
         if output_format == 'png':
             surface.write_to_png(filename)
@@ -383,4 +392,4 @@ if __name__ == '__main__':
     c.paper_height_mm = 297
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain', ['png', 'pdf'], '/tmp/mymap')
+    o.render(c, 'plain', ['pdf'], '/tmp/mymap')

@@ -23,14 +23,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
+import logging
 import math
 import pango
 import pangocairo
-import random # TODO: remove
-import string
 
 import coords
 import grid
+
+l = logging.getLogger('ocitysmap')
+
+class IndexEmptyError(Exception):
+    pass
 
 class IndexDoesNotFitError(Exception):
     pass
@@ -166,19 +170,15 @@ class IndexItem:
                           line_end - line_start - fheight/2)
         ctx.restore()
 
-class StreetIndex:
+class StreetIndexRenderer:
     """
     The StreetIndex class encapsulate all the logic related to the querying and
     rendering of the street index.
     """
 
-    def __init__(self, osmid, bounding_box, i18n, grid):
-        self._osmid = osmid
-        self._bbox = bounding_box
+    def __init__(self, i18n, streets, amenities):
         self._i18n = i18n
-        self._grid = grid
-
-        self._data = self._get_streets() + self._get_amenities()
+        self._data = streets + amenities
 
         self._label_fd = pango.FontDescription('DejaVu')
         self._header_fd = pango.FontDescription('Georgia Bold')
@@ -210,6 +210,8 @@ class StreetIndex:
              alignment not in ('left', 'right'))):
             raise ValueError, 'Incompatible freedom direction and alignment!'
 
+        if not self._data:
+            raise IndexEmptyError
 
         ctx = cairo.Context(surface)
         ctx.move_to(x, y)
@@ -247,25 +249,19 @@ class StreetIndex:
         print "index: (%d x %d)" % (index_width, index_height)
         print
 
-        if alignment == 'top':
-            base_offset_x = 0
-            base_offset_y = 0
-        elif alignment == 'bottom':
-            base_offset_x = 0
+        base_offset_x = 0
+        base_offset_y = 0
+        if alignment == 'bottom':
             base_offset_y = h - index_height
-        elif alignment == 'left':
-            base_offset_x = 0
-            base_offset_y = 0
-        elif alignment == 'right':
+        if alignment == 'right':
             base_offset_x = w - index_width
-            base_offset_y = 0
 
         if not self._i18n.isrtl():
             delta_x = column_width
             offset_x = 0
         else:
             delta_x = - column_width
-            offset_x = w + delta_x
+            offset_x = index_width + delta_x
 
         offset_y = 0
         for category in self._data:
@@ -292,37 +288,7 @@ class StreetIndex:
 
                 offset_y += label_fheight
 
-
-        ctx.save()
-        ctx.rectangle(x, y, w, h)
-        ctx.stroke()
-        ctx.restore()
-
-        ctx.save()
-        ctx.set_source_rgba(1.0, 0.0, 0.0, 0.3)
-        ctx.rectangle(x + base_offset_x, y + base_offset_y,
-                      index_width, index_height)
-        ctx.fill()
-        ctx.restore()
-
-
-#        return new_x, new_y, new_w, new_h
-
-    def as_csv(self, fobj):
-        """Saves the street index as CSV to the provided file object."""
-        # TODO: write to CSV
-        raise NotImplementedError
-
-    def _get_streets(self):
-        streets = []
-        for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
-            streets.append(IndexCategory(i,
-                [IndexItem(l,s) for l,s in
-                    [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
-        return streets
-
-    def _get_amenities(self):
-        return []
+        return base_offset_x, base_offset_y, index_width, index_height
 
     def _create_layout_with_font(self, pc, font_desc):
         layout = pc.create_layout()
@@ -456,24 +422,137 @@ class StreetIndex:
 
         raise ValueError, 'Invalid freedom direction!'
 
+class StreetIndex:
+    def __init__(self, db, osmid, bounding_box, i18n, grid, polygon):
+        self._db = db
+        self._osmid = osmid
+        self._bounding_box = bounding_box
+        self._i18n = i18n
+        self._grid = grid
+        self._polygon = polygon
+
+    def _humanize_street_label(self, street):
+        return (self._i18n.user_readable_street(street[0]),
+                self._user_readable_label(street[1]))
+
+    def _humanize_street_list(self, sl):
+        """Given a list of street and their corresponding squares, do some
+        cleanup and pass it through the internationalization layer to
+        get proper sorting, filtering of common prefixes, etc.
+
+        Args:
+            sl (list): list of streets, each in the form [(name, squares)].
+
+        Returns the humanized street list.
+        """
+
+        # We transform the string representing the squares list into a
+        # Python list
+        sl = [(street[0],
+               [map(int, x.split(',')) for x in street[1].split(';')[:-1]])
+              for street in sl]
+
+        # Street prefixes are postfixed, a human readable label is
+        # built to represent the list of squares, and the list is
+        # alphabetically-sorted.
+        prev_locale = locale.getlocale(locale.LC_COLLATE)
+        locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
+        try:
+            sl = sorted(map(self._humanize_street_label, sl),
+                        lambda x, y: locale.strcoll(x[0].lower(), y[0].lower()))
+        finally:
+            locale.setlocale(locale.LC_COLLATE, prev_locale)
+
+        result = []
+        first_letter = None
+        current_category = None
+        for street in sl:
+            if not self._i18n.first_letter_equal(street[0][0], first_letter):
+                current_category = IndexCategory(street[0])
+                result.append(current_category)
+            current_category.items.append(IndexItem(street[0], street[1]))
+
+        return result
+
+    def get_streets(self):
+        """Get the list of streets in the administrative area if city is
+        defined or in the bounding box otherwise, and for each
+        street, the list of squares that it intersects.
+
+        Returns a list of the form [(street_name, 'A-B1'),
+                                    (street2_name, 'B3')]
+        """
+
+        cursor = self._db.cursor()
+        l.info("Getting streets...")
+
+        intersect = 'true'
+        if self._polygon:
+            intersect = """st_intersects(way, st_transform(
+                                GeomFromText('%s', 4002), 900913))""" % self._polygon
+
+        cursor.execute("""select name, textcat_all(x || ',' || y || ';')
+                          from (select distinct name, x, y
+                                from planet_osm_line
+                                join %s
+                                on st_intersects(way, st_transform(geom, 900913))
+                                where trim(name) != '' and highway is not null
+                                and %s)
+                          as foo
+                          group by name
+                          order by name;""" % \
+                           (self._map_areas_table_name,
+                            intersect))
+
+        sl = cursor.fetchall()
+        l.debug("Got streets (%d)." % len(sl))
+        return self.humanize_street_list(sl)
+
+
 if __name__ == '__main__':
+    import random
+    import string
+
+    random.seed(42)
+
     bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
     grid = grid.Grid(bbox)
 
     surface = cairo.PDFSurface('/tmp/index.pdf', 1000, 1000)
 
     class i18nMock:
+        def __init__(self, rtl):
+            self.rtl = rtl
         def isrtl(self):
-            return False
+            return self.rtl
 
-    index = StreetIndex(None, bbox, i18nMock(), grid)
-    index.render(surface, 50, 50, 800, 520, 'height', 'top')
+    margin = 50
+    width = 800
+    height = 500
+
+    streets = []
+    for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
+         streets.append(IndexCategory(i, [IndexItem(l,s) for l,s in
+                    [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
+
+    index = StreetIndexRenderer(i18nMock(False), streets, [])
+    index.render(surface, 50, 50, width, height, 'height', 'top')
     surface.show_page()
-    index.render(surface, 50, 50, 800, 520, 'height', 'bottom')
+    index.render(surface, 50, 50, width, height, 'height', 'bottom')
     surface.show_page()
-    index.render(surface, 50, 50, 800, 520, 'width', 'left')
+    index.render(surface, 50, 50, width, height, 'width', 'left')
     surface.show_page()
-    index.render(surface, 50, 50, 800, 520, 'width', 'right')
+    index.render(surface, 50, 50, width, height, 'width', 'right')
+    surface.show_page()
+
+    index = StreetIndexRenderer(i18nMock(True), streets, [])
+    index.render(surface, 50, 50, width, height, 'height', 'top')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'height', 'bottom')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'left')
+    surface.show_page()
+    index.render(surface, 50, 50, width, height, 'width', 'right')
 
     surface.finish()
 
