@@ -43,10 +43,6 @@ class BoundingBox:
         if (self._long1 > self._long2):
             self._long1, self._long2 = self._long2, self._long1
 
-    def __str__(self):
-        return '(%s %s)' % (self.ptstr(self.get_top_left()),
-                            self.ptstr(self.get_bottom_right()))
-
     @staticmethod
     def parse_wkt(wkt):
         """Returns a BoundingBox object created from the coordinates of a
@@ -56,7 +52,9 @@ class BoundingBox:
                            coords[3][1], coords[3][0])
 
     @staticmethod
-    def parse(points):
+    def parse_latlon_strtuple(points):
+        """Returns a BoundingBox object from a tuple of strings
+        [("lat1, lon1"), ("lat2", "lon2")]"""
         (lat1, long1) = points[0].split(',')
         (lat2, long2) = points[1].split(',')
         return BoundingBox(lat1, long1, lat2, long2)
@@ -67,8 +65,29 @@ class BoundingBox:
     def get_bottom_right(self):
         return (self._lat2, self._long2)
 
-    def ptstr(self, point):
+    def create_expanded(self, dlat, dlong):
+        """Return a new bbox of the same size + dlat/dlong added
+           on the top-left sides"""
+        return BoundingBox(self._lat1 + dlat, self._long1 - dlong,
+                           self._lat2 - dlat, self._long2 + dlong)
+
+    @staticmethod
+    def _ptstr(point):
         return '%.4f,%.4f' % (point[0], point[1])
+
+    def __str__(self):
+        return '(%s %s)' % (BoundingBox._ptstr(self.get_top_left()),
+                            BoundingBox._ptstr(self.get_bottom_right()))
+
+    def as_wkt(self, with_polygon_statement=True):
+        xmax, ymin = self.get_top_left()
+        xmin, ymax = self.get_bottom_right()
+        s_coords = ("%f %f, %f %f, %f %f, %f %f, %f %f"
+                    % (ymin, xmin, ymin, xmax, ymax, xmax,
+                       ymax, xmin, ymin, xmin))
+        if with_polygon_statement:
+            return "POLYGON((%s))" % s_coords
+        return s_coords
 
     def spheric_sizes(self):
         """Metric distances at the bounding box top latitude.
@@ -79,12 +98,6 @@ class BoundingBox:
         radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat1))
         return (EARTH_RADIUS * math.radians(delta_lat),
                 radius_lat * math.radians(delta_long))
-
-    def create_expanded(self, dlat, dlong):
-        """Return a new bbox of the same size + dlat/dlong added
-           on the top-left sides"""
-        return BoundingBox(self._lat1 + dlat, self._long1 - dlong,
-                           self._lat2 - dlat, self._long2 + dlong)
 
     def get_pixel_size_for_zoom_factor(self, zoom):
         """Return the size in pixels (tuple width,height) needed to
