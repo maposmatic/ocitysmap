@@ -23,6 +23,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """OCitySMap 2.
+
+TODO: write some documentation here
 """
 
 __author__ = 'The MapOSMatic developers'
@@ -40,6 +42,7 @@ import tempfile
 import coords
 import i18n
 import index
+import index.render
 import renderers
 
 l = logging.getLogger('ocitysmap')
@@ -123,6 +126,9 @@ class Stylesheet:
                 for name in styles.split(',')]
 
 class OCitySMap:
+    """
+    TODO
+    """
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
 
@@ -134,7 +140,16 @@ class OCitySMap:
 
     def __init__(self, config_files=None,
                  grid_table_prefix=None):
-        """..."""
+        """Instanciate a new configured OCitySMap instance.
+
+        Args:
+            config_file (string or list or None): path, or list of paths to
+                the OCitySMap configuration file(s). If None, sensible defaults
+                are tried.
+            grid_table_prefix (string): a prefix for the grid map areas PostGIS
+                table, which is useful when multiple renderings run
+                concurrently.
+        """
 
         if config_files is None:
             config_files = ['/etc/ocitysmap.conf', '~/.ocitysmap.conf']
@@ -155,6 +170,7 @@ class OCitySMap:
 
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
+        l.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
 
     def _get_db(self):
         if self.__db:
@@ -195,7 +211,17 @@ class OCitySMap:
         l.debug('Configured statement timeout: %s.' %
                   cursor.fetchall()[0][0])
 
+    def _cleanup_tempdir(self, tmpdir):
+        l.debug('Cleaning up %s...' % tmpdir)
+        for root, dirs, files in os.walk(tmpdir, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(tmpdir)
+
     def _get_bounding_box(self, osmid):
+        """Returns the envelope bounding box around the given OSM ID."""
         l.debug('Searching bounding box around OSM ID %d...' % osmid)
         cursor = self._db.cursor()
         cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
@@ -210,29 +236,22 @@ class OCitySMap:
         l.debug('Found bounding box %s.' % bbox)
         return bbox
 
-    def _cleanup_tempdir(self, tmpdir):
-        l.debug('Cleaning up %s...' % tmpdir)
-        for root, dirs, files in os.walk(tmpdir, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
-        os.rmdir(tmpdir)
-
-
-    _regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
-
     def _get_osmid_area(self, osmid):
+        """Returns the bounding box area around the given OSM ID."""
+        # TODO: 
         l.info('Looking for contour around OSM ID %d...' % osmid)
         cursor = self._db.cursor()
         cursor.execute("""select st_astext(st_transform(st_buildarea(way), 4002))
                                    as polygon
                               from planet_osm_polygon
                               where osm_id=%d;""" % osmid)
-        data = cursor.fetchall()
+        records = cursor.fetchall()
+
+        if not records:
+            raise ValueError, 'OSM ID %d not found in the database!' % osmid
 
         try:
-            polygon = data[0][0].strip()
+            polygon = records[0][0].strip()
         except (KeyError, IndexError, AttributeError):
             l.error('Invalid database structure!')
             return None
@@ -240,8 +259,10 @@ class OCitySMap:
         return polygon
 
     def _get_shade_wkt(self, bounding_box, polygon):
-        """..."""
-        matches = self._regexp_polygon.match(polygon)
+        """Creates a shade area for bounding_box with an inner hole for the
+        given polygon."""
+        regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
+        matches = regexp_polygon.match(polygon)
         if not matches:
             l.error('Administrative boundary looks invalid!')
             return None
@@ -294,8 +315,8 @@ class OCitySMap:
                                               self._locale_path)
         config.rtl = self._i18n.isrtl()
 
-        l.info('Rendering language: %s (rtl: %s).' %
-               (self._i18n.language_code(), config.rtl))
+        l.info('Rendering with renderer %s in language: %s (rtl: %s).' %
+               (renderer_name, self._i18n.language_code(), config.rtl))
 
         # Make sure we have a bounding box
         config.bounding_box = (config.bounding_box or
@@ -321,11 +342,12 @@ class OCitySMap:
 
         renderer.canvas.render()
         street_index = index.StreetIndex(self._db, config.osmid,
-                                         renderer.canvas.get_actual_bounding_box(),
-                                         self._i18n, renderer.grid,
-                                         polygon)
+                renderer.canvas.get_actual_bounding_box(),
+                self._i18n, renderer.grid, polygon)
 
-        street_index_renderer = index.StreetIndexRenderer(self._i18n, [], [])
+        street_index_renderer = index.render.StreetIndexRenderer(self._i18n,
+                # TODO: index.get_streets(), index.get_amenities())
+                [], [])
 
         try:
             for output_format in output_formats:
@@ -337,7 +359,8 @@ class OCitySMap:
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, renderer, street_index_renderer, filename, output_format):
+    def _render_one(self, renderer, street_index_renderer, filename,
+                    output_format):
         l.info('Rendering %s...' % filename)
 
         factory = None

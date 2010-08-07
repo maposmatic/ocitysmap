@@ -68,7 +68,7 @@ class MapCanvas:
         g_width, g_height = self._geo_bbox.get_pixel_size_for_zoom_factor(
                 stylesheet.zoom_level)
 
-        l.debug('Corrected bounding box from %s to %s (ratio: %.2f).' %
+        l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
                 (bounding_box, self._geo_bbox, graphical_ratio))
 
         # Create the Mapnik map with the corrected width and height and zoom to
@@ -171,9 +171,6 @@ if __name__ == '__main__':
     bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
     canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210)
     new_bbox = canvas.get_actual_bounding_box()
-
-    print bbox
-    print new_bbox
 
     canvas.add_shape_file(
         shapes.LineShapeFile(new_bbox, '/tmp/mygrid.shp', 'grid')

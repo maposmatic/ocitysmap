@@ -22,7 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import locale, os
+import locale
+import logging
+import os
 
 # The ogr module is now known as osgeo.ogr in recent versions of the
 # module, but we want to keep compatibility with older versions
@@ -31,14 +33,18 @@ try:
 except ImportError:
     import ogr
 
-
 import coords
+
+l = logging.getLogger('ocitysmap')
 
 class _ShapeFile:
     """
     This class represents a shapefile (.shp) that can be added to a Mapnik map
     as a layer. It provides a few methods to add some geometry 'features' to
     the shape file.
+
+    This is a private base class and is not meant to be used directly from the
+    outside.
     """
 
     def __init__(self, bounding_box, out_filename, layer_name):
@@ -87,10 +93,16 @@ class _ShapeFile:
         return "ShapeFile(%s)" % self._filepath
 
 class LineShapeFile(_ShapeFile):
+    """
+    Shape file for LineString geometries.
+    """
+
     def __init__(self, bounding_box, out_filename, layer_name):
         _ShapeFile.__init__(self, bounding_box, out_filename, layer_name)
         self._layer = self._ds.CreateLayer(self._layer_name,
                                            geom_type=ogr.wkbLineString)
+        l.debug('Created layer %s in LineShapeFile %s.' %
+                (layer_name, out_filename))
 
     def add_bounding_rectangle(self):
         self.add_horiz_line(self._bbox.get_top_left()[0])
@@ -116,10 +128,16 @@ class LineShapeFile(_ShapeFile):
         return self
 
 class PolyShapeFile(_ShapeFile):
+    """
+    Shape file for Polygon geometries.
+    """
+
     def __init__(self, bounding_box, out_filename, layer_name):
         _ShapeFile.__init__(self, bounding_box, out_filename, layer_name)
         self._layer = self._ds.CreateLayer(self._layer_name,
                                            geom_type=ogr.wkbPolygon)
+        l.debug('Created layer %s in PolyShapeFile %s.' %
+                (layer_name, out_filename))
 
     def add_shade_from_wkt(self, wkt):
         """Add the polygon feature to the shape file."""
@@ -137,6 +155,7 @@ class PolyShapeFile(_ShapeFile):
         return self
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     (LineShapeFile(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637),
                    '/tmp/mygrid.shp', 'test')
         .add_horiz_line(44.48)

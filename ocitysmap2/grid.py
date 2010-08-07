@@ -33,7 +33,7 @@ l = logging.getLogger('ocitysmap')
 class Grid:
     """
     The Grid class defines the grid overlayed on a rendered map. It controls
-    the grid size, nuber and size of squares, etc.
+    the grid size, number and size of squares, etc.
     """
 
     # Available and supported grid sizes, in meters.
@@ -55,6 +55,9 @@ class Grid:
         self._bbox = bounding_box
         self._height_m, self._width_m = bounding_box.spheric_sizes()
 
+        l.info('Laying out grid on %.1fx%.1fm area...' %
+               (self._width_m, self._height_m))
+
         for size in sorted(Grid.AVAILABLE_GRID_SIZES_METERS, reverse=True):
             self.grid_size_m = size
             self.horiz_count = self._width_m / size
@@ -63,11 +66,6 @@ class Grid:
             if (min(self.horiz_count, self.vert_count) >
                 Grid.GRID_COUNT_TRESHOLD):
                 break
-
-        l.info('Using %dx%dm grid (%dx%d squares).' % (self.grid_size_m,
-                                                       self.grid_size_m,
-                                                       self.horiz_count,
-                                                       self.vert_count))
 
         self._horiz_angle = (abs(self._bbox.get_top_left()[1] -
                                  self._bbox.get_bottom_right()[1]) /
@@ -90,6 +88,10 @@ class Grid:
         self.vertical_labels = map(self._gen_vertical_square_label,
                                    xrange(int(math.ceil(self.vert_count))))
 
+        l.info('Using %dx%dm grid (%dx%d squares).' %
+               (self.grid_size_m, self.grid_size_m,
+                self.horiz_count, self.vert_count))
+
     def generate_shape_file(self, filename):
         """Generates the grid shapefile with all the horizontal and
         vertical lines added.
@@ -109,6 +111,15 @@ class Grid:
         return g
 
     def _gen_horizontal_square_label(self, x):
+        """Generates a human-readable label for the given horizontal square
+        number. For example:
+             1 -> A
+             2 -> B
+            26 -> Z
+            27 -> AA
+            28 -> AB
+            ...
+        """
         label = ''
         while x != -1:
             label = chr(ord('A') + x % 26) + label
@@ -116,6 +127,8 @@ class Grid:
         return label
 
     def _gen_vertical_square_label(self, x):
+        """Generate a human-readable label for the given vertical square
+        number. Since we put numbers verticaly, this is simply x+1."""
         return str(x + 1)
 
 if __name__ == "__main__":

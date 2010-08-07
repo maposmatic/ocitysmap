@@ -29,7 +29,7 @@ EARTH_RADIUS = 6370986 # meters
 class BoundingBox:
     """
     The BoundingBox class defines a geographic rectangle area specified by the
-    coordinates of the top left and bottom right corners, in latitude and
+    coordinates of its top left and bottom right corners, in latitude and
     longitude (4002 projection).
     """
 
@@ -88,14 +88,14 @@ class BoundingBox:
 
     def get_pixel_size_for_zoom_factor(self, zoom):
         """Return the size in pixels (tuple width,height) needed to
-        render the bounding box at the given zoom factor"""
+        render the bounding box at the given zoom factor."""
         delta_long = abs(self._long1 - self._long2)
         # 2^zoom tiles (1 tile = 256 pix) for the whole earth
         pix_x = delta_long * (2 ** (zoom + 8)) / 360
 
         # http://en.wikipedia.org/wiki/Mercator_projection
-        def yplan(lat):
-            return math.log(math.tan(math.pi/4. + math.radians(lat)/2.))
+        yplan = lambda lat: math.log(math.tan(math.pi/4.0 +
+                                              math.radians(lat)/2.0))
 
         # OSM maps are drawn between -85 deg and + 85, the whole amplitude
         # is 256*2^(zoom)
