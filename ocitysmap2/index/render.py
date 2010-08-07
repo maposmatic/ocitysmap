@@ -28,7 +28,7 @@ import math
 import pango
 import pangocairo
 
-from ocitysmap2.index import commons
+import commons
 
 l = logging.getLogger('ocitysmap')
 

@@ -29,12 +29,11 @@ import pango
 import pangocairo
 
 from ocitysmap2 import coords, draw_utils, grid
-from indexer import StreetIndex
-from render import StreetIndexRenderer
-from commons import IndexCategory, IndexItem
+import commons
+import indexer
+import render
 
 l = logging.getLogger('ocitysmap')
-
 
 if __name__ == '__main__':
     import random
@@ -61,8 +60,10 @@ if __name__ == '__main__':
 
     streets = []
     for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
-         streets.append(IndexCategory(i, [IndexItem(l,s) for l,s in
-                    [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
+         streets.append(
+                 commons.IndexCategory(i, [commons.IndexItem(l,s) for l,s in
+                    [(''.join(random.choice(string.letters)
+                        for i in xrange(random.randint(1, 10))), 'A1')]*4]))
 
     index = render.StreetIndexRenderer(i18nMock(False), streets, [])
     index.render(surface, 50, 50, width, height, 'height', 'top')
@@ -84,4 +85,4 @@ if __name__ == '__main__':
     index.render(surface, 50, 50, width, height, 'width', 'right')
 
     surface.finish()
-
+    print "Generated /tmp/index.pdf."

@@ -393,9 +393,9 @@ class OCitySMap:
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-#        rs = renderer.create_rendering_session(surface, street_index, dpi)
-#        renderer.render(rs)
-        street_index_renderer.render(surface, 50, 50, 1000, 1000, 'height', 'top')
+        rs = renderer.create_rendering_session(surface, street_index, dpi)
+        renderer.render(rs)
+#        street_index_renderer.render(surface, 50, 50, 1000, 1000, 'height', 'top')
 
         if output_format == 'png':
             surface.write_to_png(filename)
@@ -405,8 +405,7 @@ class OCitySMap:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    o = OCitySMap([os.path.join(os.path.dirname(__file__)), '..',
-                   'ocitysmap.conf.mine'])
+    o = OCitySMap(['/home/sam/src/python/maposmatic/ocitysmap/ocitysmap.conf.mine'])
 
     c = RenderingConfiguration()
     c.title = 'Chevreuse'

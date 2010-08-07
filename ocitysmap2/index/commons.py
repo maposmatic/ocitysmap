@@ -26,15 +26,21 @@ import pango
 
 from ocitysmap2 import draw_utils
 
-
 class IndexEmptyError(Exception):
+    """This exception is raised when no data is to be rendered in the index."""
     pass
 
 class IndexDoesNotFitError(Exception):
+    """This exception is raised when the index does not fit in the given
+    graphical area, even after trying smaller font sizes."""
     pass
 
-
 class IndexCategory:
+    """
+    The IndexCategory represents a set of index items that belong to the same
+    category (their first letter is the same or they are of the same amenity
+    type).
+    """
     name = None
     items = None
 
@@ -49,7 +55,14 @@ class IndexCategory:
         """Draw this category header.
 
         Args:
-            ...
+            rtl (boolean): whether to draw right-to-left or not.
+            ctx (cairo.Context): the Cairo context to draw to.
+            pc (pangocairo.CairoContext): the PangoCairo context.
+            layout (pango.layout): the Pango layout to draw text into.
+            fascent (int): font ascent.
+            fheight (int): font height.
+            baseline_x (int): base X axis position.
+            baseline_y (int): base Y axis position.
         """
 
         ctx.save()
@@ -70,7 +83,11 @@ class IndexCategory:
         return [x.squares for x in self.items]
 
 class IndexItem:
-    __slots__ = ['label', 'squares']
+    """
+    An IndexItem represents one item in the index (a street or a POI). It
+    contains the item label (street name, POI name or description) and the
+    humanized squares description.
+    """
     label = None
     squares = None
 
@@ -160,3 +177,4 @@ if __name__ == "__main__":
                      72, 120)
 
     surface.finish()
+    print "Generated /tmp/idx_commons.pdf"
