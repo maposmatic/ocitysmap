@@ -67,31 +67,54 @@ if __name__ == '__main__':
         def isrtl(self):
             return self.rtl
 
-    width = 5*(20 / 2.54) * 72
-    height = 5*(29 / 2.54) * 72
+    width = 2.5*(20 / 2.54) * 72
+    height = 2.5*(29 / 2.54) * 72
 
-    surface = cairo.PDFSurface('/tmp/index.pdf', width, height)
+    surface = cairo.PDFSurface('/tmp/myindex.pdf', width, height)
 
     index = render.StreetIndexRenderer(i18nMock(False),
                                        street_index.categories)
-    index.render(surface, 0, 0, width, height, 'height', 'top')
+
+    def _render(freedom_dimension, alignment):
+        x,y,w,h = 50, 50, width-100, height-100
+
+        # Draw constraining rectangle
+        ctx = cairo.Context(surface)
+        ctx.set_source_rgb(.2,0,0)
+        ctx.rectangle(x,y,w,h)
+        ctx.stroke()
+
+        # Precompute index area
+        x,y,w,h,ncols = index.precompute_occupation_area(surface, x,y,w,h,
+                                                         freedom_dimension,
+                                                         alignment)
+
+        # Draw a green background for the precomputed area
+        ctx.set_source_rgba(0,1,0,.5)
+        ctx.rectangle(x,y,w,h)
+        ctx.fill()
+
+        # Render the index
+        index.render(surface,x,y,w,h,ncols)
+
+    _render('height', 'top')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'height', 'bottom')
+    _render('height', 'bottom')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'width', 'left')
+    _render('width', 'left')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'width', 'right')
+    _render('width', 'right')
     surface.show_page()
 
     index = render.StreetIndexRenderer(i18nMock(True),
                                        street_index.categories)
-    index.render(surface, 0, 0, width, height, 'height', 'top')
+    _render('height', 'top')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'height', 'bottom')
+    _render('height', 'bottom')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'width', 'left')
+    _render('width', 'left')
     surface.show_page()
-    index.render(surface, 0, 0, width, height, 'width', 'right')
+    _render('width', 'right')
 
     surface.finish()
-    print "Generated /tmp/index.pdf."
+    print "Generated /tmp/myindex.pdf."

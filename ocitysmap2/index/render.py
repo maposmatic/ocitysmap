@@ -38,17 +38,21 @@ class StreetIndexRenderer:
     rendering of the street index.
     """
 
-    def __init__(self, i18n, index_categories):
+    def __init__(self, i18n, index_categories,
+                 header_font_spec = 'Georgia Bold',
+                 label_font_spec = 'DejaVu'):
         self._i18n = i18n
         self._index_categories = index_categories
 
-        self._label_fd = pango.FontDescription('DejaVu')
-        self._header_fd = pango.FontDescription('Georgia Bold')
+        self._header_fd = pango.FontDescription(header_font_spec)
+        self._label_fd = pango.FontDescription(label_font_spec)
 
-    def render(self, surface, x, y, w, h, freedom_direction, alignment):
-        """Render the street and amenities index at the given (x,y) coordinates
-        into the provided Cairo surface. The index must not be larger than the
-        provided width and height (in pixels).
+    def precompute_occupation_area(self, surface, x, y, w, h,
+                                   freedom_direction, alignment):
+        """Prepare to render the street and amenities index at the
+        given (x,y) coordinates into the provided Cairo surface. The
+        index must not be larger than the provided width and height
+        (in pixels). Nothing will be drawn on surface.
 
         Args:
             surface (cairo.Surface): the cairo surface to render into.
@@ -62,10 +66,11 @@ class StreetIndexRenderer:
                 of 'height', 'left' or 'right' for 'width'. Tells which side to
                 stick the index to.
 
-        Returns the new actual graphical bounding box (new_x, new_y, new_w,
-        new_h) used by the index.
+        Returns the recommended actual graphical bounding box (new_x,
+        new_y, new_w, new_h, n_cols) where the index should be
+        rendered. Raise IndexDoesNotFitError when the provided area's
+        surface is not enough to hold the index.
         """
-
         if ((freedom_direction == 'height' and
              alignment not in ('top', 'bottom')) or
             (freedom_direction == 'width' and
@@ -76,7 +81,6 @@ class StreetIndexRenderer:
             raise commons.IndexEmptyError
 
         ctx = cairo.Context(surface)
-        ctx.move_to(x, y)
 
         # Create a PangoCairo context for drawing to Cairo
         pc = pangocairo.CairoContext(ctx)
@@ -94,23 +98,11 @@ class StreetIndexRenderer:
                 self._create_layout_with_font(pc, self._header_fd)
 
         if freedom_direction == 'height':
-            index_width = w
+            index_width  = w
             index_height = min_dimension
         elif freedom_direction == 'width':
-            index_width = min_dimension
+            index_width  = min_dimension
             index_height = h
-
-        cairo_colspace = label_em
-        column_width = int(math.floor((index_width + cairo_colspace) / n_cols))
-
-        label_layout.set_width((column_width - label_em) * pango.SCALE)
-        header_layout.set_width((column_width - label_em) * pango.SCALE)
-
-        print "columns#", n_cols
-        print "min_dim:", min_dimension
-        print "col width:", column_width
-        print "index: (%d x %d)" % (index_width, index_height)
-        print
 
         base_offset_x = 0
         base_offset_y = 0
@@ -119,39 +111,78 @@ class StreetIndexRenderer:
         if alignment == 'right':
             base_offset_x = w - index_width
 
+        return (x+base_offset_x, y+base_offset_y,
+                index_width, index_height, n_cols)
+
+
+    def render(self, surface, x, y, w, h, n_cols):
+        """Render the street and amenities index at the given (x,y) coordinates
+        into the provided Cairo surface. The index must not be larger than the
+        provided surface (use precompute_occupation_area() to adjust it).
+
+        Args:
+            surface (cairo.Surface): the cairo surface to render into.
+            x (int): horizontal origin position, in pixels.
+            y (int): vertical origin position, in pixels.
+            w (int): maximum usable width for the index, in dots (Cairo unit).
+            h (int): maximum usable height for the index, in dots (Cairo unit).
+        """
+
+        if not self._index_categories:
+            raise commons.IndexEmptyError
+
+        ctx = cairo.Context(surface)
+        ctx.move_to(x, y)
+
+        # Create a PangoCairo context for drawing to Cairo
+        pc = pangocairo.CairoContext(ctx)
+
+        self._label_fd.set_size(12 * pango.SCALE)
+        self._header_fd.set_size(16 * pango.SCALE)
+
+        label_layout, label_fascent, label_fheight, label_em = \
+                self._create_layout_with_font(pc, self._label_fd)
+        header_layout, header_fascent, header_fheight, header_em = \
+                self._create_layout_with_font(pc, self._header_fd)
+
+        cairo_colspace = label_em
+        column_width = int(math.floor((w + cairo_colspace) / n_cols))
+
+        label_layout.set_width((column_width - label_em) * pango.SCALE)
+        header_layout.set_width((column_width - label_em) * pango.SCALE)
+
         if not self._i18n.isrtl():
-            delta_x = column_width
+            delta_x  = column_width
             offset_x = 0
         else:
-            delta_x = - column_width
-            offset_x = index_width + delta_x
+            delta_x  = - column_width
+            offset_x = w - column_width + cairo_colspace
 
         offset_y = 0
         for category in self._index_categories:
-            if offset_y + header_fheight + label_fheight > index_height:
+            if offset_y + header_fheight + label_fheight > h:
                 offset_y = 0
                 offset_x += delta_x
 
             category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
                     header_fascent, header_fheight,
-                    x + base_offset_x + offset_x,
-                    y + base_offset_y + offset_y + header_fascent)
+                    x + offset_x,
+                    y + offset_y + header_fascent)
 
             offset_y += header_fheight
 
             for street in category.items:
-                if offset_y + label_fheight > index_height:
+                if offset_y + label_fheight > h:
                     offset_y = 0
                     offset_x += delta_x
 
                 street.draw(self._i18n.isrtl(), ctx, pc, label_layout,
                         label_fascent, label_fheight,
-                        x + base_offset_x + offset_x,
-                        y + base_offset_y + offset_y + label_fascent)
+                        x + offset_x,
+                        y + offset_y + label_fascent)
 
                 offset_y += label_fheight
 
-        return base_offset_x, base_offset_y, index_width, index_height
 
     def _create_layout_with_font(self, pc, font_desc):
         layout = pc.create_layout()
@@ -262,6 +293,9 @@ class StreetIndexRenderer:
                 self._compute_column_occupation(pc, label_font_size,
                                                 header_font_size)
 
+        if zone_width_dots < tall_width:
+            raise commons.IndexDoesNotFitError
+
         if freedom_direction == 'height':
             n_cols = math.floor(zone_width_dots / float(tall_width))
             min_required_height = (math.ceil(tall_height / n_cols) +
@@ -294,11 +328,14 @@ if __name__ == '__main__':
 
     import render
 
+    width = 72*21./2.54
+    height = .75 * 72*29.7/2.54
+
     random.seed(42)
 
     bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
 
-    surface = cairo.PDFSurface('/tmp/index_render.pdf', 1000, 1000)
+    surface = cairo.PDFSurface('/tmp/myindex_render.pdf', width, height)
 
     class i18nMock:
         def __init__(self, rtl):
@@ -306,32 +343,53 @@ if __name__ == '__main__':
         def isrtl(self):
             return self.rtl
 
-    margin = 50
-    width = 800
-    height = 500
-
     streets = []
     for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
          streets.append(commons.IndexCategory(i, [commons.IndexItem(l,squares=s) for l,s in
                     [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
 
     index = render.StreetIndexRenderer(i18nMock(False), streets)
-    index.render(surface, 50, 50, width, height, 'height', 'top')
+
+    def _render(freedom_dimension, alignment):
+        x,y,w,h = 50, 50, width-100, height-100
+
+        # Draw constraining rectangle
+        ctx = cairo.Context(surface)
+        ctx.set_source_rgb(.2,0,0)
+        ctx.rectangle(x,y,w,h)
+        ctx.stroke()
+
+        # Precompute index area
+        x,y,w,h,ncols = index.precompute_occupation_area(surface, x,y,w,h,
+                                                         freedom_dimension,
+                                                         alignment)
+
+        # Draw a green background for the precomputed area
+        ctx.set_source_rgba(0,1,0,.5)
+        ctx.rectangle(x,y,w,h)
+        ctx.fill()
+
+        # Render the index
+        index.render(surface,x,y,w,h,ncols)
+
+
+    _render('height', 'top')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'height', 'bottom')
+    _render('height', 'bottom')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'width', 'left')
+    _render('width', 'left')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'width', 'right')
+    _render('width', 'right')
     surface.show_page()
 
     index = render.StreetIndexRenderer(i18nMock(True), streets)
-    index.render(surface, 50, 50, width, height, 'height', 'top')
+    _render('height', 'top')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'height', 'bottom')
+    _render('height', 'bottom')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'width', 'left')
+    _render('width', 'left')
     surface.show_page()
-    index.render(surface, 50, 50, width, height, 'width', 'right')
+    _render('width', 'right')
 
     surface.finish()
+    print "Generated /tmp/myindex_render.pdf"
