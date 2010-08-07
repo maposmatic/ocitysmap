@@ -19,15 +19,14 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- Create a partial index to speed up the city name lookups (a few
--- milliseconds versus a few minutes):
-create index admin_city_names
+-- Create a partial index to speed up the city name/administrative boundaries
+-- lookups (a few milliseconds versus a few minutes):
+create index admin_boundaries_names
        on planet_osm_line (boundary,admin_level,name)
-       where (boundary='administrative' and admin_level='8');
+       where (boundary='administrative');
 
 -- Create an aggregate used to build the list of squares that each
 -- street intersects
-
 CREATE AGGREGATE textcat_all(
   basetype    = text,
   sfunc       = textcat,
