@@ -31,8 +31,9 @@ import shapes
 
 l = logging.getLogger('ocitysmap')
 
-# TODO: use 4002 instead?
-_MAIN_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
+_MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
+                     "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
+                     "+nadgrids=@null +no_defs +over"
 
 class MapCanvas:
     """
@@ -51,7 +52,7 @@ class MapCanvas:
             graphical_ratio (float): ratio of the map area (width/height).
         """
 
-        self._proj = mapnik.Projection(_MAIN_PROJECTION)
+        self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
 
         # This is where the magic of the map canvas happens. Given an original
         # bounding box and a graphical ratio for the output, the bounding box
@@ -76,7 +77,7 @@ class MapCanvas:
 
         # Create the Mapnik map with the corrected width and height and zoom to
         # the corrected bounding box ('envelope' in the Mapnik jargon)
-        self._map = mapnik.Map(g_width, g_height, _MAIN_PROJECTION)
+        self._map = mapnik.Map(g_width, g_height, _MAPNIK_PROJECTION)
         mapnik.load_map(self._map, stylesheet.path)
         self._map.zoom_to_box(envelope)
 

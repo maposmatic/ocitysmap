@@ -61,6 +61,10 @@ class StreetIndex:
     def categories(self):
         return self._categories
 
+    def write_to_csv(self, filename):
+        # TODO: implement writing the index to CSV
+        pass
+
     def _get_selected_amenities(self):
         # Amenities to retrieve from DB, a list of string tuples:
         #  1. Category, displayed headers in the final index
