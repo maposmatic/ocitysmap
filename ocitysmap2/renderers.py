@@ -482,6 +482,12 @@ def get_renderers():
     """Returns the list of available renderers' names."""
     return _RENDERERS
 
+def get_paper_sizes():
+    """Returns a list of paper sizes specifications, 3-uples (name, width in
+    millimeters, height in millimeters). The paper sizes are returned assuming
+    portrait mode."""
+    return Renderer.PAPER_SIZES
+
 if __name__ == '__main__':
     import coords
     import cairo

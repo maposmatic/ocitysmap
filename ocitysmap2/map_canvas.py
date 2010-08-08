@@ -53,7 +53,10 @@ class MapCanvas:
 
         self._proj = mapnik.Projection(_MAIN_PROJECTION)
 
-        # TODO: document!
+        # This is where the magic of the map canvas happens. Given an original
+        # bounding box and a graphical ratio for the output, the bounding box
+        # is adjusted (extended) to fill the destination zone. See
+        # _fix_bbox_ratio for more details on how this is done.
         orig_envelope = self._project_envelope(bounding_box)
 
         off_x, off_y, width, height = self._fix_bbox_ratio(
@@ -83,6 +86,9 @@ class MapCanvas:
         l.info('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
 
     def _fix_bbox_ratio(self, off_x, off_y, width, height, dest_ratio):
+        """Adjusts the area expressed by its origin's offset and its size to
+        the given destination ratio by tweaking one of the two dimensions
+        depending on the current ratio and the destination ratio."""
         cur_ratio = float(width)/height
 
         if cur_ratio < dest_ratio:
@@ -100,7 +106,13 @@ class MapCanvas:
                        line_width=1.0):
         """
         Args:
-            shape_file (shapes.ShapeFile): ...
+            shape_file (shapes.ShapeFile): path to the shape file to overlay on
+                this map canvas.
+            str_color (string): litteral name of the layer's color, needs to be
+                understood by mapnik.Color.
+            alpha (float): transparency factor in the range 0 (invisible) -> 1
+                (opaque).
+            line_width (float): line width for the features that will be drawn.
         """
         col = mapnik.Color(str_color)
         col.a = int(255 * alpha)
@@ -109,11 +121,10 @@ class MapCanvas:
                              'line_width': line_width})
         l.debug('Added shape file %s to map canvas as layer %s.' %
                 (shape_file.get_filepath(), shape_file.get_layer_name()))
-        return shape_file
 
     def render(self):
-        """Render the map in memory with all the added shapes. Returns the
-        corresponding mapnik.Map object."""
+        """Render the map in memory with all the added shapes. The Mapnik Map
+        object can be accessed with self.get_rendered_map()."""
 
         # Add all shapes to the map
         for shape in self._shapes:

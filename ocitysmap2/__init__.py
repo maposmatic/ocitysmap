@@ -24,7 +24,52 @@
 
 """OCitySMap 2.
 
-TODO: write some documentation here
+OCitySMap is a Mapnik-based map rendering engine from OpenStreetMap.org data.
+It is architectured around the concept of Renderers, in charge of rendering the
+map and all the visual features that go along with it (scale, grid, legend,
+index, etc.) on the given paper size using a provided Mapnik stylesheet,
+according to their implemented layout.
+
+The PlainRenderer for example renders a full-page map with its grid, a title
+header and copyright notice, but without the index.
+
+How to use OCitySMap?
+---------------------
+
+The API of OCitySMap is very simple. First, you need to instanciate the main
+OCitySMap class with the path to your OCitySMap configuration file (see
+ocitysmap.conf-template):
+
+
+    ocitysmap = ocitysmap2.OCitySMap('/path/to/your/config')
+
+The next step is to create a RenderingConfiguration, the object that
+encapsulates all the information to parametize the rendering, including the
+Mapnik stylesheet. You can retrieve the list of supported stylesheets (directly
+as Stylesheet objects) with:
+
+    styles = ocitysmap.get_all_style_configurations()
+
+Fill in your RenderingConfiguration with the map title, the OSM ID or bounding
+box, the chosen map language, the Stylesheet object and the paper size (in
+millimeters) and simply pass it to OCitySMap's render method:
+
+    ocitysmap.render(rendering_configuration, layout_name,
+                     output_formats, prefix)
+
+The layout name is the renderer's key name. You can get the list of all
+supported renderers with ocitysmap.get_all_renderers(). The output_formats is a
+list of output formats. For now, the following formats are supported:
+
+    * PNG at 300dpi
+    * PDF
+    * SVG
+    * SVGZ (gzipped-SVG)
+    * PS
+
+The prefix is the filename prefix for all the rendered files. This is usually a
+path to the destination's directory, eventually followed by some unique, yet
+common prefix for the files rendered for a job.
 """
 
 __author__ = 'The MapOSMatic developers'
@@ -127,7 +172,8 @@ class Stylesheet:
 
 class OCitySMap:
     """
-    TODO: documentation here
+    This is the main entry point of the OCitySMap map rendering engine. Read
+    this module's documentation for more details on its API.
     """
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
@@ -286,9 +332,12 @@ class OCitySMap:
         raise LookupError, 'The requested stylesheet %s was not found!' % name
 
     def get_all_renderers(self):
-        """Returns the list of all available layout renderers (list of Renderer
-        objects)."""
-        pass
+        """Returns the list of all available layout renderers (list of
+        Renderer classes)."""
+        return renderers.get_renderers()
+
+    def get_all_paper_sizes(self):
+        return renderers.get_paper_sizes()
 
     def render(self, config, renderer_name, output_formats, file_prefix):
         """Renders a job with the given rendering configuration, using the
