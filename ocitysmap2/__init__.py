@@ -266,43 +266,28 @@ class OCitySMap:
                 os.rmdir(os.path.join(root, name))
         os.rmdir(tmpdir)
 
-    def _get_bounding_box(self, osmid):
-        """Returns the envelope bounding box around the given OSM ID."""
-        l.debug('Searching bounding box around OSM ID %d...' % osmid)
+    def get_geographic_info(self, osmids):
+        """Returns the envelope and area, in 4002 projection, of all the
+        provided OSM IDs."""
+
+        # Ensure all OSM IDs are integers, bust cast them back to strings
+        # afterwards.
+        osmids = map(str, map(int, osmids))
+        l.debug('Looking up bounding box and contour of OSM IDs %s...'
+                % osmids)
+
         cursor = self._db.cursor()
-        cursor.execute("""select st_astext(st_transform(st_envelope(way), 4002))
-                              from planet_osm_polygon where osm_id=%d;""" %
-                       osmid)
+        cursor.execute("""select osm_id,
+                              st_astext(st_transform(st_envelope(way), 4002)),
+                              st_astext(st_transform(st_buildarea(way), 4002))
+                            from planet_osm_polygon where osm_id in (%s);""" %
+                       ', '.join(osmids))
         records = cursor.fetchall()
-
-        if not records:
-            raise ValueError, 'OSM ID %d not found in the database!' % osmid
-
-        bbox = coords.BoundingBox.parse_wkt(records[0][0])
-        l.debug('Found bounding box %s.' % bbox)
-        return bbox
-
-    def _get_osmid_area(self, osmid):
-        """Returns the bounding box area around the given OSM ID."""
-        # TODO: merge with get_bounding_box
-        l.info('Looking for contour around OSM ID %d...' % osmid)
-        cursor = self._db.cursor()
-        cursor.execute("""select st_astext(st_transform(st_buildarea(way), 4002))
-                                   as polygon
-                              from planet_osm_polygon
-                              where osm_id=%d;""" % osmid)
-        records = cursor.fetchall()
-
-        if not records:
-            raise ValueError, 'OSM ID %d not found in the database!' % osmid
 
         try:
-            polygon = records[0][0].strip()
+            return map(lambda x: (x[0], x[1].strip(), x[2].strip()), records)
         except (KeyError, IndexError, AttributeError):
-            l.error('Invalid database structure!')
-            return None
-
-        return polygon
+            raise AssertionError, 'Invalid database structure!'
 
     def _get_shade_wkt(self, bounding_box, polygon):
         """Creates a shade area for bounding_box with an inner hole for the
@@ -363,9 +348,14 @@ class OCitySMap:
         l.info('Rendering with renderer %s in language: %s (rtl: %s).' %
                (renderer_name, self._i18n.language_code(), config.rtl))
 
+        try:
+            osmid_geo_info = self.get_geographic_info([config.osmid])[0]
+        except IndexError:
+            raise AssertionError, 'OSM ID not found in the database!'
+
         # Make sure we have a bounding box
         config.bounding_box = (config.bounding_box or
-                               self._get_bounding_box(config.osmid))
+                               coords.BoundingBox.parse_wkt(osmid_geo_info[1]))
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
@@ -376,7 +366,7 @@ class OCitySMap:
         renderer.create_map_canvas()
 
         if config.osmid:
-            polygon = self._get_osmid_area(config.osmid)
+            polygon = osmid_geo_info[2]
             if polygon:
                 shade_wkt = self._get_shade_wkt(
                         renderer.canvas.get_actual_bounding_box(),
