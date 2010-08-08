@@ -100,7 +100,7 @@ class BoundingBox:
                 radius_lat * math.radians(delta_long))
 
     def get_pixel_size_for_zoom_factor(self, zoom):
-        """Return the size in pixels (tuple width,height) needed to
+        """Return the size in pixels (tuple height,width) needed to
         render the bounding box at the given zoom factor."""
         delta_long = abs(self._long1 - self._long2)
         # 2^zoom tiles (1 tile = 256 pix) for the whole earth
@@ -115,4 +115,4 @@ class BoundingBox:
         pix_y = (yplan(self._lat1) - yplan(self._lat2)) \
                 * (2 ** (zoom + 7)) / yplan(85)
 
-        return (int(math.ceil(pix_x)), int(math.ceil(pix_y)))
+        return (int(math.ceil(pix_y)), int(math.ceil(pix_x)))

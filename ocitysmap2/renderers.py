@@ -92,7 +92,7 @@ class Renderer:
 
     # The DEFAULT_KM_IN_MM represents the minimum acceptable size in milimeters
     # on the rendered map of a kilometer
-    DEFAULT_KM_IN_MM = 80
+    DEFAULT_KM_IN_MM = 100
 
     def __init__(self, rc, tmpdir):
         self.rc = rc
@@ -440,9 +440,9 @@ class PlainRenderer(Renderer):
         capable).
         """
 
-        geo_width_m, geo_height_m = bounding_box.spheric_sizes()
-        paper_width_mm = geo_width_m/1000.0 * resolution_km_in_mm
-        paper_height_mm = geo_height_m/1000.0 * resolution_km_in_mm
+        geo_height_m, geo_width_m = bounding_box.spheric_sizes()
+        paper_width_mm = int(geo_width_m/1000.0 * resolution_km_in_mm)
+        paper_height_mm = int(geo_height_m/1000.0 * resolution_km_in_mm)
 
         l.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
                 'on paper.' % (geo_width_m, geo_height_m,

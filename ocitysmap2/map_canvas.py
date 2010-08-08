@@ -65,7 +65,7 @@ class MapCanvas:
                 off_x+width, off_y+height)
 
         self._geo_bbox = self._inverse_envelope(envelope)
-        g_width, g_height = self._geo_bbox.get_pixel_size_for_zoom_factor(
+        g_height, g_width = self._geo_bbox.get_pixel_size_for_zoom_factor(
                 stylesheet.zoom_level)
 
         l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
