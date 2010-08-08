@@ -195,8 +195,6 @@ class StreetIndex:
 
         return [category for category in result if category.items]
 
-    def build_data_nogrid(self):
-        return self._categories
 
 if __name__ == "__main__":
     import os

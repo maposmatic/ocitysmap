@@ -127,7 +127,7 @@ class Stylesheet:
 
 class OCitySMap:
     """
-    TODO
+    TODO: documentation here
     """
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
@@ -238,7 +238,7 @@ class OCitySMap:
 
     def _get_osmid_area(self, osmid):
         """Returns the bounding box area around the given OSM ID."""
-        # TODO: 
+        # TODO: merge with get_bounding_box
         l.info('Looking for contour around OSM ID %d...' % osmid)
         cursor = self._db.cursor()
         cursor.execute("""select st_astext(st_transform(st_buildarea(way), 4002))
