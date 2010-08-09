@@ -540,3 +540,5 @@ if __name__ == '__main__':
     plain.canvas.render()
     plain.render(plain.create_rendering_session(surface, None))
     surface.finish()
+
+    print "Generated /tmp/plain.pdf"

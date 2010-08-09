@@ -197,3 +197,5 @@ if __name__ == '__main__':
 
     canvas.render()
     mapnik.render_to_file(canvas.get_rendered_map(), '/tmp/mymap.png', 'png')
+
+    print "Generated /tmp/mymap.png"
