@@ -492,6 +492,12 @@ if __name__ == '__main__':
     import coords
     import cairo
 
+    # Hack to fake gettext
+    try:
+        _(u"Test gettext")
+    except NameError:
+        _ = lambda x: x
+
     logging.basicConfig(level=logging.DEBUG)
 
     bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
