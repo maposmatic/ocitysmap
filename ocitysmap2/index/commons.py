@@ -95,25 +95,25 @@ class IndexItem:
     contains the item label (street name, POI name or description) and the
     humanized squares description.
     """
-    __slots__ = ['label', 'db_table', 'osm_id', 'squares']
-    label    = None
-    db_table = None
-    osm_id   = None
-    squares  = None
+    __slots__    = ['label', 'endpoint1', 'endpoint2', 'location_str']
+    label        = None # str
+    endpoint1    = None # coords.Point
+    endpoint2    = None # coords.Point
+    location_str = None # str or None
 
-    def __init__(self, label, db_table = None, osm_id = None, squares = None):
-        self.label    = label
-        self.db_table = db_table
-        self.osm_id   = osm_id
-        self.squares  = squares
+    def __init__(self, label, endpoint1, endpoint2 = None):
+        self.label        = label
+        self.endpoint1    = endpoint1
+        self.endpoint2    = endpoint2 or endpoint1
+        self.location_str = None
 
     def __str__(self):
-        return '%s...%s' % (self.label, self.squares)
+        return '%s...%s' % (self.label, self.location_str)
 
     def __repr__(self):
         return ('IndexItem(%s, %s, %s, %s)'
-                % (repr(self.label), repr(self.db_table), repr(self.osm_id),
-                   repr(self.squares)))
+                % (repr(self.label), self.endpoint1, self.endpoint2,
+                   repr(self.location_str)))
 
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
@@ -143,12 +143,12 @@ class IndexItem:
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
-                                                        self.squares or '???')
+                                                        self.location_str or '???')
         else:
             _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
                                                          fascent, fheight,
                                                          baseline_x, baseline_y,
-                                                         self.squares or '???')
+                                                         self.location_str or '???')
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
@@ -183,8 +183,8 @@ if __name__ == "__main__":
     fheight = ((font_metric.get_ascent() + font_metric.get_descent())
                / pango.SCALE)
 
-    first_item  = IndexItem('First Item', 'A1')
-    second_item = IndexItem('Second Item', 'A2')
+    first_item  = IndexItem('First Item', None)
+    second_item = IndexItem('Second Item', None)
     category    = IndexCategory('Hello world !', [first_item, second_item])
 
     category.draw(False, ctx, pc, layout, fascent, fheight,
