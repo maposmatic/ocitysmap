@@ -26,6 +26,38 @@ import math
 
 EARTH_RADIUS = 6370986 # meters
 
+
+class Point:
+    def __init__(self, lat, long_):
+        self._lat, self._long = float(lat), float(long_)
+
+    @staticmethod
+    def parse_wkt(wkt):
+        long_,lat = wkt[6:-1].split()
+        return Point(lat, long_)
+
+    def get_latlong(self):
+        return self._lat, self._long
+
+    def as_wkt(self, with_point_statement=True):
+        contents = '%f %f' % (self._long, self._lat)
+        if with_point_statement:
+            return "POINT(%s)" % contents
+        return contents
+
+    def __str__(self):
+        return 'Point(lat=%f, long_=%f)' % (self._lat, self._long)
+
+    def spheric_spherical_vector(self, other):
+        """Approx (self - other) vector converted to lat/long meters
+        wrt the given other point"""
+        delta_lat  = abs(self._lat - other._lat)
+        delta_long = abs(self._long - other._long)
+        radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat))
+        return (EARTH_RADIUS * math.radians(delta_lat),
+                radius_lat * math.radians(delta_long))
+
+
 class BoundingBox:
     """
     The BoundingBox class defines a geographic rectangle area specified by the
@@ -76,8 +108,9 @@ class BoundingBox:
         return '%.4f,%.4f' % (point[0], point[1])
 
     def __str__(self):
-        return '(%s %s)' % (BoundingBox._ptstr(self.get_top_left()),
-                            BoundingBox._ptstr(self.get_bottom_right()))
+        return 'BoundingBox(%s %s)' \
+            % (BoundingBox._ptstr(self.get_top_left()),
+               BoundingBox._ptstr(self.get_bottom_right()))
 
     def as_wkt(self, with_polygon_statement=True):
         xmax, ymin = self.get_top_left()
@@ -116,3 +149,9 @@ class BoundingBox:
                 * (2 ** (zoom + 7)) / yplan(85)
 
         return (int(math.ceil(pix_y)), int(math.ceil(pix_x)))
+
+
+if __name__ == "__main__":
+    wkt = 'POINT(2.0333 48.7062132250362)'
+    pt = Point.parse_wkt(wkt)
+    print wkt, pt, pt.as_wkt()
