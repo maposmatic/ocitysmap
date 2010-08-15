@@ -337,6 +337,10 @@ if __name__ == '__main__':
 
     surface = cairo.PDFSurface('/tmp/myindex_render.pdf', width, height)
 
+    def rnd_str(max_len, letters = string.letters):
+        return ''.join(random.choice(letters)
+                       for i in xrange(random.randint(1, max_len)))
+
     class i18nMock:
         def __init__(self, rtl):
             self.rtl = rtl
@@ -345,8 +349,20 @@ if __name__ == '__main__':
 
     streets = []
     for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
-         streets.append(commons.IndexCategory(i, [commons.IndexItem(l,squares=s) for l,s in
-                    [(''.join(random.choice(string.letters) for i in xrange(random.randint(1, 10))), 'A1')]*4]))
+        items = []
+        for label, location_str in [(rnd_str(10).capitalize(),
+                                     '%s%d-%s%d' \
+                                         % (rnd_str(2,
+                                                    string.ascii_uppercase),
+                                            random.randint(1,19),
+                                            rnd_str(2,
+                                                    string.ascii_uppercase),
+                                            random.randint(1,19),
+                                            ))]*4:
+            item              = commons.IndexItem(label,endpoint1=None)
+            item.location_str = location_str
+            items.append(item)
+        streets.append(commons.IndexCategory(i, items))
 
     index = render.StreetIndexRenderer(i18nMock(False), streets)
 
