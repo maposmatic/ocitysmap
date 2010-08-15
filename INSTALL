@@ -247,6 +247,12 @@ diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindi
     wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
     tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
 
+    wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/10m-populated-places.zip
+    unzip 10m-populated-places.zip -d /path/to/mapnik-osm/world_boundaries
+
+    wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/110m-admin-0-boundary-lines.zip
+    unzip 110m-admin-0-boundary-lines.zip -d /path/to/mapnik-osm/world_boundaries
+
     c. Enabling unifont
 
     In order to get correct rendering for Korean, Chineese or Japanese
