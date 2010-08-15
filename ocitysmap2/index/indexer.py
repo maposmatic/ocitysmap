@@ -92,9 +92,10 @@ class StreetIndex:
 
         Args:
             sl (list of tuple): list tuples of the form (street_name,
-                                leftmost, rightmost, topmost,
-                                bottommost) where the *most values
-                                WKT point strings in 4326 SRID
+                                linestring_wkt) where linestring_wkt
+                                is a WKT for the linestring between
+                                the 2 most distant point of the
+                                street, in 4326 SRID
 
         Returns the list of IndexCategory objects. Each IndexItem will
         have its square location still undefined at that point
@@ -125,8 +126,13 @@ class StreetIndex:
                 result.append(current_category)
 
             # Parse the WKT from the largest linestring in shape
-            s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                           linestring[11:-1].split(','))
+            try:
+                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                               linestring[11:-1].split(','))
+            except (ValueError, TypeError):
+                l.exception("Error parsing %s for %s" % (repr(linestring),
+                                                         repr(street_name)))
+                raise
             endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
             endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(commons.IndexItem(street_name,
@@ -151,7 +157,8 @@ class StreetIndex:
         query = """
 select name,
        --- street_kind, -- only when group by is: group by name, street_kind
-       st_astext(st_transform(ST_LongestLine(street_path, street_path), 4002))
+       st_astext(st_transform(ST_LongestLine(street_path, street_path),
+                              4002)) as longest_linestring
 from
   (select name,
           -- highway as street_kind, -- only when group by name, street_kind
@@ -177,11 +184,6 @@ from
     def _build_amenities_index_nogrid(self):
         cursor = self._db.cursor()
 
-        intersect = ("""st_intersects(way, st_transform(
-                                     GeomFromText('%s', 4002), 900913))"""
-                     % (self._polygon_wkt or self._bounding_box.as_wkt()))
-
-
         result = []
         for catname, db_amenity, label in self._get_selected_amenities():
             l.info("Getting amenities for %s/%s..." % (catname, db_amenity))
@@ -194,36 +196,53 @@ from
             else:
                 current_category = result[-1]
 
-            query = """select name, db_table, osm_id
-                       from (select distinct amenity, name,
-                                             'point' as db_table,
-                                             osm_id
-                                    from planet_osm_point
-                                    where amenity = %(amenity)s
-                                          and %(intersect)s
-                             union
-                             select distinct amenity, name,
-                                             'polygon' as db_table,
-                                             osm_id
-                                    from planet_osm_polygon
-                                    where amenity = %(amenity)s
-                                          and %(intersect)s)
-                        as foo
-                        group by amenity, osm_id, db_table, name
-                        order by amenity, name""" \
-                % dict(amenity   = _sql_escape_unicode(db_amenity),
-                       intersect = intersect)
+            query = """
+select amenity_name,
+       st_astext(st_transform(ST_LongestLine(amenity_contour, amenity_contour),
+                              4002)) as longest_linestring
+from (
+       select name as amenity_name,
+              st_intersection(%(wkb_limits)s, way) as amenity_contour
+       from planet_osm_point
+       where trim(name) != ''
+             and amenity = %(amenity)s and ST_intersects(way, %(wkb_limits)s)
+      union
+       select name as amenity_name,
+              st_intersection(%(wkb_limits)s, way) as amenity_contour
+       from planet_osm_polygon
+       where trim(name) != '' and amenity = %(amenity)s
+             and ST_intersects(way, %(wkb_limits)s)
+     ) as foo
+order by amenity_name""" \
+                % {'amenity': _sql_escape_unicode(db_amenity),
+                   'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
+                                  % (self._polygon_wkt or self._bounding_box.as_wkt()))}
+
+
+            l.debug("Amenity query for for %s/%s (nogrid): %s" \
+                        % (catname, db_amenity, query))
 
             cursor.execute(query)
-            # TODO: fix me
-            items = [commons.IndexItem(name or label, # TODO: params...
-                                       None
-                                       ) \
-                         for name,db_table,osm_id in cursor.fetchall()]
+
+            for amenity_name, linestring in cursor.fetchall():
+                # Parse the WKT from the largest linestring in shape
+                try:
+                    s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                                   linestring[11:-1].split(','))
+                except (ValueError, TypeError):
+                    l.exception("Error parsing %s for %s/%s/%s"
+                                % (repr(linestring), catname, db_amenity,
+                                   repr(amenity_name)))
+                    continue
+                    ## raise
+                endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
+                endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
+                current_category.items.append(commons.IndexItem(amenity_name,
+                                                                endpoint1,
+                                                                endpoint2))
 
             l.debug("Got %d amenities for %s/%s."
-                    % (len(items), catname, db_amenity))
-            current_category.items.extend(items)
+                    % (len(current_category.items), catname, db_amenity))
 
         return [category for category in result if category.items]
 
