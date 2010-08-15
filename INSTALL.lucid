@@ -1,0 +1,243 @@
+OCitySMap installation instructions
+===================================
+
+These instructions refer to software dependencies by using Ubuntu
+Lucid (10.04) package names. Minor adaptations might be needed for
+other distributions or for the precise Debian or Ubuntu release you
+are using. They have been tested on several x86_64 hosts.
+
+ 1. Installation of PostgreSQL and PostGIS
+
+    sudo aptitude install postgresql postgresql-contrib
+
+ 2. Creation of a new PostgreSQL user
+
+    sudo -u postgres createuser -P -S -D -R maposmatic
+
+    Enter the password twice (we use later 'ereiamjh' as example
+    password).
+
+ 3. Creation of the database
+
+    sudo -u postgres createdb -E UTF8 -O maposmatic maposmatic
+
+    (see http://wiki.openstreetmap.org/wiki/Mapnik/PostGIS)
+
+    You can now try to connect to the database, using:
+
+    psql -h localhost -U maposmatic maposmatic
+
+    If it doesn't work, fix your configuration.
+
+ 4. Enable PostGIS on the database
+
+    PostGIS is in fact a set of functions and datatypes for
+    PostgreSQL, and every PostgreSQL database needing these features
+    must be initialized as follows. We do this initialization of the
+    database with superuser privileges, and then later fix the table
+    owners so that our normal user can use the database.
+
+    a. Enable the plpgsql language on the maposmatic database
+
+    sudo -u postgres createlang plpgsql maposmatic
+
+    b. Download postgis 1.5.1
+
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+
+    sudo aptitude update
+    sudo aptitude dist-upgrade # Or safe-upgrade if you prefer
+
+    sudo aptitude install postgresql-8.4-postgis
+
+    c. Install PostGIS support in Postgres
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql \
+              -d maposmatic
+
+    Provide comments (Optional):
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql \
+              -d maposmatic
+
+    d. Add the list of spatial referential systems
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql \
+              -d maposmatic
+
+    e. Add the intarray extension for diff files support (osc)
+
+    sudo -u postgres \
+         psql \
+              -f /usr/share/postgresql/8.4/contrib/_int.sql \
+              -d maposmatic
+
+    f. Change the owner of the new tables to maposmatic
+
+    echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
+          ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
+    sudo -u postgres psql -d maposmatic
+
+ 5. Installation of osm2pgsql
+
+    osm2pgsql is the tool that takes OSM data as input, and creates a
+    PostGIS database from it. At the time of the writing of this
+    document, the osm2pgsql packaged in Debian/Ubuntu is not recent
+    enough, so we grab a fresh version from SVN (we used revision
+    17318).
+
+    a. If needed, install SVN
+
+    sudo aptitude install subversion
+
+    b. Grab osm2pgsql code
+
+    svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
+    # Tested revision: r22641
+
+    c. Install the build dependencies
+
+    sudo apt-get build-dep osm2pgsql
+
+    d. Compile
+
+    cd osm2pgsql
+    ./autogen.sh
+    ./configure # with --prefix=.... as needed
+    make
+
+    e. Install
+
+    Provided you supplied the correct --prefix=... option, just enter:
+
+    make install
+
+ 6. Download the OSM data
+
+    We give the example for Luxembourg.
+
+    wget http://download.geofabrik.de/osm/europe/luxembourg.osm.bz2
+
+ 7. Import the OSM data
+
+    osm2pgsql -s -c -d maposmatic -m -U maposmatic -W \
+              -H localhost luxembourg.osm.bz2
+
+    If you have a lot of RAM, remove '-s', it will make the import
+    faster. If you miss RAM (and have a lot of time available) you can
+    also use the '-C' option together with '-s'. (See osm2pgsql -h).
+
+    If you want to add other OSM DB files, replace the '-c' option
+    with a '-a' option in the subsequent files you are adding: if you
+    keep the '-c' option, it will erase any previous GIS data you may
+    have. For example:
+
+    osm2pgsql -s -a -d maposmatic -m -U maposmatic -W \
+              -H localhost ile-de-france.osm.bz2
+
+
+ 8. Install Mapnik
+
+    We need Mapnik 0.7.1, which is not yet available in stable
+    Debian/Ubuntu, so we need to compile it from source.
+
+    a. Install the dependencies
+
+    sudo apt-get build-dep python-mapnik
+
+    b. Download Mapnik
+
+    wget http://download.berlios.de/mapnik/mapnik-0.7.1.tar.bz2
+
+    c. Compile and install Mapnik
+
+    tar xvjf mapnik-0.7.1.tar.bz2
+    cd mapnik-0.7.1
+
+    python scons/scons.py configure INPUT_PLUGINS=all \
+      OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
+
+    (You can also path PREFIX=... and PYTHON_PREFIX=.... if you don't
+    want a system-wide installation)
+
+    python scons/scons.py
+
+    python scons/scons.py install
+
+    d. Check the installation
+
+    Run a Python interpreter, and run "import mapnik". If it doesn't
+    work and you didn't do a system-wide installation of Mapnik, don't
+    forget to set the PYTHONPATH and LD_LIBRARY_PATH environment
+    variables.
+
+10. Install Mapnik-OSM
+
+    Mapnik-OSM is the set of files that tell Mapnik how to render
+    OpenStreetMap maps.
+
+    a. Download
+
+    svn co http://svn.openstreetmap.org/applications/rendering/mapnik \
+        mapnik-osm
+    # Tested revision: r22641
+
+    b. Installation of static data
+
+    In addition to the OpenStreetMap data, some other static data are
+    used to render the maps (world boundaries, etc.)
+
+    cd mapnik-osm
+    sh ./get-coastlines.sh
+
+    c. Enabling unifont
+
+    In order to get correct rendering for Korean, Chineese or Japanese
+    character, the unifont font must be used. In order do enable it,
+    edit inc/fontset-settings.xml.inc, and uncomment the following
+    line :
+
+    	  <Font face_name="unifont Medium" />
+
+    in the book-fonts, bold-fonts and oblique-fonts sections.
+
+    d. Configuration
+
+    python ./generate_xml.py --dbname maposmatic --host 'localhost' \
+                             --user maposmatic --port 5432 \
+                             --password 'ereiamjh'
+
+11. Installation of OCitySMap
+
+    a. Install Git if needed
+
+    sudo aptitude install git-core git-email
+
+    b. Grab the sources
+
+    git clone git://git.savannah.nongnu.org/maposmatic/ocitysmap.git
+
+    c. Install dependencies
+
+    sudo aptitude install python-psycopg2 python-gdal \
+                          python-gtk2 python-cairo
+
+    Note that python-gtk2 is not needed for any graphical interface,
+    but because it contains Pango and PangoCairo that we use to render
+    text on the map.
+
+    e. Configuration file
+
+    Create a ~/.ocitysmap.conf configuration file, modeled after the
+    provided ocitysmap.conf-template file.
+
+12. Run OCitySMap
+
+    ./ocitysmap-render -f png -c Sanguinet
+
