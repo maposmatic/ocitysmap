@@ -26,6 +26,8 @@
 import logging
 import locale
 import psycopg2
+import csv
+import datetime
 
 from ocitysmap2.index import commons
 from ocitysmap2 import coords
@@ -62,9 +64,43 @@ class StreetIndex:
     def categories(self):
         return self._categories
 
-    def write_to_csv(self, filename):
+    def write_to_csv(self, title, output_filename):
         # TODO: implement writing the index to CSV
-        raise NotImplementedError
+        try:
+            fd = open(output_filename, 'w')
+        except Exception,ex:
+            l.warning('error while opening destination file %s: %s'
+                      % (output_filename, ex))
+            return
+
+        l.debug("Creating CSV file %s..." % output_filename)
+        writer = csv.writer(fd)
+
+        # Try to treat indifferently unicode and str in CSV rows
+        def csv_writerow(row):
+            _r = []
+            for e in row:
+                if type(e) is unicode:
+                    _r.append(e.encode('UTF-8'))
+                else:
+                    _r.append(e)
+            return writer.writerow(_r)
+
+        copyright_notice = (u'© %(year)d MapOSMatic/ocitysmap authors. '
+                            u'Map data © %(year)d OpenStreetMap.org '
+                            u'and contributors (CC-BY-SA)' %
+                            {'year': datetime.date.today().year})
+        if title is not None:
+            csv_writerow(['# (UTF-8)', title, copyright_notice])
+        else:
+            csv_writerow(['# (UTF-8)', '', copyright_notice])
+
+        for category in self._categories:
+            csv_writerow(['%s' % category.name])
+            for item in category.items:
+                csv_writerow(['', item.label, item.location_str or '???'])
+
+        fd.close()
 
     def _get_selected_amenities(self):
         # Amenities to retrieve from DB, a list of string tuples:

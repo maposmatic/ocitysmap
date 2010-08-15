@@ -388,7 +388,7 @@ class OCitySMap:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 self._render_one(renderer, street_index_renderer,
                                  output_filename, output_format)
-            street_index.write_to_csv('%s.csv' % file_prefix)
+            street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
         finally:
             self._cleanup_tempdir(tmpdir)
 
