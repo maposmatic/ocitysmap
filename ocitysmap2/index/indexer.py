@@ -28,6 +28,7 @@ import locale
 import psycopg2
 
 from ocitysmap2.index import commons
+from ocitysmap2 import coords
 
 import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
