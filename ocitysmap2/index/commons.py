@@ -47,6 +47,7 @@ class IndexCategory:
     items = None
 
     def __init__(self, name, items = None):
+        assert name is not None
         self.name  = name
         self.items = items or list()
 
@@ -101,10 +102,11 @@ class IndexItem:
     endpoint2    = None # coords.Point
     location_str = None # str or None
 
-    def __init__(self, label, endpoint1, endpoint2 = None):
+    def __init__(self, label, endpoint1, endpoint2):
+        assert label is not None
         self.label        = label
         self.endpoint1    = endpoint1
-        self.endpoint2    = endpoint2 or endpoint1
+        self.endpoint2    = endpoint2
         self.location_str = None
 
     def __str__(self):
@@ -183,8 +185,8 @@ if __name__ == "__main__":
     fheight = ((font_metric.get_ascent() + font_metric.get_descent())
                / pango.SCALE)
 
-    first_item  = IndexItem('First Item', None)
-    second_item = IndexItem('Second Item', None)
+    first_item  = IndexItem('First Item', None, None)
+    second_item = IndexItem('Second Item', None, None)
     category    = IndexCategory('Hello world !', [first_item, second_item])
 
     category.draw(False, ctx, pc, layout, fascent, fheight,
