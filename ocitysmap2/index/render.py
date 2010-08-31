@@ -96,7 +96,7 @@ class StreetIndexRenderingArea:
 
 class StreetIndexRenderer:
     """
-    The StreetIndex class encapsulate all the logic related to the querying and
+    The StreetIndex class encapsulates all the logic related to the querying and
     rendering of the street index.
     """
 

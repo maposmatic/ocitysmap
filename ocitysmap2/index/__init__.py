@@ -35,6 +35,7 @@ if __name__ == '__main__':
 
     from ocitysmap2 import i18n, coords
     from ocitysmap2.index import commons
+    from ocitysmap2.grid import Grid
 
     import render
 
@@ -72,6 +73,10 @@ if __name__ == '__main__':
 
     surface = cairo.PDFSurface('/tmp/myindex.pdf', width, height)
 
+    # Map index to grid
+    grid = Grid(bbox, rtl = False)
+    street_index.apply_grid(grid)
+
     index = render.StreetIndexRenderer(i18nMock(False),
                                        street_index.categories)
 
@@ -106,6 +111,14 @@ if __name__ == '__main__':
     surface.show_page()
     _render('width', 'right')
     surface.show_page()
+
+    ##
+    ## Now demo with RTL = True
+    ##
+
+    # Map index to grid
+    grid = Grid(bbox, rtl = True)
+    street_index.apply_grid(grid)
 
     index = render.StreetIndexRenderer(i18nMock(True),
                                        street_index.categories)

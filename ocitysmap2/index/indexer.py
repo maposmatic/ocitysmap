@@ -64,6 +64,23 @@ class StreetIndex:
     def categories(self):
         return self._categories
 
+    def apply_grid(self, grid):
+        """
+        Fix the label location_str field by mapping the streets to the
+        given grid.
+
+        Args:
+           grid (ocitysmap2.Grid): the Grid object from which we
+           compute the location strings
+
+        Returns:
+           Nothing, but self._categories will have been modified !
+        """
+        for category in self._categories:
+            for item in category.items:
+                item.update_location_str(grid)
+
+
     def write_to_csv(self, title, output_filename):
         # TODO: implement writing the index to CSV
         try:

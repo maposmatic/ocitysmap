@@ -90,6 +90,7 @@ class IndexCategory:
     def get_all_item_squares(self):
         return [x.squares for x in self.items]
 
+
 class IndexItem:
     """
     An IndexItem represents one item in the index (a street or a POI). It
@@ -160,6 +161,41 @@ class IndexItem:
                                     line_start + fheight/4, baseline_y,
                                     line_end - line_start - fheight/2)
         ctx.restore()
+
+    def update_location_str(self, grid):
+        """
+        Update the location_str field from the given Grid object.
+
+        Args:
+           grid (ocitysmap2.Grid): the Grid object from which we
+           compute the location strings
+
+        Returns:
+           Nothing, but the location_str field will have been altered
+        """
+        if self.endpoint1 is not None:
+            ep1_label = grid.get_location_str( * self.endpoint1.get_latlong())
+        else:
+            ep1_label = None
+        if self.endpoint2 is not None:
+            ep2_label = grid.get_location_str( * self.endpoint2.get_latlong())
+        else:
+            ep2_label = None
+        if ep1_label is None:
+            ep1_label = ep2_label
+        if ep2_label is None:
+            ep2_label = ep1_label
+
+        if ep1_label == ep2_label:
+            if ep1_label is None:
+                self.location_str = "???"
+            self.location_str = ep1_label
+        elif grid.rtl:
+            self.location_str = "%s-%s" % (max(ep1_label, ep2_label),
+                                           min(ep1_label, ep2_label))
+        else:
+            self.location_str = "%s-%s" % (min(ep1_label, ep2_label),
+                                           max(ep1_label, ep2_label))
 
 
 if __name__ == "__main__":

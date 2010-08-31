@@ -53,6 +53,7 @@ class Grid:
         """
 
         self._bbox = bounding_box
+        self.rtl   = rtl
         self._height_m, self._width_m = bounding_box.spheric_sizes()
 
         l.info('Laying out grid on %.1fx%.1fm area...' %
@@ -67,35 +68,34 @@ class Grid:
                 Grid.GRID_COUNT_TRESHOLD):
                 break
 
-        self._horiz_angle = (abs(self._bbox.get_top_left()[1] -
-                                 self._bbox.get_bottom_right()[1]) /
-                             self.horiz_count)
-        self._vert_angle  = (abs(self._bbox.get_top_left()[0] -
-                                 self._bbox.get_bottom_right()[0]) /
-                             self.vert_count)
+        self._horiz_angle_span = abs(self._bbox.get_top_left()[1] -
+                                     self._bbox.get_bottom_right()[1])
+        self._vert_angle_span  = abs(self._bbox.get_top_left()[0] -
+                                     self._bbox.get_bottom_right()[0])
 
-        self._horizontal_lines = [self._bbox.get_top_left()[0] -
-                                  (x+1) * self._vert_angle for x in xrange(
-                                      int(math.floor(self.vert_count)))]
-        self._vertical_lines   = [self._bbox.get_top_left()[1] +
-                                  (x+1) * self._horiz_angle for x in xrange(
-                                      int(math.floor(self.horiz_count)))]
+        self._horiz_unit_angle = (self._horiz_angle_span / self.horiz_count)
+        self._vert_unit_angle  = (self._vert_angle_span / self.vert_count)
+
+        self._horizontal_lines = [ ( self._bbox.get_top_left()[0] -
+                                    (x+1) * self._vert_unit_angle)
+                                  for x in xrange(int(math.floor(self.vert_count)))]
+        self._vertical_lines   = [ (self._bbox.get_top_left()[1] +
+                                    (x+1) * self._horiz_unit_angle)
+                                   for x in xrange(int(math.floor(self.horiz_count)))]
 
         self.horizontal_labels = map(self._gen_horizontal_square_label,
                                       xrange(int(math.ceil(self.horiz_count))))
-        if rtl:
-            self.horizontal_labels.reverse()
         self.vertical_labels = map(self._gen_vertical_square_label,
                                    xrange(int(math.ceil(self.vert_count))))
 
-        l.info('Using %dx%dm grid (%dx%d squares).' %
+        l.info('Using %sx%sm grid (%sx%s squares).' %
                (self.grid_size_m, self.grid_size_m,
                 self.horiz_count, self.vert_count))
 
     def generate_shape_file(self, filename):
         """Generates the grid shapefile with all the horizontal and
         vertical lines added.
-        
+
         Args:
             filename (string): path to the temporary shape file that will be
                 generated.
@@ -120,6 +120,9 @@ class Grid:
             28 -> AB
             ...
         """
+        if self.rtl:
+            x = len(self._vertical_lines) - x
+
         label = ''
         while x != -1:
             label = chr(ord('A') + x % 26) + label
@@ -130,6 +133,22 @@ class Grid:
         """Generate a human-readable label for the given vertical square
         number. Since we put numbers verticaly, this is simply x+1."""
         return str(x + 1)
+
+    def get_location_str(self, lattitude, longitude):
+        """
+        Translate the given lattitude/longitude (EPSG:4326) into a
+        string of the form "CA42"
+        """
+        hdelta = min(abs(longitude - self._bbox.get_top_left()[1]),
+                     self._horiz_angle_span)
+        hlabel = self.horizontal_labels[int(hdelta / self._horiz_unit_angle)]
+
+        vdelta = min(abs(lattitude - self._bbox.get_top_left()[0]),
+                     self._vert_angle_span)
+        vlabel = self.vertical_labels[int(vdelta / self._vert_unit_angle)]
+
+        return "%s%s" % (hlabel, vlabel)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
