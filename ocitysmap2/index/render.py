@@ -32,6 +32,68 @@ import commons
 
 l = logging.getLogger('ocitysmap')
 
+
+class StreetIndexRenderingStyle:
+    """
+    The StreetIndexRenderingStyle class defines how the header and
+    label items should be drawn (font family, size, etc.).
+    """
+    __slots__ = ["header_font_spec", "label_font_spec"]
+    header_font_spec = None
+    label_font_spec  = None
+
+    def __init__(self, header_font_spec, label_font_spec):
+        """
+        Specify how the headers and label should be rendered. The
+        Pango Font Speficication strings below are of the form
+        "serif,monospace bold italic condensed 16". See
+        http://www.pygtk.org/docs/pygtk/class-pangofontdescription.html
+        for more details.
+
+        Args:
+           header_font_spec (str): Pango Font Specification for the headers.
+           label_font_spec (str): Pango Font Specification for the labels.
+        """
+        self.header_font_spec = header_font_spec
+        self.label_font_spec  = label_font_spec
+
+    def __str__(self):
+        return "Style(headers=%s, labels=%s)" % (repr(self.header_font_spec),
+                                                 repr(self.label_font_spec))
+
+
+class StreetIndexRenderingArea:
+    """
+    The StreetIndexRenderingArea class describes the parameters of the
+    Cairo area and its parameters (fonts) where the index should be
+    renedered. It is basically returned by
+    StreetIndexRenderer::precompute_occupation_area() and used by
+    StreetIndexRenderer::render(). All its attributes x,y,w,h may be
+    used by the global map rendering engines.
+    """
+
+    def __init__(self, street_index_rendering_style, x, y, w, h, n_cols):
+        """
+        Describes the Cairo area to use when rendering the index.
+
+        Args:
+             street_index_rendering_style (StreetIndexRenderingStyle):
+                   how to render the text inside the index
+             x (int): horizontal origin position (cairo units).
+             y (int): vertical origin position (cairo units).
+             w (int): width of area to use (cairo units).
+             h (int): height of area to use (cairo units).
+             n_cols (int): number of columns in the index.
+        """
+        self.rendering_style = street_index_rendering_style
+        self.x, self.y, self.w, self.h, self.n_cols = x, y, w, h, n_cols
+
+    def __str__(self):
+        return "Area(%s, %dx%d+%d+%d, n_cols=%d)" \
+            % (self.rendering_style,
+               self.w, self.h, self.x, self.y, self.n_cols)
+
+
 class StreetIndexRenderer:
     """
     The StreetIndex class encapsulate all the logic related to the querying and
@@ -39,13 +101,32 @@ class StreetIndexRenderer:
     """
 
     def __init__(self, i18n, index_categories,
-                 header_font_spec = 'Georgia Bold',
-                 label_font_spec = 'DejaVu'):
-        self._i18n = i18n
+                 street_index_rendering_styles \
+                     = [ StreetIndexRenderingStyle('Georgia Bold 16',
+                                                   'DejaVu 12'),
+                         StreetIndexRenderingStyle('Georgia Bold 14',
+                                                   'DejaVu 10'),
+                         StreetIndexRenderingStyle('Georgia Bold 12',
+                                                   'DejaVu 8'),
+                         StreetIndexRenderingStyle('Georgia Bold 10',
+                                                   'DejaVu 7'),
+                         StreetIndexRenderingStyle('Georgia Bold 8',
+                                                   'DejaVu 6'),
+                         StreetIndexRenderingStyle('Georgia Bold 6',
+                                                   'DejaVu 5'),
+                         StreetIndexRenderingStyle('Georgia Bold 5',
+                                                   'DejaVu 4'),
+                         StreetIndexRenderingStyle('Georgia Bold 4',
+                                                   'DejaVu 3'),
+                         StreetIndexRenderingStyle('Georgia Bold 3',
+                                                   'DejaVu 2'),
+                         StreetIndexRenderingStyle('Georgia Bold 2',
+                                                   'DejaVu 2'),
+                         StreetIndexRenderingStyle('Georgia Bold 1',
+                                                   'DejaVu 1'), ] ):
+        self._i18n             = i18n
         self._index_categories = index_categories
-
-        self._header_fd = pango.FontDescription(header_font_spec)
-        self._label_fd = pango.FontDescription(label_font_spec)
+        self._rendering_styles = street_index_rendering_styles
 
     def precompute_occupation_area(self, surface, x, y, w, h,
                                    freedom_direction, alignment):
@@ -66,10 +147,10 @@ class StreetIndexRenderer:
                 of 'height', 'left' or 'right' for 'width'. Tells which side to
                 stick the index to.
 
-        Returns the recommended actual graphical bounding box (new_x,
-        new_y, new_w, new_h, n_cols) where the index should be
-        rendered. Raise IndexDoesNotFitError when the provided area's
-        surface is not enough to hold the index.
+        Returns the actual graphical StreetIndexRenderingArea defining
+        how and where the index should be rendered. Raise
+        IndexDoesNotFitError when the provided area's surface is not
+        enough to hold the index.
         """
         if ((freedom_direction == 'height' and
              alignment not in ('top', 'bottom')) or
@@ -80,23 +161,37 @@ class StreetIndexRenderer:
         if not self._index_categories:
             raise commons.IndexEmptyError
 
-        ctx = cairo.Context(surface)
+        l.debug("Determining inde area within %dx%d+%d+%d aligned %s/%s..."
+                % (w,h,x,y, alignment, freedom_direction))
 
         # Create a PangoCairo context for drawing to Cairo
-        pc = pangocairo.CairoContext(ctx)
+        ctx = cairo.Context(surface)
+        pc  = pangocairo.CairoContext(ctx)
 
-        n_cols, min_dimension = self._compute_columns_split(pc,
-                                                            w, h, 12, 16,
-                                                            freedom_direction)
+        # Iterate over the rendering_styles until we find a suitable layout
+        rendering_style = None
+        for rs in self._rendering_styles:
+            l.debug("Trying index fit using %s..." % rs)
+            try:
+                n_cols, min_dimension \
+                    = self._compute_columns_split(pc, rs, w, h,
+                                                  freedom_direction)
 
-        self._label_fd.set_size(12 * pango.SCALE)
-        self._header_fd.set_size(16 * pango.SCALE)
+                # Great: index did fit OK !
+                rendering_style = rs
+                break
 
-        label_layout, label_fascent, label_fheight, label_em = \
-                self._create_layout_with_font(pc, self._label_fd)
-        header_layout, header_fascent, header_fheight, header_em = \
-                self._create_layout_with_font(pc, self._header_fd)
+            except commons.IndexDoesNotFitError:
+                # Index did not fit => try smaller...
+                l.debug("Index %s too large: should try a smaller one."
+                        % rs)
+                continue
 
+        # Index really did not fit with any of the rendering styles ?
+        if not rendering_style:
+            raise commons.IndexDoesNotFitError("Index does not fit in area")
+
+        # Realign at bottom/top left/right
         if freedom_direction == 'height':
             index_width  = w
             index_height = min_dimension
@@ -111,42 +206,45 @@ class StreetIndexRenderer:
         if alignment == 'right':
             base_offset_x = w - index_width
 
-        return (x+base_offset_x, y+base_offset_y,
-                index_width, index_height, n_cols)
+        area = StreetIndexRenderingArea(rendering_style,
+                                        x+base_offset_x, y+base_offset_y,
+                                        index_width, index_height, n_cols)
+        l.debug("Will be able to render index in %s" % area)
+        return area
 
 
-    def render(self, surface, x, y, w, h, n_cols):
+    def render(self, surface, rendering_area):
         """Render the street and amenities index at the given (x,y) coordinates
         into the provided Cairo surface. The index must not be larger than the
         provided surface (use precompute_occupation_area() to adjust it).
 
         Args:
             surface (cairo.Surface): the cairo surface to render into.
-            x (int): horizontal origin position, in pixels.
-            y (int): vertical origin position, in pixels.
-            w (int): maximum usable width for the index, in dots (Cairo unit).
-            h (int): maximum usable height for the index, in dots (Cairo unit).
+            rendering_area (StreetIndexRenderingArea): the result from
+                precompute_occupation_area().
         """
 
         if not self._index_categories:
             raise commons.IndexEmptyError
 
         ctx = cairo.Context(surface)
-        ctx.move_to(x, y)
+        ctx.move_to(rendering_area.x, rendering_area.y)
 
         # Create a PangoCairo context for drawing to Cairo
         pc = pangocairo.CairoContext(ctx)
 
-        self._label_fd.set_size(12 * pango.SCALE)
-        self._header_fd.set_size(16 * pango.SCALE)
+        header_fd = pango.FontDescription(rendering_area.rendering_style.header_font_spec)
+        label_fd  = pango.FontDescription(rendering_area.rendering_style.label_font_spec)
 
         label_layout, label_fascent, label_fheight, label_em = \
-                self._create_layout_with_font(pc, self._label_fd)
+                self._create_layout_with_font(pc, label_fd)
         header_layout, header_fascent, header_fheight, header_em = \
-                self._create_layout_with_font(pc, self._header_fd)
+                self._create_layout_with_font(pc, header_fd)
 
         cairo_colspace = label_em
-        column_width = int(math.floor((w + cairo_colspace) / n_cols))
+        column_width = int(math.floor(float(rendering_area.w
+                                            + cairo_colspace)
+                                      / rendering_area.n_cols))
 
         label_layout.set_width((column_width - label_em) * pango.SCALE)
         header_layout.set_width((column_width - label_em) * pango.SCALE)
@@ -156,30 +254,30 @@ class StreetIndexRenderer:
             offset_x = 0
         else:
             delta_x  = - column_width
-            offset_x = w - column_width + cairo_colspace
+            offset_x = rendering_area.w - column_width + cairo_colspace
 
         offset_y = 0
         for category in self._index_categories:
-            if offset_y + header_fheight + label_fheight > h:
+            if offset_y + header_fheight + label_fheight > rendering_area.h:
                 offset_y = 0
                 offset_x += delta_x
 
             category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
-                    header_fascent, header_fheight,
-                    x + offset_x,
-                    y + offset_y + header_fascent)
+                          header_fascent, header_fheight,
+                          rendering_area.x + offset_x,
+                          rendering_area.y + offset_y + header_fascent)
 
             offset_y += header_fheight
 
             for street in category.items:
-                if offset_y + label_fheight > h:
+                if offset_y + label_fheight > rendering_area.h:
                     offset_y = 0
                     offset_x += delta_x
 
                 street.draw(self._i18n.isrtl(), ctx, pc, label_layout,
-                        label_fascent, label_fheight,
-                        x + offset_x,
-                        y + offset_y + label_fascent)
+                            label_fascent, label_fheight,
+                            rendering_area.x + offset_x,
+                            rendering_area.y + offset_y + label_fascent)
 
                 offset_y += label_fheight
 
@@ -196,6 +294,7 @@ class StreetIndexRenderer:
         em = font_metric.get_approximate_char_width() / pango.SCALE
 
         return layout, fascent, fheight, em
+
 
     def _compute_lines_occupation(self, pc, font_desc, n_em_padding,
                                   text_lines):
@@ -217,7 +316,8 @@ class StreetIndexRenderer:
             fheight: scaled font height.
         """
 
-        layout, fascent, fheight, em = self._create_layout_with_font(pc, font_desc)
+        layout, fascent, fheight, em = self._create_layout_with_font(pc,
+                                                                     font_desc)
         width = max(map(lambda x: self._label_width(layout, x), text_lines))
         # Save some extra space horizontally
         width += n_em_padding * em
@@ -227,31 +327,32 @@ class StreetIndexRenderer:
         return {'column_width': width, 'column_height': height,
                 'fascent': fascent, 'fheight': fheight}
 
+
     def _label_width(self, layout, label):
         layout.set_text(label)
         return layout.get_size()[0] / pango.SCALE
 
-    def _compute_column_occupation(self, pc, label_font_size,
-                                   header_font_size):
+
+    def _compute_column_occupation(self, pc, rendering_style):
         """Returns the size of the tall column with all headers, labels and
         squares for the given font sizes.
 
         Args:
             pc (pangocairo.CairoContext): the PangoCairo context.
-            label_font_size (int): font size for street labels and squares.
-            header_font_size (int): font size for headers.
+            rendering_style (StreetIndexRenderingStyle): how to render the
+                headers and labels.
         """
 
-        self._label_fd.set_size(label_font_size * pango.SCALE)
-        self._header_fd.set_size(header_font_size * pango.SCALE)
+        header_fd = pango.FontDescription(rendering_style.header_font_spec)
+        label_fd  = pango.FontDescription(rendering_style.label_font_spec)
 
-        # Account for maximum square width (at worst "Z99-Z99")
-        label_block = self._compute_lines_occupation(pc, self._label_fd, 1+7,
+        # Account for maximum square width (at worst " " + "Z99-Z99")
+        label_block = self._compute_lines_occupation(pc, label_fd, 1+7,
                 reduce(lambda x,y: x+y.get_all_item_labels(),
                        self._index_categories, []))
 
         # Reserve a small margin around the category headers
-        headers_block = self._compute_lines_occupation(pc, self._header_fd, 2,
+        headers_block = self._compute_lines_occupation(pc, header_fd, 2,
                 [x.name for x in self._index_categories])
 
         column_width = max(label_block['column_width'],
@@ -262,8 +363,9 @@ class StreetIndexRenderer:
         return column_width, column_height, \
                 max(label_block['fheight'], headers_block['fheight'])
 
-    def _compute_columns_split(self, pc, zone_width_dots, zone_height_dots,
-                               label_font_size, header_font_size,
+
+    def _compute_columns_split(self, pc, rendering_style,
+                               zone_width_dots, zone_height_dots,
                                freedom_direction):
         """Computes the columns split for this index. From the one tall column
         width and height it finds the number of columns fitting on the zone
@@ -274,12 +376,12 @@ class StreetIndexRenderer:
 
         Args:
             pc (pangocairo.CairoContext): the PangoCairo context.
+            rendering_style (StreetIndexRenderingStyle): how to render the
+                headers and labels.
             zone_width_dots (float): maximum width of the Cairo zone dedicated
                 to the index.
             zone_height_dots (float): maximum height of the Cairo zone
                 dedicated to the index.
-            label_font_size (int): font size for street labels and squares.
-            header_font_size (int): font size for headers.
             freedom_direction (string): the zone dimension that is flexible for
                 rendering this index, can be 'width' or 'height'. If the
                 streets don't fill the zone dedicated to the index, we need to
@@ -290,8 +392,7 @@ class StreetIndexRenderer:
         """
 
         tall_width, tall_height, vertical_extra = \
-                self._compute_column_occupation(pc, label_font_size,
-                                                header_font_size)
+                self._compute_column_occupation(pc, rendering_style)
 
         if zone_width_dots < tall_width:
             raise commons.IndexDoesNotFitError
@@ -328,6 +429,8 @@ if __name__ == '__main__':
 
     import render
 
+    logging.basicConfig(level=logging.DEBUG)
+
     width = 72*21./2.54
     height = .75 * 72*29.7/2.54
 
@@ -348,7 +451,9 @@ if __name__ == '__main__':
             return self.rtl
 
     streets = []
-    for i in ['A', 'B', 'C', 'D', 'E', 'Schools', 'Public buildings']:
+    for i in ['A', 'B', # 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+              'N', 'O', # 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+              'Schools', 'Public buildings']:
         items = []
         for label, location_str in [(rnd_str(10).capitalize(),
                                      '%s%d-%s%d' \
@@ -376,17 +481,18 @@ if __name__ == '__main__':
         ctx.stroke()
 
         # Precompute index area
-        x,y,w,h,ncols = index.precompute_occupation_area(surface, x,y,w,h,
-                                                         freedom_dimension,
-                                                         alignment)
+        rendering_area = index.precompute_occupation_area(surface, x,y,w,h,
+                                                          freedom_dimension,
+                                                          alignment)
 
         # Draw a green background for the precomputed area
         ctx.set_source_rgba(0,1,0,.5)
-        ctx.rectangle(x,y,w,h)
+        ctx.rectangle(rendering_area.x, rendering_area.y,
+                      rendering_area.w, rendering_area.h)
         ctx.fill()
 
         # Render the index
-        index.render(surface,x,y,w,h,ncols)
+        index.render(surface, rendering_area)
 
 
     _render('height', 'top')

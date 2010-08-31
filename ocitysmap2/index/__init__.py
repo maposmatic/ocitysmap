@@ -85,17 +85,18 @@ if __name__ == '__main__':
         ctx.stroke()
 
         # Precompute index area
-        x,y,w,h,ncols = index.precompute_occupation_area(surface, x,y,w,h,
-                                                         freedom_dimension,
-                                                         alignment)
+        rendering_area = index.precompute_occupation_area(surface, x,y,w,h,
+                                                          freedom_dimension,
+                                                          alignment)
 
         # Draw a green background for the precomputed area
         ctx.set_source_rgba(0,1,0,.5)
-        ctx.rectangle(x,y,w,h)
+        ctx.rectangle(rendering_area.x, rendering_area.y,
+                      rendering_area.w, rendering_area.h)
         ctx.fill()
 
         # Render the index
-        index.render(surface,x,y,w,h,ncols)
+        index.render(surface, rendering_area)
 
     _render('height', 'top')
     surface.show_page()
