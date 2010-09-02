@@ -211,7 +211,7 @@ class Renderer:
 
         ctx.restore()
 
-    def render_shade(self, shade_wkt):
+    def add_shade(self, shade_wkt):
         # Add the grey shade
         shade_shape = shapes.PolyShapeFile(
                 self.canvas.get_actual_bounding_box(),

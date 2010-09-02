@@ -44,18 +44,24 @@ l = logging.getLogger('ocitysmap')
 
 class StreetIndex:
 
-    def __init__(self, db, osmid, bounding_box, i18n, grid, polygon_wkt):
-        self._db = db
-        self._osmid = osmid
-        self._bounding_box = bounding_box
+    def __init__(self, db, polygon_wkt, i18n):
+        """
+        Prepare the index of the streets inside the given WKT. This
+        constructor will perform all the SQL queries.
+
+        Args:
+           db (psycopg2 DB): The GIS database
+           polygon_wkt (str): The WKT of the surrounding polygon of interest
+           i18n (i18n.i18n): Internationalization configuration
+
+        Note: All the arguments have to be provided !
+        """
         self._i18n = i18n
-        self._grid = grid
-        self._polygon_wkt = polygon_wkt
 
         # Build the contents of the index
         self._categories = \
-            (self._build_street_index_nogrid()
-             + self._build_amenities_index_nogrid())
+            (self._list_streets(db, polygon_wkt)
+             + self._list_amenities(db, polygon_wkt))
 
         if not self._categories:
             raise IndexEmptyError("Nothing to index")
@@ -66,8 +72,8 @@ class StreetIndex:
 
     def apply_grid(self, grid):
         """
-        Fix the label location_str field by mapping the streets to the
-        given grid.
+        Update the location_str field of the streets and amenities by
+        mapping them onto the given grid.
 
         Args:
            grid (ocitysmap2.Grid): the Grid object from which we
@@ -120,12 +126,21 @@ class StreetIndex:
         fd.close()
 
     def _get_selected_amenities(self):
-        # Amenities to retrieve from DB, a list of string tuples:
-        #  1. Category, displayed headers in the final index
-        #  2. db_amenity, description string stored in the DB
-        #  3. Label, text to display in the index for this amenity
+        """
+        Return the kinds of amenities to retrieve from DB as a list of
+        string tuples:
+          1. Category, displayed headers in the final index
+          2. db_amenity, description string stored in the DB
+          3. Label, text to display in the index for this amenity
+
+        Note: This has to be a function because gettext() has to be
+        called, which takes i18n into account... It cannot be
+        statically defined as a class attribute for example.
+        """
+
         selected_amenities = [
-            (_(u"Places of worship"), "place_of_worship", _(u"Place of worship")),
+            (_(u"Places of worship"), "place_of_worship",
+             _(u"Place of worship")),
             (_(u"Education"), "kindergarten", _(u"Kindergarten")),
             (_(u"Education"), "school", _(u"School")),
             (_(u"Education"), "college", _(u"College")),
@@ -194,16 +209,20 @@ class StreetIndex:
 
         return result
 
-    def _build_street_index_nogrid(self):
-        """Get the list of streets in the administrative area if city
-        is defined or in the bounding box otherwise. Don't try to map
-        these streets onto the grid of squares.
+    def _list_streets(self, db, polygon_wkt):
+        """Get the list of streets inside the given polygon. Don't
+        try to map them onto the grid of squares (there location_str
+        field remains undefined).
+
+        Args:
+           db (psycopg2 DB): The GIS database
+           polygon_wkt (str): The WKT of the surrounding polygon of interest
 
         Returns a list of commons.IndexCategory objects, with their IndexItems
         having no specific grid square location
         """
 
-        cursor = self._db.cursor()
+        cursor = db.cursor()
         l.info("Getting streets (no grid)...")
 
         # POstGIS >= 1.5.0 for this to work:
@@ -223,7 +242,7 @@ from
    group by name ---, street_kind -- (optional)
    order by name) as foo;
 """ % dict(wkb_limits = ("st_transform(GeomFromText('%s', 4002), 900913)"
-                         % (self._polygon_wkt or self._bounding_box.as_wkt())))
+                         % (polygon_wkt,)))
 
         l.debug("Street query (nogrid): %s" % query)
 
@@ -234,8 +253,21 @@ from
 
         return self._convert_street_index(sl)
 
-    def _build_amenities_index_nogrid(self):
-        cursor = self._db.cursor()
+
+    def _list_amenities(self, db, polygon_wkt):
+        """Get the list of amenities inside the given polygon. Don't
+        try to map them onto the grid of squares (there location_str
+        field remains undefined).
+
+        Args:
+           db (psycopg2 DB): The GIS database
+           polygon_wkt (str): The WKT of the surrounding polygon of interest
+
+        Returns a list of commons.IndexCategory objects, with their IndexItems
+        having no specific grid square location
+        """
+
+        cursor = db.cursor()
 
         result = []
         for catname, db_amenity, label in self._get_selected_amenities():
@@ -269,7 +301,7 @@ from (
 order by amenity_name""" \
                 % {'amenity': _sql_escape_unicode(db_amenity),
                    'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
-                                  % (self._polygon_wkt or self._bounding_box.as_wkt()))}
+                                  % (polygon_wkt,))}
 
 
             l.debug("Amenity query for for %s/%s (nogrid): %s" \
@@ -326,8 +358,7 @@ if __name__ == "__main__":
     # Paris bbox
     # limits_wkt = """POLYGON((2.22405964791711 48.8155243047565,2.22405964791711 48.9021584078545,2.46979772401737 48.9021584078545,2.46979772401737 48.8155243047565,2.22405964791711 48.8155243047565))"""
 
-    street_index = StreetIndex(db, None, None, i18n, None,
-                               limits_wkt)
+    street_index = StreetIndex(db, limits_wkt, i18n)
 
     print "=> Got %d categories, total %d items" \
         % (len(street_index.categories),

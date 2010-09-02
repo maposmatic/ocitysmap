@@ -58,7 +58,7 @@ if __name__ == '__main__':
                           host='localhost',
                           database='maposmatic')
 
-    street_index = StreetIndex(db, None, None, i18n, None, bbox.as_wkt())
+    street_index = StreetIndex(db, bbox.as_wkt(), i18n)
     print street_index.categories
 
     # Render the items

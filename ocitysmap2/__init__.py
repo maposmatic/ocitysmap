@@ -111,6 +111,9 @@ class RenderingConfiguration:
         self.paper_width_mm  = None
         self.paper_height_mm = None
 
+        # Setup by Rendering routines from osmid and bounding_box fields:
+        self.polygon_wkt     = None # str (WKT of interest)
+
 class Stylesheet:
     """
     A Stylesheet object defines how the map features will be rendered. It
@@ -267,8 +270,9 @@ class OCitySMap:
         os.rmdir(tmpdir)
 
     def get_geographic_info(self, osmids):
-        """Returns the envelope and area, in 4002 projection, of all the
-        provided OSM IDs."""
+        """Return a list of tuples (one tuple for each specified ID in
+        osmids) where each tuple contains (osmid, WKT_envelope,
+        WKT_buildarea)"""
 
         # Ensure all OSM IDs are integers, bust cast them back to strings
         # afterwards.
@@ -348,40 +352,52 @@ class OCitySMap:
         l.info('Rendering with renderer %s in language: %s (rtl: %s).' %
                (renderer_name, self._i18n.language_code(), config.rtl))
 
-        try:
-            osmid_geo_info = self.get_geographic_info([config.osmid])[0]
-        except IndexError:
-            raise AssertionError, 'OSM ID not found in the database!'
+        # Determine bounding box and WKT of interest
+        if config.osmid:
+            try:
+                osmid_geo_info = self.get_geographic_info([config.osmid])[0]
+            except IndexError:
+                raise AssertionError, 'OSM ID not found in the database!'
+
+            # Define the bbox if not already defined
+            if not config.bounding_box:
+                config.bounding_box \
+                    = coords.BoundingBox.parse_wkt(osmid_geo_info[1])
+
+            # Update the polygon WKT of interest
+            config.polygon_wkt = osmid_geo_info[2]
+        else:
+            # No OSM ID provided => use specified bbox
+            config.polygon_wkt = config.bounding_box.as_wkt()
 
         # Make sure we have a bounding box
-        config.bounding_box = (config.bounding_box or
-                               coords.BoundingBox.parse_wkt(osmid_geo_info[1]))
+        assert config.bounding_box is not None
+        assert config.polygon_wkt is not None
+
+        # Prepare the index
+        street_index = index.indexer.StreetIndex(self._db,
+                                                 config.polygon_wkt,
+                                                 self._i18n)
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         l.debug('Rendering in temporary directory %s' % tmpdir)
 
+        # Prepare the main renderer
         renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
         renderer = renderer_cls(config, tmpdir)
         renderer.create_map_canvas()
 
-        if config.osmid:
-            polygon = osmid_geo_info[2]
-            if polygon:
-                shade_wkt = self._get_shade_wkt(
-                        renderer.canvas.get_actual_bounding_box(),
-                        polygon)
-                renderer.render_shade(shade_wkt)
-        else:
-            polygon = None
+        shade_wkt = self._get_shade_wkt(
+            renderer.canvas.get_actual_bounding_box(),
+            config.polygon_wkt)
+        renderer.add_shade(shade_wkt)
 
         renderer.canvas.render()
-        street_index = index.indexer.StreetIndex(self._db, config.osmid,
-                renderer.canvas.get_actual_bounding_box(),
-                self._i18n, renderer.grid, polygon)
 
-        street_index_renderer = index.StreetIndexRenderer(self._i18n,
-                                                          street_index.categories)
+        street_index_renderer = index.StreetIndexRenderer(
+            self._i18n,
+            street_index.categories)
 
         try:
             for output_format in output_formats:
