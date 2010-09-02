@@ -381,39 +381,32 @@ class OCitySMap:
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
-        l.debug('Rendering in temporary directory %s' % tmpdir)
-
-        # Prepare the main renderer
-        renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
-        renderer = renderer_cls(config, tmpdir)
-        renderer.create_map_canvas()
-
-        shade_wkt = self._get_shade_wkt(
-            renderer.canvas.get_actual_bounding_box(),
-            config.polygon_wkt)
-        renderer.add_shade(shade_wkt)
-
-        renderer.canvas.render()
-
-        street_index_renderer = index.StreetIndexRenderer(
-            self._i18n,
-            street_index.categories)
-
         try:
+            l.debug('Rendering in temporary directory %s' % tmpdir)
+
+            # Prepare the generic renderer
+            renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
+            renderer = renderer_cls(config, tmpdir, street_index)
+
+            # Update the street_index to reflect the grid's actual position
+            if renderer.grid:
+                street_index.apply_grid(renderer.grid)
+
+            # Perform the actual rendering to the Cairo devices
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
-                self._render_one(renderer, street_index_renderer,
-                                 output_filename, output_format)
+                self._render_one(renderer, output_format, output_filename)
+
+            # Also dump the CSV street index
             street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, renderer, street_index_renderer, filename,
-                    output_format):
+    def _render_one(self, renderer, output_format, output_filename):
         l.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
-        dpi = renderers.RenderingSession.PT_PER_INCH
+        dpi = renderers.UTILS.PT_PER_INCH
 
         if output_format == 'png':
             try:
@@ -422,17 +415,17 @@ class OCitySMap:
                 dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
             factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                int(renderers.RenderingSession.pt_to_dots_with_dpi(w, dpi)),
-                int(renderers.RenderingSession.pt_to_dots_with_dpi(h, dpi)))
+                int(renderers.UTILS.convert_pt_to_dots_with_dpi(w, dpi)),
+                int(renderers.UTILS.convert_pt_to_dots_with_dpi(h, dpi)))
         elif output_format == 'svg':
-            factory = lambda w,h: cairo.SVGSurface(filename, w, h)
+            factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
         elif output_format == 'svgz':
             factory = lambda w,h: cairo.SVGSurface(
-                    gzip.GzipFile(filename, 'wb'), w, h)
+                    gzip.GzipFile(output_filename, 'wb'), w, h)
         elif output_format == 'pdf':
-            factory = lambda w,h: cairo.PDFSurface(filename, w, h)
+            factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
         elif output_format == 'ps':
-            factory = lambda w,h: cairo.PSSurface(filename, w, h)
+            factory = lambda w,h: cairo.PSSurface(output_filename, w, h)
         elif output_format == 'csv':
             # We don't render maps into CSV.
             return
@@ -442,13 +435,11 @@ class OCitySMap:
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-        rs = renderer.create_rendering_session(surface, street_index_renderer,
-                                               dpi)
-        renderer.render(rs)
+        renderer.render(surface, dpi)
 
-        l.debug('Writing %s...' % filename)
+        l.debug('Writing %s...' % output_filename)
         if output_format == 'png':
-            surface.write_to_png(filename)
+            surface.write_to_png(output_filename)
 
         surface.finish()
 
