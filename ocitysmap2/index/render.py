@@ -213,21 +213,21 @@ class StreetIndexRenderer:
         return area
 
 
-    def render(self, surface, rendering_area):
+    def render(self, ctx, rendering_area):
         """Render the street and amenities index at the given (x,y) coordinates
         into the provided Cairo surface. The index must not be larger than the
         provided surface (use precompute_occupation_area() to adjust it).
 
         Args:
-            surface (cairo.Surface): the cairo surface to render into.
+            ctx (cairo.Context): the cairo context to use for the rendering
             rendering_area (StreetIndexRenderingArea): the result from
-                precompute_occupation_area().
+                precompute_occupation_area()
         """
 
         if not self._index_categories:
             raise commons.IndexEmptyError
 
-        ctx = cairo.Context(surface)
+        ctx.save()
         ctx.move_to(rendering_area.x, rendering_area.y)
 
         # Create a PangoCairo context for drawing to Cairo
@@ -280,6 +280,9 @@ class StreetIndexRenderer:
                             rendering_area.y + offset_y + label_fascent)
 
                 offset_y += label_fheight
+
+        # Restore original context
+        ctx.restore()
 
 
     def _create_layout_with_font(self, pc, font_desc):
@@ -476,6 +479,8 @@ if __name__ == '__main__':
 
         # Draw constraining rectangle
         ctx = cairo.Context(surface)
+
+        ctx.save()
         ctx.set_source_rgb(.2,0,0)
         ctx.rectangle(x,y,w,h)
         ctx.stroke()
@@ -490,9 +495,10 @@ if __name__ == '__main__':
         ctx.rectangle(rendering_area.x, rendering_area.y,
                       rendering_area.w, rendering_area.h)
         ctx.fill()
+        ctx.restore()
 
         # Render the index
-        index.render(surface, rendering_area)
+        index.render(ctx, rendering_area)
 
 
     _render('height', 'top')

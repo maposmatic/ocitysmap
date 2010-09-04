@@ -111,8 +111,12 @@ class RenderingConfiguration:
         self.paper_width_mm  = None
         self.paper_height_mm = None
 
-        # Setup by Rendering routines from osmid and bounding_box fields:
+        # Setup by OCitySMap::render() from osmid and bounding_box fields:
         self.polygon_wkt     = None # str (WKT of interest)
+
+        # Setup by OCitySMap::render() from language field:
+        self.i18n            = None # i18n object
+
 
 class Stylesheet:
     """
@@ -345,12 +349,12 @@ class OCitySMap:
                 'At least an OSM ID or a bounding box must be provided!'
 
         output_formats = map(lambda x: x.lower(), output_formats)
-        self._i18n = i18n.install_translation(config.language,
-                                              self._locale_path)
-        config.rtl = self._i18n.isrtl()
+        config.i18n = i18n.install_translation(config.language,
+                                               self._locale_path)
 
         l.info('Rendering with renderer %s in language: %s (rtl: %s).' %
-               (renderer_name, self._i18n.language_code(), config.rtl))
+               (renderer_name, config.i18n.language_code(),
+                config.i18n.isrtl()))
 
         # Determine bounding box and WKT of interest
         if config.osmid:
@@ -377,7 +381,7 @@ class OCitySMap:
         # Prepare the index
         street_index = index.indexer.StreetIndex(self._db,
                                                  config.polygon_wkt,
-                                                 self._i18n)
+                                                 config.i18n)
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')

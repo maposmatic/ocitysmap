@@ -85,6 +85,8 @@ if __name__ == '__main__':
 
         # Draw constraining rectangle
         ctx = cairo.Context(surface)
+
+        ctx.save()
         ctx.set_source_rgb(.2,0,0)
         ctx.rectangle(x,y,w,h)
         ctx.stroke()
@@ -99,9 +101,10 @@ if __name__ == '__main__':
         ctx.rectangle(rendering_area.x, rendering_area.y,
                       rendering_area.w, rendering_area.h)
         ctx.fill()
+        ctx.restore()
 
         # Render the index
-        index.render(surface, rendering_area)
+        index.render(ctx, rendering_area)
 
     _render('height', 'top')
     surface.show_page()
