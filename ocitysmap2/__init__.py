@@ -430,11 +430,14 @@ class OCitySMap:
             # ImageSurface. Because, for some reason, with
             # ImageSurface, the font metrics would NOT match those
             # pre-computed by renderer_cls.__init__() and used to
-            # layout the whole page in a device-independent manner
-            factory = lambda w,h: cairo.PDFSurface(
-                None,
-                int(renderers.UTILS.convert_pt_to_dots(w, dpi)),
-                int(renderers.UTILS.convert_pt_to_dots(h, dpi)))
+            # layout the whole page
+            def factory(w,h):
+                w_px = int(renderers.UTILS.convert_pt_to_dots(w, dpi))
+                h_px = int(renderers.UTILS.convert_pt_to_dots(h, dpi))
+                LOG.debug("Rendering PNG into %dpx x %dpx area..."
+                          % (w_px, h_px))
+                return cairo.PDFSurface(None, w_px, h_px)
+
         elif output_format == 'svg':
             factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
         elif output_format == 'svgz':
