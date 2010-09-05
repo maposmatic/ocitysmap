@@ -399,7 +399,10 @@ class OCitySMap:
             # Perform the actual rendering to the Cairo devices
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
-                self._render_one(renderer, output_format, output_filename)
+                try:
+                    self._render_one(renderer, output_format, output_filename)
+                except index.commons.IndexDoesNotFitError:
+                    l.exception("The actual font metrics probably don't match those pre-computed by the renderer's constructor. Backtrace follows...")
 
             # Also dump the CSV street index
             street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
@@ -418,7 +421,14 @@ class OCitySMap:
             except ConfigParser.NoOptionError:
                 dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
-            factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32,
+            # As strange as it may seem, we HAVE to use a vector
+            # device here and not a raster device such as
+            # ImageSurface. Because, for some reason, with
+            # ImageSurface, the font metrics would NOT match those
+            # pre-computed by renderer_cls.__init__() and used to
+            # layout the whole page in a device-independent manner
+            factory = lambda w,h: cairo.PDFSurface(
+                None,
                 int(renderers.UTILS.convert_pt_to_dots(w, dpi)),
                 int(renderers.UTILS.convert_pt_to_dots(h, dpi)))
         elif output_format == 'svg':
@@ -455,18 +465,22 @@ if __name__ == '__main__':
 
     c = RenderingConfiguration()
     c.title = 'Chevreuse, Yvelines, Île-de-France, France, Europe, Monde'
-    c.osmid = -943886 # -7444 (Paris)
+    c.osmid = -943886 # Chevreuse
+    # c.osmid = -7444   # Paris
     c.language = 'fr_FR.UTF-8'
     c.paper_width_mm = 297
     c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain', ['pdf', 'ps', 'svgz', 'csv'],
+    o.render(c, 'plain',
+             ['png', 'pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_plain')
 
-    o.render(c, 'single_page_index_bottom', ['pdf', 'ps', 'svgz', 'csv'],
+    o.render(c, 'single_page_index_bottom',
+             ['png', 'pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_index_portrait')
 
     c.paper_width_mm,c.paper_height_mm = c.paper_height_mm,c.paper_width_mm
-    o.render(c, 'single_page_index_side', ['pdf', 'ps', 'svgz', 'csv'],
+    o.render(c, 'single_page_index_side',
+             ['png', 'pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_index_landscape')

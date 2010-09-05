@@ -29,6 +29,7 @@ import pango
 import pangocairo
 
 import commons
+from ocitysmap2.renderers import UTILS
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -213,39 +214,71 @@ class StreetIndexRenderer:
         return area
 
 
-    def render(self, ctx, rendering_area):
-        """Render the street and amenities index at the given (x,y) coordinates
-        into the provided Cairo surface. The index must not be larger than the
-        provided surface (use precompute_occupation_area() to adjust it).
+    def render(self, ctx, rendering_area, dpi = UTILS.PT_PER_INCH):
+        """
+        Render the street and amenities index at the given (x,y)
+        coordinates into the provided Cairo surface. The index must
+        not be larger than the provided surface (use
+        precompute_occupation_area() to adjust it).
 
         Args:
-            ctx (cairo.Context): the cairo context to use for the rendering
+            ctx (cairo.Context): the cairo context to use for the rendering.
             rendering_area (StreetIndexRenderingArea): the result from
-                precompute_occupation_area()
+                precompute_occupation_area().
+            dpi (number): resolution of the target device.
         """
 
         if not self._index_categories:
             raise commons.IndexEmptyError
 
+        LOG.debug("Rendering the street index within %s at %sdpi..."
+                  % (rendering_area, dpi))
+
+        ##
+        ## In the following, the algorithm only manipulates values
+        ## expressed in 'pt'. Only the drawing-related functions will
+        ## translate them to cairo units
+        ##
+
         ctx.save()
-        ctx.move_to(rendering_area.x, rendering_area.y)
+        ctx.move_to(UTILS.convert_pt_to_dots(rendering_area.x, dpi),
+                    UTILS.convert_pt_to_dots(rendering_area.y, dpi))
 
         # Create a PangoCairo context for drawing to Cairo
         pc = pangocairo.CairoContext(ctx)
 
-        header_fd = pango.FontDescription(rendering_area.rendering_style.header_font_spec)
-        label_fd  = pango.FontDescription(rendering_area.rendering_style.label_font_spec)
+        header_fd = pango.FontDescription(
+            rendering_area.rendering_style.header_font_spec)
+        label_fd  = pango.FontDescription(
+            rendering_area.rendering_style.label_font_spec)
 
         label_layout, label_fascent, label_fheight, label_em = \
                 self._create_layout_with_font(pc, label_fd)
         header_layout, header_fascent, header_fheight, header_em = \
                 self._create_layout_with_font(pc, header_fd)
 
+        # By OCitysmap's convention, the default resolution is 72 dpi,
+        # which maps to the default pangocairo resolution (96 dpi
+        # according to pangocairo docs). If we want to render with
+        # another resolution (different from 72), we have to scale the
+        # pangocairo resolution accordingly:
+        pangocairo.context_set_resolution(label_layout.get_context(),
+                                          96.*dpi/UTILS.PT_PER_INCH)
+        pangocairo.context_set_resolution(header_layout.get_context(),
+                                          96.*dpi/UTILS.PT_PER_INCH)
+        # All this is because we want pango to have the exact same
+        # behavior as with the default 72dpi resolution. If we instead
+        # decided to call cairo::scale, then pango might choose
+        # different font metrics which don't fit in the prepared
+        # layout anymore...
+
         margin = label_em
         column_width = int(rendering_area.w / rendering_area.n_cols)
 
-        label_layout.set_width((column_width - margin) * pango.SCALE)
-        header_layout.set_width((column_width - margin) * pango.SCALE)
+        label_layout.set_width(int(UTILS.convert_pt_to_dots(
+                    (column_width - margin) * pango.SCALE, dpi)))
+        header_layout.set_width(int(UTILS.convert_pt_to_dots(
+                    (column_width - margin) * pango.SCALE, dpi)))
 
         if not self._i18n.isrtl():
             offset_x = margin/2.
@@ -264,9 +297,13 @@ class StreetIndexRenderer:
                 actual_n_cols += 1
 
             category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
-                          header_fascent, header_fheight,
-                          rendering_area.x + offset_x,
-                          rendering_area.y + offset_y + header_fascent)
+                          UTILS.convert_pt_to_dots(header_fascent, dpi),
+                          UTILS.convert_pt_to_dots(header_fheight, dpi),
+                          UTILS.convert_pt_to_dots(rendering_area.x
+                                                   + offset_x, dpi),
+                          UTILS.convert_pt_to_dots(rendering_area.y
+                                                   + offset_y
+                                                   + header_fascent, dpi))
 
             offset_y += header_fheight
 
@@ -278,9 +315,13 @@ class StreetIndexRenderer:
                     actual_n_cols += 1
 
                 street.draw(self._i18n.isrtl(), ctx, pc, label_layout,
-                            label_fascent, label_fheight,
-                            rendering_area.x + offset_x,
-                            rendering_area.y + offset_y + label_fascent)
+                            UTILS.convert_pt_to_dots(label_fascent, dpi),
+                            UTILS.convert_pt_to_dots(label_fheight, dpi),
+                            UTILS.convert_pt_to_dots(rendering_area.x
+                                                     + offset_x, dpi),
+                            UTILS.convert_pt_to_dots(rendering_area.y
+                                                     + offset_y
+                                                     + label_fascent, dpi))
 
                 offset_y += label_fheight
 
@@ -327,6 +368,7 @@ class StreetIndexRenderer:
 
         layout, fascent, fheight, em = self._create_layout_with_font(pc,
                                                                      font_desc)
+
         width = max(map(lambda x: self._label_width(layout, x), text_lines))
         # Save some extra space horizontally
         width += n_em_padding * em

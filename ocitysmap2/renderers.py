@@ -619,13 +619,30 @@ class SinglePageRenderer(Renderer):
         if self._index_renderer and self._index_area:
             ctx.save()
 
-            self._index_renderer.render(ctx, self._index_area)
+            # NEVER use ctx.scale() here because otherwise pango will
+            # choose different dont metrics which may be incompatible
+            # with what has been computed by __init__(), which may
+            # require more columns than expected !  Instead, we have
+            # to trick pangocairo into believing it is rendering to a
+            # device with the same default resolution, but with a
+            # cairo resolution matching the 'dpi' specified
+            # resolution. See
+            # index::render::StreetIndexRenederer::render() and
+            # comments within.
 
-            ctx.rectangle(self._index_area.x, self._index_area.y,
-                          self._index_area.w, self._index_area.h)
-            ctx.stroke()
+            self._index_renderer.render(ctx, self._index_area, dpi)
 
             ctx.restore()
+
+            # Also draw a rectangle
+            ctx.save()
+            ctx.rectangle(UTILS.convert_pt_to_dots(self._index_area.x, dpi),
+                          UTILS.convert_pt_to_dots(self._index_area.y, dpi),
+                          UTILS.convert_pt_to_dots(self._index_area.w, dpi),
+                          UTILS.convert_pt_to_dots(self._index_area.h, dpi))
+            ctx.stroke()
+            ctx.restore()
+
 
         ##
         ## Draw the map, scaled to fit the designated area
