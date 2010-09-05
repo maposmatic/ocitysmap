@@ -461,12 +461,12 @@ if __name__ == '__main__':
     c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain', ['pdf'],
+    o.render(c, 'plain', ['pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_plain')
 
-    o.render(c, 'single_page_index_bottom', ['pdf'],
+    o.render(c, 'single_page_index_bottom', ['pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_index_portrait')
 
     c.paper_width_mm,c.paper_height_mm = c.paper_height_mm,c.paper_width_mm
-    o.render(c, 'single_page_index_side', ['pdf'],
+    o.render(c, 'single_page_index_side', ['pdf', 'ps', 'svgz', 'csv'],
              '/tmp/mymap_index_landscape')
