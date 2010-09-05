@@ -252,10 +252,13 @@ class StreetIndexRenderer:
         label_fd  = pango.FontDescription(
             rendering_area.rendering_style.label_font_spec)
 
-        label_layout, label_fascent, label_fheight, label_em = \
-                self._create_layout_with_font(pc, label_fd)
         header_layout, header_fascent, header_fheight, header_em = \
                 self._create_layout_with_font(pc, header_fd)
+        label_layout, label_fascent, label_fheight, label_em = \
+                self._create_layout_with_font(pc, label_fd)
+
+        #print "RENDER", header_layout, header_fascent, header_fheight, header_em
+        #print "RENDER", label_layout, label_fascent, label_fheight, label_em
 
         # By OCitysmap's convention, the default resolution is 72 dpi,
         # which maps to the default pangocairo resolution (96 dpi
@@ -329,7 +332,9 @@ class StreetIndexRenderer:
         ctx.restore()
 
         # Simple verification...
-        assert actual_n_cols == rendering_area.n_cols
+        if actual_n_cols < rendering_area.n_cols:
+            LOG.warning("Rounding/security margin lost some space (%d actual cols vs. allocated %d" % (actual_n_cols, rendering_area.n_cols))
+        assert actual_n_cols <= rendering_area.n_cols
 
 
     def _create_layout_with_font(self, pc, font_desc):
@@ -338,10 +343,10 @@ class StreetIndexRenderer:
         font = layout.get_context().load_font(font_desc)
         font_metric = font.get_metrics()
 
-        fascent = font_metric.get_ascent() / pango.SCALE
-        fheight = ((font_metric.get_ascent() + font_metric.get_descent())
-                   / pango.SCALE)
-        em = font_metric.get_approximate_char_width() / pango.SCALE
+        fascent = float(font_metric.get_ascent()) / pango.SCALE
+        fheight = float((font_metric.get_ascent() + font_metric.get_descent())
+                        / pango.SCALE)
+        em = float(font_metric.get_approximate_char_width()) / pango.SCALE
 
         return layout, fascent, fheight, em
 
@@ -368,6 +373,7 @@ class StreetIndexRenderer:
 
         layout, fascent, fheight, em = self._create_layout_with_font(pc,
                                                                      font_desc)
+        #print "PREPARE", layout, fascent, fheight, em
 
         width = max(map(lambda x: self._label_width(layout, x), text_lines))
         # Save some extra space horizontally
@@ -381,8 +387,7 @@ class StreetIndexRenderer:
 
     def _label_width(self, layout, label):
         layout.set_text(label)
-        return layout.get_size()[0] / pango.SCALE
-
+        return float(layout.get_size()[0]) / pango.SCALE
 
     def _compute_column_occupation(self, pc, rendering_style):
         """Returns the size of the tall column with all headers, labels and
