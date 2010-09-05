@@ -447,6 +447,9 @@ class OCitySMap:
             factory = lambda w,h: cairo.PDFSurface(output_filename, w, h)
         elif output_format == 'ps':
             factory = lambda w,h: cairo.PSSurface(output_filename, w, h)
+        elif output_format == 'ps.gz':
+            factory = lambda w,h: cairo.PSSurface(
+                gzip.GzipFile(output_filename, 'wb'), w, h)
         elif output_format == 'csv':
             # We don't render maps into CSV.
             return
@@ -479,15 +482,16 @@ if __name__ == '__main__':
     c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain',
-             ['png', 'pdf', 'ps', 'svgz', 'csv'],
-             '/tmp/mymap_plain')
-
+    # c.paper_width_mm,c.paper_height_mm = c.paper_height_mm,c.paper_width_mm
     o.render(c, 'single_page_index_bottom',
-             ['png', 'pdf', 'ps', 'svgz', 'csv'],
-             '/tmp/mymap_index_portrait')
+             ['png', 'pdf', 'ps.gz', 'svgz', 'csv'],
+             '/tmp/mymap_index_bottom')
 
     c.paper_width_mm,c.paper_height_mm = c.paper_height_mm,c.paper_width_mm
     o.render(c, 'single_page_index_side',
-             ['png', 'pdf', 'ps', 'svgz', 'csv'],
-             '/tmp/mymap_index_landscape')
+             ['png', 'pdf', 'ps.gz', 'svgz', 'csv'],
+             '/tmp/mymap_index_side')
+
+    o.render(c, 'plain',
+             ['png', 'pdf', 'ps.gz', 'svgz', 'csv'],
+             '/tmp/mymap_plain')
