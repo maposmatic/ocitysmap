@@ -223,9 +223,9 @@ class StreetIndex:
         """
 
         cursor = db.cursor()
-        l.info("Getting streets (no grid)...")
+        l.info("Getting streets...")
 
-        # POstGIS >= 1.5.0 for this to work:
+        # PostGIS >= 1.5.0 for this to work:
         query = """
 select name,
        --- street_kind, -- only when group by is: group by name, street_kind
@@ -244,12 +244,12 @@ from
 """ % dict(wkb_limits = ("st_transform(GeomFromText('%s', 4002), 900913)"
                          % (polygon_wkt,)))
 
-        l.debug("Street query (nogrid): %s" % query)
+        # l.debug("Street query (nogrid): %s" % query)
 
         cursor.execute(query)
         sl = cursor.fetchall()
 
-        l.debug("Got %d streets (no grid)." % len(sl))
+        l.debug("Got %d streets." % len(sl))
 
         return self._convert_street_index(sl)
 
@@ -304,8 +304,8 @@ order by amenity_name""" \
                                   % (polygon_wkt,))}
 
 
-            l.debug("Amenity query for for %s/%s (nogrid): %s" \
-                        % (catname, db_amenity, query))
+            # l.debug("Amenity query for for %s/%s (nogrid): %s" \
+            #             % (catname, db_amenity, query))
 
             cursor.execute(query)
 

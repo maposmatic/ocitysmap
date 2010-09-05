@@ -90,7 +90,7 @@ import index
 import index.render
 import renderers
 
-l = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('ocitysmap')
 
 class RenderingConfiguration:
     """
@@ -210,7 +210,7 @@ class OCitySMap:
             config_files = [config_files]
 
         config_files = map(os.path.expanduser, config_files)
-        l.info('Reading OCitySMap configuration from %s...' %
+        LOG.info('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
         self._parser = ConfigParser.RawConfigParser()
@@ -223,7 +223,8 @@ class OCitySMap:
 
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
-        l.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
+        LOG.debug('Found %d Mapnik stylesheets.'
+                  % len(self.STYLESHEET_REGISTRY))
 
     def _get_db(self):
         if self.__db:
@@ -231,8 +232,9 @@ class OCitySMap:
 
         # Database connection
         datasource = dict(self._parser.items('datasource'))
-        l.info('Connecting to database %s on %s as %s...' %
-                 (datasource['dbname'], datasource['host'], datasource['user']))
+        LOG.info('Connecting to database %s on %s as %s...' %
+                 (datasource['dbname'], datasource['host'],
+                  datasource['user']))
 
         db = psycopg2.connect(user=datasource['user'],
                               password=datasource['password'],
@@ -261,11 +263,11 @@ class OCitySMap:
         cursor.execute('set session statement_timeout=%d;' %
                        (timeout_minutes * 60 * 1000))
         cursor.execute('show statement_timeout;')
-        l.debug('Configured statement timeout: %s.' %
+        LOG.debug('Configured statement timeout: %s.' %
                   cursor.fetchall()[0][0])
 
     def _cleanup_tempdir(self, tmpdir):
-        l.debug('Cleaning up %s...' % tmpdir)
+        LOG.debug('Cleaning up %s...' % tmpdir)
         for root, dirs, files in os.walk(tmpdir, topdown=False):
             for name in files:
                 os.remove(os.path.join(root, name))
@@ -281,8 +283,8 @@ class OCitySMap:
         # Ensure all OSM IDs are integers, bust cast them back to strings
         # afterwards.
         osmids = map(str, map(int, osmids))
-        l.debug('Looking up bounding box and contour of OSM IDs %s...'
-                % osmids)
+        LOG.debug('Looking up bounding box and contour of OSM IDs %s...'
+                  % osmids)
 
         cursor = self._db.cursor()
         cursor.execute("""select osm_id,
@@ -303,7 +305,7 @@ class OCitySMap:
         regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
         matches = regexp_polygon.match(polygon)
         if not matches:
-            l.error('Administrative boundary looks invalid!')
+            LOG.error('Administrative boundary looks invalid!')
             return None
         inside = matches.groups()[0]
 
@@ -352,9 +354,9 @@ class OCitySMap:
         config.i18n = i18n.install_translation(config.language,
                                                self._locale_path)
 
-        l.info('Rendering with renderer %s in language: %s (rtl: %s).' %
-               (renderer_name, config.i18n.language_code(),
-                config.i18n.isrtl()))
+        LOG.info('Rendering with renderer %s in language: %s (rtl: %s).' %
+                 (renderer_name, config.i18n.language_code(),
+                  config.i18n.isrtl()))
 
         # Determine bounding box and WKT of interest
         if config.osmid:
@@ -386,7 +388,7 @@ class OCitySMap:
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         try:
-            l.debug('Rendering in temporary directory %s' % tmpdir)
+            LOG.debug('Rendering in temporary directory %s' % tmpdir)
 
             # Prepare the generic renderer
             renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
@@ -402,7 +404,9 @@ class OCitySMap:
                 try:
                     self._render_one(renderer, output_format, output_filename)
                 except index.commons.IndexDoesNotFitError:
-                    l.exception("The actual font metrics probably don't match those pre-computed by the renderer's constructor. Backtrace follows...")
+                    LOG.exception("The actual font metrics probably don't "
+                                  "match those pre-computed by the renderer's"
+                                  "constructor. Backtrace follows...")
 
             # Also dump the CSV street index
             street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
@@ -410,7 +414,7 @@ class OCitySMap:
             self._cleanup_tempdir(tmpdir)
 
     def _render_one(self, renderer, output_format, output_filename):
-        l.info('Rendering to %s format...' % output_format.upper())
+        LOG.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
         dpi = renderers.UTILS.PT_PER_INCH
@@ -451,7 +455,7 @@ class OCitySMap:
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
         renderer.render(surface, dpi)
 
-        l.debug('Writing %s...' % output_filename)
+        LOG.debug('Writing %s...' % output_filename)
         if output_format == 'png':
             surface.write_to_png(output_filename)
 
