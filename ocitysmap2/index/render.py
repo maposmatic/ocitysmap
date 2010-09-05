@@ -30,7 +30,7 @@ import pangocairo
 
 import commons
 
-l = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('ocitysmap')
 
 
 class StreetIndexRenderingStyle:
@@ -161,8 +161,8 @@ class StreetIndexRenderer:
         if not self._index_categories:
             raise commons.IndexEmptyError
 
-        l.debug("Determining inde area within %dx%d+%d+%d aligned %s/%s..."
-                % (w,h,x,y, alignment, freedom_direction))
+        LOG.debug("Determining index area within %dx%d+%d+%d aligned %s/%s..."
+                  % (w,h,x,y, alignment, freedom_direction))
 
         # Create a PangoCairo context for drawing to Cairo
         ctx = cairo.Context(surface)
@@ -171,7 +171,7 @@ class StreetIndexRenderer:
         # Iterate over the rendering_styles until we find a suitable layout
         rendering_style = None
         for rs in self._rendering_styles:
-            l.debug("Trying index fit using %s..." % rs)
+            LOG.debug("Trying index fit using %s..." % rs)
             try:
                 n_cols, min_dimension \
                     = self._compute_columns_split(pc, rs, w, h,
@@ -183,7 +183,7 @@ class StreetIndexRenderer:
 
             except commons.IndexDoesNotFitError:
                 # Index did not fit => try smaller...
-                l.debug("Index %s too large: should try a smaller one."
+                LOG.debug("Index %s too large: should try a smaller one."
                         % rs)
                 continue
 
@@ -209,7 +209,7 @@ class StreetIndexRenderer:
         area = StreetIndexRenderingArea(rendering_style,
                                         x+base_offset_x, y+base_offset_y,
                                         index_width, index_height, n_cols)
-        l.debug("Will be able to render index in %s" % area)
+        LOG.debug("Will be able to render index in %s" % area)
         return area
 
 
@@ -241,26 +241,27 @@ class StreetIndexRenderer:
         header_layout, header_fascent, header_fheight, header_em = \
                 self._create_layout_with_font(pc, header_fd)
 
-        cairo_colspace = label_em
-        column_width = int(math.floor(float(rendering_area.w
-                                            + cairo_colspace)
-                                      / rendering_area.n_cols))
+        margin = label_em
+        column_width = int(rendering_area.w / rendering_area.n_cols)
 
-        label_layout.set_width((column_width - label_em) * pango.SCALE)
-        header_layout.set_width((column_width - label_em) * pango.SCALE)
+        label_layout.set_width((column_width - margin) * pango.SCALE)
+        header_layout.set_width((column_width - margin) * pango.SCALE)
 
         if not self._i18n.isrtl():
+            offset_x = margin/2.
             delta_x  = column_width
-            offset_x = 0
         else:
+            offset_x = rendering_area.w - column_width + margin/2.
             delta_x  = - column_width
-            offset_x = rendering_area.w - column_width + cairo_colspace
 
-        offset_y = 0
+        actual_n_cols = 1
+        offset_y = margin/2.
         for category in self._index_categories:
-            if offset_y + header_fheight + label_fheight > rendering_area.h:
-                offset_y = 0
-                offset_x += delta_x
+            if ( offset_y + header_fheight + label_fheight
+                 + margin/2. > rendering_area.h ):
+                offset_y       = margin/2.
+                offset_x      += delta_x
+                actual_n_cols += 1
 
             category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
                           header_fascent, header_fheight,
@@ -270,9 +271,11 @@ class StreetIndexRenderer:
             offset_y += header_fheight
 
             for street in category.items:
-                if offset_y + label_fheight > rendering_area.h:
-                    offset_y = 0
-                    offset_x += delta_x
+                if ( offset_y + label_fheight + margin/2.
+                     > rendering_area.h ):
+                    offset_y       = margin/2.
+                    offset_x      += delta_x
+                    actual_n_cols += 1
 
                 street.draw(self._i18n.isrtl(), ctx, pc, label_layout,
                             label_fascent, label_fheight,
@@ -283,6 +286,9 @@ class StreetIndexRenderer:
 
         # Restore original context
         ctx.restore()
+
+        # Simple verification...
+        assert actual_n_cols == rendering_area.n_cols
 
 
     def _create_layout_with_font(self, pc, font_desc):
@@ -328,7 +334,7 @@ class StreetIndexRenderer:
         height = fheight * len(text_lines)
 
         return {'column_width': width, 'column_height': height,
-                'fascent': fascent, 'fheight': fheight}
+                'fascent': fascent, 'fheight': fheight, 'em': em}
 
 
     def _label_width(self, layout, label):
@@ -344,6 +350,9 @@ class StreetIndexRenderer:
             pc (pangocairo.CairoContext): the PangoCairo context.
             rendering_style (StreetIndexRenderingStyle): how to render the
                 headers and labels.
+
+        Return a tuple (width of tall column, height of tall column,
+                        vertical margin to reserve after each small column).
         """
 
         header_fd = pango.FontDescription(rendering_style.header_font_spec)
@@ -363,8 +372,12 @@ class StreetIndexRenderer:
         column_height = label_block['column_height'] + \
                         headers_block['column_height']
 
-        return column_width, column_height, \
-                max(label_block['fheight'], headers_block['fheight'])
+        # We make sure there will be enough space for a header and a
+        # label at the bottom of each column plus an additional
+        # vertical margin (arbitrary set to 1em, see render())
+        vertical_extra = ( label_block['fheight'] + headers_block['fheight']
+                           + label_block['em'] )
+        return column_width, column_height, vertical_extra
 
 
     def _compute_columns_split(self, pc, rendering_style,
@@ -390,8 +403,8 @@ class StreetIndexRenderer:
                 streets don't fill the zone dedicated to the index, we need to
                 try with a zone smaller in the freedom_direction.
 
-        Returns the number of columns that will be in the index and the new
-        value for the flexible dimension.
+        Returns a tuple (number of columns that will be in the index,
+                         the new value for the flexible dimension).
         """
 
         tall_width, tall_height, vertical_extra = \
@@ -402,21 +415,28 @@ class StreetIndexRenderer:
 
         if freedom_direction == 'height':
             n_cols = math.floor(zone_width_dots / float(tall_width))
-            min_required_height = (math.ceil(tall_height / n_cols) +
-                                   vertical_extra)
+            if n_cols <= 0:
+                raise commons.IndexDoesNotFitError
 
-            if (n_cols <= 0 or n_cols * tall_width > zone_width_dots or
-                min_required_height > zone_height_dots):
+            min_required_height \
+                = math.ceil(float(tall_height + n_cols*vertical_extra)
+                            / n_cols)
+
+            LOG.debug("min req H %f vs. allocatable H %f"
+                      % (min_required_height, zone_height_dots))
+
+            if min_required_height > zone_height_dots:
                 raise commons.IndexDoesNotFitError
 
             return int(n_cols), min_required_height
+
         elif freedom_direction == 'width':
             n_cols = math.ceil(float(tall_height) / zone_height_dots)
             extra = n_cols * vertical_extra
             min_required_width = n_cols * tall_width
 
-            if (min_required_width > zone_width_dots or
-                tall_height + extra > n_cols * zone_height_dots):
+            if ( (min_required_width > zone_width_dots)
+                 or (tall_height + extra > n_cols * zone_height_dots) ):
                 raise commons.IndexDoesNotFitError
 
             return int(n_cols), min_required_width

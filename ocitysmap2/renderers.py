@@ -379,7 +379,8 @@ class SinglePageRenderer(Renderer):
                                         self._copyright_margin_pt))
 
         # Prepare the Index (may raise a IndexDoesNotFitError)
-        if self.street_index and len(self.street_index) and index_position:
+        if ( index_position and self.street_index
+             and self.street_index.categories ):
             self._index_renderer, self._index_area \
                 = self._create_index_rendering(index_position == "side")
         else:
@@ -613,6 +614,20 @@ class SinglePageRenderer(Renderer):
         ctx = cairo.Context(cairo_surface)
 
         ##
+        ## Draw the index, when applicable
+        ##
+        if self._index_renderer and self._index_area:
+            ctx.save()
+
+            self._index_renderer.render(ctx, self._index_area)
+
+            ctx.rectangle(self._index_area.x, self._index_area.y,
+                          self._index_area.w, self._index_area.h)
+            ctx.stroke()
+
+            ctx.restore()
+
+        ##
         ## Draw the map, scaled to fit the designated area
         ##
         ctx.save()
@@ -641,14 +656,6 @@ class SinglePageRenderer(Renderer):
                           UTILS.convert_pt_to_dots(self._grid_legend_margin_pt,
                                                    dpi))
         ctx.restore()
-
-        ##
-        ## Draw the index, when applicable
-        ##
-        if self._index_renderer and self._index_area:
-            ctx.save()
-            self._index_renderer(ctx, self._index_area)
-            ctx.restore()
 
         ##
         ## Draw the title

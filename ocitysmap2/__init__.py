@@ -419,8 +419,8 @@ class OCitySMap:
                 dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
             factory = lambda w,h: cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                int(renderers.UTILS.convert_pt_to_dots_with_dpi(w, dpi)),
-                int(renderers.UTILS.convert_pt_to_dots_with_dpi(h, dpi)))
+                int(renderers.UTILS.convert_pt_to_dots(w, dpi)),
+                int(renderers.UTILS.convert_pt_to_dots(h, dpi)))
         elif output_format == 'svg':
             factory = lambda w,h: cairo.SVGSurface(output_filename, w, h)
         elif output_format == 'svgz':
@@ -461,4 +461,12 @@ if __name__ == '__main__':
     c.paper_height_mm = 420
     c.stylesheet = o.get_stylesheet_by_name('Default')
 
-    o.render(c, 'plain', ['pdf'], '/tmp/mymap')
+    o.render(c, 'plain', ['pdf'],
+             '/tmp/mymap_plain')
+
+    o.render(c, 'single_page_index_bottom', ['pdf'],
+             '/tmp/mymap_index_portrait')
+
+    c.paper_width_mm,c.paper_height_mm = c.paper_height_mm,c.paper_width_mm
+    o.render(c, 'single_page_index_side', ['pdf'],
+             '/tmp/mymap_index_landscape')
