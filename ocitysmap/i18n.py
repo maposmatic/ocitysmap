@@ -80,7 +80,7 @@ class i18n_fr_generic(i18n):
                      u"Degré", u"Escalier",
                      u"Escaliers", u"Esplanade", u"Funiculaire",
                      u"Giratoire", u"Hameau", u"Impasse", u"Jardin",
-                     u"Jardins", u"Liaison", u"Mail", u"Montée", u"Môle",
+                     u"Jardins", u"Liaison", u"Lotissement", u"Mail", u"Montée", u"Môle",
                      u"Parc", u"Passage", u"Passerelle", u"Passerelles",
                      u"Place", u"Placette", u"Pont", u"Promenade",
                      u"Petite Avenue", u"Petite Rue", u"Quai",
