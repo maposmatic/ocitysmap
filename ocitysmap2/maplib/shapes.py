@@ -33,8 +33,6 @@ try:
 except ImportError:
     import ogr
 
-import coords
-
 l = logging.getLogger('ocitysmap')
 
 class _ShapeFile:
@@ -155,6 +153,8 @@ class PolyShapeFile(_ShapeFile):
         return self
 
 if __name__ == "__main__":
+    from ocitysmap2 import coords
+
     logging.basicConfig(level=logging.DEBUG)
     (LineShapeFile(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637),
                    '/tmp/mygrid.shp', 'test')

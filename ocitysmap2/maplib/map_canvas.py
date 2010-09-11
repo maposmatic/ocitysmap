@@ -26,7 +26,7 @@ import logging
 import mapnik
 import os
 
-import coords
+from ocitysmap2 import coords
 import shapes
 
 l = logging.getLogger('ocitysmap')

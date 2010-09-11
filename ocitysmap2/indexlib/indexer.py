@@ -29,7 +29,7 @@ import psycopg2
 import csv
 import datetime
 
-from ocitysmap2.index import commons
+import commons
 from ocitysmap2 import coords
 
 import psycopg2.extensions
@@ -64,7 +64,7 @@ class StreetIndex:
              + self._list_amenities(db, polygon_wkt))
 
         if not self._categories:
-            raise IndexEmptyError("Nothing to index")
+            raise commons.IndexEmptyError("Nothing to index")
 
     @property
     def categories(self):
@@ -138,18 +138,24 @@ class StreetIndex:
         statically defined as a class attribute for example.
         """
 
-        selected_amenities = [
-            (_(u"Places of worship"), "place_of_worship",
-             _(u"Place of worship")),
-            (_(u"Education"), "kindergarten", _(u"Kindergarten")),
-            (_(u"Education"), "school", _(u"School")),
-            (_(u"Education"), "college", _(u"College")),
-            (_(u"Education"), "university", _(u"University")),
-            (_(u"Education"), "library", _(u"Library")),
-            (_(u"Public buildings"), "townhall", _(u"Town hall")),
-            (_(u"Public buildings"), "post_office", _(u"Post office")),
-            (_(u"Public buildings"), "public_building", _(u"Public building")),
-            (_(u"Public buildings"), "police", _(u"Police"))]
+        # Make sure gettext is available...
+        try:
+            selected_amenities = [
+                (_(u"Places of worship"), "place_of_worship",
+                 _(u"Place of worship")),
+                (_(u"Education"), "kindergarten", _(u"Kindergarten")),
+                (_(u"Education"), "school", _(u"School")),
+                (_(u"Education"), "college", _(u"College")),
+                (_(u"Education"), "university", _(u"University")),
+                (_(u"Education"), "library", _(u"Library")),
+                (_(u"Public buildings"), "townhall", _(u"Town hall")),
+                (_(u"Public buildings"), "post_office", _(u"Post office")),
+                (_(u"Public buildings"), "public_building",
+                 _(u"Public building")),
+                (_(u"Public buildings"), "police", _(u"Police"))]
+        except NameError:
+            l.exception("i18n has to be initialized beforehand")
+            return []
 
         return selected_amenities
 
@@ -335,7 +341,7 @@ order by amenity_name""" \
 if __name__ == "__main__":
     import os
     import psycopg2
-    from ocitysmap2 import i18n, coords
+    from ocitysmap2 import i18n
 
     logging.basicConfig(level=logging.DEBUG)
 

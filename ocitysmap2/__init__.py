@@ -86,9 +86,12 @@ import tempfile
 
 import coords
 import i18n
-import index
-import index.render
-import renderers
+
+from indexlib.indexer import StreetIndex
+from indexlib.commons import IndexDoesNotFitError
+
+from layoutlib import renderers
+import layoutlib.commons
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -226,7 +229,8 @@ class OCitySMap:
         LOG.debug('Found %d Mapnik stylesheets.'
                   % len(self.STYLESHEET_REGISTRY))
 
-    def _get_db(self):
+    @property
+    def _db(self):
         if self.__db:
             return self.__db
 
@@ -253,8 +257,6 @@ class OCitySMap:
 
         self.__db = db
         return self.__db
-
-    _db = property(_get_db)
 
     def _set_request_timeout(self, db, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
@@ -381,9 +383,9 @@ class OCitySMap:
         assert config.polygon_wkt is not None
 
         # Prepare the index
-        street_index = index.indexer.StreetIndex(self._db,
-                                                 config.polygon_wkt,
-                                                 config.i18n)
+        street_index = StreetIndex(self._db,
+                                   config.polygon_wkt,
+                                   config.i18n)
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
@@ -403,7 +405,7 @@ class OCitySMap:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 try:
                     self._render_one(renderer, output_format, output_filename)
-                except index.commons.IndexDoesNotFitError:
+                except IndexDoesNotFitError:
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
                                   "constructor. Backtrace follows...")
@@ -417,7 +419,7 @@ class OCitySMap:
         LOG.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
-        dpi = renderers.UTILS.PT_PER_INCH
+        dpi = layoutlib.commons.PT_PER_INCH
 
         if output_format == 'png':
             try:
@@ -432,8 +434,8 @@ class OCitySMap:
             # pre-computed by renderer_cls.__init__() and used to
             # layout the whole page
             def factory(w,h):
-                w_px = int(renderers.UTILS.convert_pt_to_dots(w, dpi))
-                h_px = int(renderers.UTILS.convert_pt_to_dots(h, dpi))
+                w_px = int(layoutlib.commons.convert_pt_to_dots(w, dpi))
+                h_px = int(layoutlib.commons.convert_pt_to_dots(h, dpi))
                 LOG.debug("Rendering PNG into %dpx x %dpx area..."
                           % (w_px, h_px))
                 return cairo.PDFSurface(None, w_px, h_px)

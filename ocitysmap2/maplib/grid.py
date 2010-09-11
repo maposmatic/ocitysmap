@@ -25,7 +25,6 @@
 import logging
 import math
 
-import coords
 import shapes
 
 l = logging.getLogger('ocitysmap')
@@ -151,6 +150,8 @@ class Grid:
 
 
 if __name__ == "__main__":
+    from ocitysmap2 import coords
+
     logging.basicConfig(level=logging.DEBUG)
     grid = Grid(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637))
     shape = grid.generate_shape_file('/tmp/mygrid.shp')

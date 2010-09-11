@@ -22,22 +22,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from indexer import StreetIndex
-from render  import StreetIndexRenderer
-from commons import IndexCategory, IndexItem
-
 if __name__ == '__main__':
     import os
     import string
     import random
     import psycopg2
     import cairo
+    import logging
+
+    logging.basicConfig(level=logging.DEBUG)
 
     from ocitysmap2 import i18n, coords
-    from ocitysmap2.index import commons
-    from ocitysmap2.grid import Grid
+    from ocitysmap2.maplib.grid import Grid
 
-    import render
+    from indexer  import StreetIndex
+    from renderer import StreetIndexRenderer
+    from commons  import IndexCategory, IndexItem
 
     random.seed(42)
 
@@ -77,8 +77,7 @@ if __name__ == '__main__':
     grid = Grid(bbox, rtl = False)
     street_index.apply_grid(grid)
 
-    index = render.StreetIndexRenderer(i18nMock(False),
-                                       street_index.categories)
+    index = StreetIndexRenderer(i18nMock(False), street_index.categories)
 
     def _render(freedom_dimension, alignment):
         x,y,w,h = 50, 50, width-100, height-100
@@ -123,8 +122,7 @@ if __name__ == '__main__':
     grid = Grid(bbox, rtl = True)
     street_index.apply_grid(grid)
 
-    index = render.StreetIndexRenderer(i18nMock(True),
-                                       street_index.categories)
+    index = StreetIndexRenderer(i18nMock(True), street_index.categories)
     _render('height', 'top')
     surface.show_page()
     _render('height', 'bottom')

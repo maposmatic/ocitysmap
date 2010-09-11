@@ -29,7 +29,7 @@ import pango
 import pangocairo
 
 import commons
-from ocitysmap2.renderers import UTILS
+import ocitysmap2.layoutlib.commons as UTILS
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -494,10 +494,9 @@ class StreetIndexRenderer:
 if __name__ == '__main__':
     import random
     import string
-    from ocitysmap2 import coords
-    from ocitysmap2.index import commons
 
-    import render
+    from ocitysmap2 import coords
+    import commons
 
     logging.basicConfig(level=logging.DEBUG)
 
@@ -539,7 +538,7 @@ if __name__ == '__main__':
             items.append(item)
         streets.append(commons.IndexCategory(i, items))
 
-    index = render.StreetIndexRenderer(i18nMock(False), streets)
+    index = StreetIndexRenderer(i18nMock(False), streets)
 
     def _render(freedom_dimension, alignment):
         x,y,w,h = 50, 50, width-100, height-100
@@ -577,7 +576,7 @@ if __name__ == '__main__':
     _render('width', 'right')
     surface.show_page()
 
-    index = render.StreetIndexRenderer(i18nMock(True), streets)
+    index = StreetIndexRenderer(i18nMock(True), streets)
     _render('height', 'top')
     surface.show_page()
     _render('height', 'bottom')

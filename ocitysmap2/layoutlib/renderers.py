@@ -32,24 +32,15 @@ import re
 import pango
 import pangocairo
 
-from map_canvas import MapCanvas
-from grid import Grid
-import shapes
-import index
+from ocitysmap2 import maplib
+## from ocitysmap2 import indexlib
+from ocitysmap2.maplib.map_canvas import MapCanvas
+from ocitysmap2.maplib.grid import Grid
+from ocitysmap2.indexlib.renderer import StreetIndexRenderer
+
+import commons
 
 LOG = logging.getLogger('ocitysmap')
-
-class UTILS:
-    PT_PER_INCH = 72.0
-
-    @staticmethod
-    def convert_pt_to_dots(pt, dpi = PT_PER_INCH):
-        return float(pt * dpi) / UTILS.PT_PER_INCH
-
-    @staticmethod
-    def convert_mm_to_pt(mm):
-        return ((mm/10.0) / 2.54) * 72
-
 
 class Renderer:
     """
@@ -108,9 +99,9 @@ class Renderer:
         self.street_index = street_index
 
         self.paper_width_pt = \
-                UTILS.convert_mm_to_pt(self.rc.paper_width_mm)
+                commons.convert_mm_to_pt(self.rc.paper_width_mm)
         self.paper_height_pt = \
-                UTILS.convert_mm_to_pt(self.rc.paper_height_mm)
+                commons.convert_mm_to_pt(self.rc.paper_height_mm)
 
     @staticmethod
     def _draw_centered_text(ctx, text, x, y):
@@ -162,7 +153,7 @@ class Renderer:
         """
         # TODO: read vector logo
         logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', 'images', 'osm-logo.png'))
+            os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.png'))
         try:
             with open(logo_path, 'rb') as f:
                 png = cairo.ImageSurface.create_from_png(f)
@@ -274,7 +265,7 @@ class Renderer:
                 (bounding_box.as_wkt(with_polygon_statement = False), inside)
 
             # Prepare the shade SHP
-            shade_shape = shapes.PolyShapeFile(
+            shade_shape = maplib.shapes.PolyShapeFile(
                 canvas.get_actual_bounding_box(),
                 os.path.join(self.tmpdir, 'shade.shp'),
                 'shade')
@@ -446,8 +437,8 @@ class SinglePageRenderer(Renderer):
         Return a couple (StreetIndexRenderer, StreetIndexRenderingArea).
         """
         # Now we determine the actual occupation of the index
-        index_renderer = index.StreetIndexRenderer(self.rc.i18n,
-                                                   self.street_index.categories)
+        index_renderer = StreetIndexRenderer(self.rc.i18n,
+                                             self.street_index.categories)
 
         # We use a fake vector device to determine the actual
         # rendering characteristics
@@ -596,19 +587,19 @@ class SinglePageRenderer(Renderer):
 
         # First determine some useful drawing parameters
         safe_margin_dots \
-            = UTILS.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
+            = commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
         usable_area_width_dots \
-            = UTILS.convert_pt_to_dots(self._usable_area_width_pt, dpi)
+            = commons.convert_pt_to_dots(self._usable_area_width_pt, dpi)
         usable_area_height_dots \
-            = UTILS.convert_pt_to_dots(self._usable_area_height_pt, dpi)
+            = commons.convert_pt_to_dots(self._usable_area_height_pt, dpi)
 
         title_margin_dots \
-            = UTILS.convert_pt_to_dots(self._title_margin_pt, dpi)
+            = commons.convert_pt_to_dots(self._title_margin_pt, dpi)
 
         copyright_margin_dots \
-            = UTILS.convert_pt_to_dots(self._copyright_margin_pt, dpi)
+            = commons.convert_pt_to_dots(self._copyright_margin_pt, dpi)
 
-        map_coords_dots = map(lambda l: UTILS.convert_pt_to_dots(l, dpi),
+        map_coords_dots = map(lambda l: commons.convert_pt_to_dots(l, dpi),
                               self._map_coords)
 
         ctx = cairo.Context(cairo_surface)
@@ -636,10 +627,10 @@ class SinglePageRenderer(Renderer):
 
             # Also draw a rectangle
             ctx.save()
-            ctx.rectangle(UTILS.convert_pt_to_dots(self._index_area.x, dpi),
-                          UTILS.convert_pt_to_dots(self._index_area.y, dpi),
-                          UTILS.convert_pt_to_dots(self._index_area.w, dpi),
-                          UTILS.convert_pt_to_dots(self._index_area.h, dpi))
+            ctx.rectangle(commons.convert_pt_to_dots(self._index_area.x, dpi),
+                          commons.convert_pt_to_dots(self._index_area.y, dpi),
+                          commons.convert_pt_to_dots(self._index_area.w, dpi),
+                          commons.convert_pt_to_dots(self._index_area.h, dpi))
             ctx.stroke()
             ctx.restore()
 
@@ -670,7 +661,7 @@ class SinglePageRenderer(Renderer):
         self._draw_labels(ctx, self.grid,
                           map_coords_dots[2],
                           map_coords_dots[3],
-                          UTILS.convert_pt_to_dots(self._grid_legend_margin_pt,
+                          commons.convert_pt_to_dots(self._grid_legend_margin_pt,
                                                    dpi))
         ctx.restore()
 
@@ -894,7 +885,7 @@ def get_paper_sizes():
 
 if __name__ == '__main__':
     import coords
-    import i18n
+    from ocitysmap2 import i18n
 
     # Hack to fake gettext
     try:
@@ -939,10 +930,10 @@ if __name__ == '__main__':
 
     plain = renderer_cls(config, '/tmp', None)
     surface = cairo.PDFSurface('/tmp/plain.pdf',
-                   UTILS.convert_mm_to_pt(config.paper_width_mm),
-                   UTILS.convert_mm_to_pt(config.paper_height_mm))
+                   commons.convert_mm_to_pt(config.paper_width_mm),
+                   commons.convert_mm_to_pt(config.paper_height_mm))
 
-    plain.render(surface, UTILS.PT_PER_INCH)
+    plain.render(surface, commons.PT_PER_INCH)
     surface.finish()
 
     print "Generated /tmp/plain.pdf"
