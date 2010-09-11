@@ -232,12 +232,12 @@ are using. They have been tested on several x86_64 hosts.
     but because it contains Pango and PangoCairo that we use to render
     text on the map.
 
-    e. Configuration file
+    d. Configuration file
 
     Create a ~/.ocitysmap.conf configuration file, modeled after the
-    provided ocitysmap.conf-template file.
+    provided ocitysmap2.conf-template file.
 
 12. Run OCitySMap
 
-    ./ocitysmap-render -f png -c Sanguinet
+    ./ocitysmap2-render -t "Ceci n'est pas Paris" --polygon-osmid=-943886
 
