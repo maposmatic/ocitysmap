@@ -217,10 +217,13 @@ class SinglePageRenderer(Renderer):
         # Retrieve and paint the OSM logo
         ctx.save()
         grp, logo_width = self._get_osm_logo(ctx, 0.8*h_dots)
-
-        ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
-        ctx.set_source(grp)
-        ctx.paint_with_alpha(0.5)
+        if grp:
+            ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
+            ctx.set_source(grp)
+            ctx.paint_with_alpha(0.5)
+        else:
+            LOG.warning("OSM Logo not available.")
+            logo_width = 0
         ctx.restore()
 
         # Prepare the title

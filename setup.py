@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
 # Copyright (C) 2009  David Decotigny
@@ -37,6 +39,11 @@ designed to be printed.
       license="GPL",
       maintainer="The Hackfest2009 team",
       maintainer_email="staff@maposmatic.org",
-      packages = ['ocitysmap' ],
-      scripts = ['ocitysmap-render' ]
+      packages = ['ocitysmap2',
+                  'ocitysmap2.maplib',
+                  'ocitysmap2.indexlib',
+                  'ocitysmap2.layoutlib' ],
+      scripts = ['ocitysmap2-render' ],
+      data_files = [ ('share/images/ocitysmap2',
+                      ['images/osm-logo.png', 'images/osm-logo.svg']) ]
 )

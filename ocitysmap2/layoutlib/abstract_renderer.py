@@ -24,6 +24,7 @@
 
 import math
 import os
+import sys
 import cairo
 import pango
 import re
@@ -127,13 +128,18 @@ class Renderer:
         # TODO: read vector logo
         logo_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.png'))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(
+                sys.exec_prefix, 'share', 'images', 'ocitysmap2',
+                'osm-logo.png')
+
         try:
             with open(logo_path, 'rb') as f:
                 png = cairo.ImageSurface.create_from_png(f)
                 LOG.debug('Using copyright logo: %s.' % logo_path)
         except IOError:
             LOG.warning('Cannot open logo from %s.' % logo_path)
-            return None
+            return None, None
 
         ctx.push_group()
         ctx.save()
