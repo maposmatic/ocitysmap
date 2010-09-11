@@ -244,6 +244,9 @@ class OCitySMap:
         # (which loads the unicode extensions for psycopg2)
         db.set_client_encoding('utf8')
 
+        # Make sure the DB is correctly installed
+        self._verify_db(db)
+
         try:
             timeout = int(self._parser.get('datasource', 'request_timeout'))
         except (ConfigParser.NoOptionError, ValueError):
@@ -252,6 +255,18 @@ class OCitySMap:
 
         self.__db = db
         return self.__db
+
+    def _verify_db(self, db):
+        """Make sure the PostGIS DB is compatible with us."""
+        cursor = db.cursor()
+        cursor.execute("""
+SELECT ST_AsText(ST_LongestLine(
+                    'POINT(100 100)'::geometry,
+		    'LINESTRING(20 80, 98 190, 110 180, 50 75 )'::geometry)
+	        ) As lline;
+""")
+        assert cursor.fetchall()[0][0] == "LINESTRING(100 100,98 190)", \
+            LOG.fatal("PostGIS >= 1.5 required for correct operation !")
 
     def _set_request_timeout(self, db, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
