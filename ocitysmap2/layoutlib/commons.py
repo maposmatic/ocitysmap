@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# PT/metrics conversion routines
 PT_PER_INCH = 72.0
 
 def convert_pt_to_dots(pt, dpi = PT_PER_INCH):

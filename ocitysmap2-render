@@ -38,7 +38,7 @@ def main():
     # Paper sizes, sorted in increasing widths
     KNOWN_PAPER_SIZE_NAMES = \
         map(lambda p: p[0],
-            sorted(ocitysmap2.layoutlib.renderers.Renderer.PAPER_SIZES,
+            sorted(ocitysmap2.layoutlib.PAPER_SIZES,
                    key=lambda p: p[1]))
 
     # Known renderer names
