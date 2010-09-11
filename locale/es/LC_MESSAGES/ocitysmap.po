@@ -6,16 +6,71 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-07 20:40+CEST\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
 "PO-Revision-Date: 2010-03-13 16:44+0100\n"
 "Last-Translator: Jean-Guilhem Cailton <jgc@arkemie.com>\n"
 "Language-Team: ES <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 
-#: ocitysmap2/renderers.py:318
+#: ocitysmap2/indexlib/indexer.py:144
+msgid "Places of worship"
+msgstr "Lugares de culto"
+
+#: ocitysmap2/indexlib/indexer.py:145
+msgid "Place of worship"
+msgstr "Lugar de culto"
+
+#: ocitysmap2/indexlib/indexer.py:146
+msgid "Kindergarten"
+msgstr "Jardín infantil"
+
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr "Educación"
+
+#: ocitysmap2/indexlib/indexer.py:147
+msgid "School"
+msgstr "Escuela"
+
+#: ocitysmap2/indexlib/indexer.py:148
+msgid "College"
+msgstr "Centro de estudios de grado medio"
+
+#: ocitysmap2/indexlib/indexer.py:149
+msgid "University"
+msgstr "Universidad"
+
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Library"
+msgstr "Biblioteca"
+
+#: ocitysmap2/indexlib/indexer.py:151
+msgid "Town hall"
+msgstr "Municipalidad"
+
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr "Edificios publicos"
+
+#: ocitysmap2/indexlib/indexer.py:152
+msgid "Post office"
+msgstr "Oficina de correos"
+
+#: ocitysmap2/indexlib/indexer.py:154
+msgid "Public building"
+msgstr "Edificio publico"
+
+#: ocitysmap2/indexlib/indexer.py:155
+msgid "Police"
+msgstr "Policía"
+
+#: ocitysmap2/layoutlib/renderers.py:555
 #, fuzzy
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -25,44 +80,9 @@ msgid ""
 msgstr ""
 "Tu puedes contribuir a mejorar este mapa. Ver http://wiki.openstreetmap.org"
 
-#~ msgid "Places of worship"
-#~ msgstr "Lugares de culto"
-
-#~ msgid "Place of worship"
-#~ msgstr "Lugar de culto"
-
-#~ msgid "Education"
-#~ msgstr "Educación"
-
-#~ msgid "Kindergarten"
-#~ msgstr "Jardín infantil"
-
-#~ msgid "School"
-#~ msgstr "Escuela"
-
-#~ msgid "College"
-#~ msgstr "Centro de estudios de grado medio"
-
-#~ msgid "University"
-#~ msgstr "Universidad"
-
-#~ msgid "Library"
-#~ msgstr "Biblioteca"
-
-#~ msgid "Public buildings"
-#~ msgstr "Edificios publicos"
-
-#~ msgid "Town hall"
-#~ msgstr "Municipalidad"
-
-#~ msgid "Post office"
-#~ msgstr "Oficina de correos"
-
-#~ msgid "Public building"
-#~ msgstr "Edificio publico"
-
-#~ msgid "Police"
-#~ msgstr "Policía"
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
+msgstr ""
 
 #~ msgid ""
 #~ "This map has been rendered on %s and may be incomplete or inaccurate."

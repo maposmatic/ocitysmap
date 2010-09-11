@@ -6,22 +6,81 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-07 20:40+CEST\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
 "PO-Revision-Date: 2009-12-26 20:59+0100\n"
 "Last-Translator: Thomas Petazzoni <thomas.petazzoni@enix.org>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Poedit-Language: Italian\n"
 "X-Poedit-Country: ITALY\n"
 
-#: ocitysmap2/renderers.py:318
+#: ocitysmap2/indexlib/indexer.py:144
+msgid "Places of worship"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:145
+msgid "Place of worship"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:146
+msgid "Kindergarten"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:147
+msgid "School"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:148
+msgid "College"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:149
+msgid "University"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Library"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:151
+msgid "Town hall"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:152
+msgid "Post office"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:154
+msgid "Public building"
+msgstr ""
+
+#: ocitysmap2/indexlib/indexer.py:155
+msgid "Police"
+msgstr ""
+
+#: ocitysmap2/layoutlib/renderers.py:555
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
 "This map has been rendered on %(date)s and may be incomplete or innacurate. "
 "You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
 msgstr ""

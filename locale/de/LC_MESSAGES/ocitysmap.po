@@ -6,17 +6,72 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-07 20:40+CEST\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
 "PO-Revision-Date: 2010-01-15 19:45+0100\n"
 "Last-Translator: malenki <osm@malenki.ch>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ocitysmap2/renderers.py:318
+#: ocitysmap2/indexlib/indexer.py:144
+msgid "Places of worship"
+msgstr "Anbetungsstätten"
+
+#: ocitysmap2/indexlib/indexer.py:145
+msgid "Place of worship"
+msgstr "Anbetungsstätte"
+
+#: ocitysmap2/indexlib/indexer.py:146
+msgid "Kindergarten"
+msgstr "Kindergarten"
+
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr "Bildungseinrichtungen"
+
+#: ocitysmap2/indexlib/indexer.py:147
+msgid "School"
+msgstr "Schule"
+
+#: ocitysmap2/indexlib/indexer.py:148
+msgid "College"
+msgstr "Hochschule"
+
+#: ocitysmap2/indexlib/indexer.py:149
+msgid "University"
+msgstr "Universität"
+
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Library"
+msgstr "Bibliothek"
+
+#: ocitysmap2/indexlib/indexer.py:151
+msgid "Town hall"
+msgstr "Rathaus"
+
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr "Öffentliche Einrichtungen"
+
+#: ocitysmap2/indexlib/indexer.py:152
+msgid "Post office"
+msgstr "Postamt"
+
+#: ocitysmap2/indexlib/indexer.py:154
+msgid "Public building"
+msgstr "Öffentliche Einrichtung"
+
+#: ocitysmap2/indexlib/indexer.py:155
+msgid "Police"
+msgstr "Polizei"
+
+#: ocitysmap2/layoutlib/renderers.py:555
 #, fuzzy
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -27,44 +82,9 @@ msgstr ""
 "Sie können helfen, diesen Plan zu verbessern.\n"
 " Siehe http://www.openstreetmap.de/faq.html"
 
-#~ msgid "Places of worship"
-#~ msgstr "Anbetungsstätten"
-
-#~ msgid "Place of worship"
-#~ msgstr "Anbetungsstätte"
-
-#~ msgid "Education"
-#~ msgstr "Bildungseinrichtungen"
-
-#~ msgid "Kindergarten"
-#~ msgstr "Kindergarten"
-
-#~ msgid "School"
-#~ msgstr "Schule"
-
-#~ msgid "College"
-#~ msgstr "Hochschule"
-
-#~ msgid "University"
-#~ msgstr "Universität"
-
-#~ msgid "Library"
-#~ msgstr "Bibliothek"
-
-#~ msgid "Public buildings"
-#~ msgstr "Öffentliche Einrichtungen"
-
-#~ msgid "Town hall"
-#~ msgstr "Rathaus"
-
-#~ msgid "Post office"
-#~ msgstr "Postamt"
-
-#~ msgid "Public building"
-#~ msgstr "Öffentliche Einrichtung"
-
-#~ msgid "Police"
-#~ msgstr "Polizei"
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
+msgstr ""
 
 #~ msgid ""
 #~ "This map has been rendered on %s and may be incomplete or inaccurate."

@@ -6,20 +6,75 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-07 20:40+CEST\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
 "PO-Revision-Date: 2010-02-08 10:28+0100\n"
 "Last-Translator: Łukasz Jernaś <deejay1@srem.org>\n"
 "Language-Team: \n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: ENCODING\n"
+"Language: \n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
 
-#: ocitysmap2/renderers.py:318
+#: ocitysmap2/indexlib/indexer.py:144
+msgid "Places of worship"
+msgstr "Miejsca kultu"
+
+#: ocitysmap2/indexlib/indexer.py:145
+msgid "Place of worship"
+msgstr "Miejsce kultu"
+
+#: ocitysmap2/indexlib/indexer.py:146
+msgid "Kindergarten"
+msgstr "Przedszkole"
+
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr "Edukacja"
+
+#: ocitysmap2/indexlib/indexer.py:147
+msgid "School"
+msgstr "Szkoła"
+
+#: ocitysmap2/indexlib/indexer.py:148
+msgid "College"
+msgstr "Szkoła wyższa"
+
+#: ocitysmap2/indexlib/indexer.py:149
+msgid "University"
+msgstr "Uniwersytet"
+
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Library"
+msgstr "Biblioteka"
+
+#: ocitysmap2/indexlib/indexer.py:151
+msgid "Town hall"
+msgstr "Ratusz"
+
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr "Budynki użyteczności publicznej"
+
+#: ocitysmap2/indexlib/indexer.py:152
+msgid "Post office"
+msgstr "Poczta"
+
+#: ocitysmap2/indexlib/indexer.py:154
+msgid "Public building"
+msgstr "Budynek użyteczności publicznej"
+
+#: ocitysmap2/indexlib/indexer.py:155
+msgid "Police"
+msgstr "Policja"
+
+#: ocitysmap2/layoutlib/renderers.py:555
 #, fuzzy
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -30,44 +85,9 @@ msgstr ""
 "Aby pomóc ulepszyć tą mapę, zajrzyj na stronę internetową http://wiki."
 "openstreetmap.org"
 
-#~ msgid "Places of worship"
-#~ msgstr "Miejsca kultu"
-
-#~ msgid "Place of worship"
-#~ msgstr "Miejsce kultu"
-
-#~ msgid "Education"
-#~ msgstr "Edukacja"
-
-#~ msgid "Kindergarten"
-#~ msgstr "Przedszkole"
-
-#~ msgid "School"
-#~ msgstr "Szkoła"
-
-#~ msgid "College"
-#~ msgstr "Szkoła wyższa"
-
-#~ msgid "University"
-#~ msgstr "Uniwersytet"
-
-#~ msgid "Library"
-#~ msgstr "Biblioteka"
-
-#~ msgid "Public buildings"
-#~ msgstr "Budynki użyteczności publicznej"
-
-#~ msgid "Town hall"
-#~ msgstr "Ratusz"
-
-#~ msgid "Post office"
-#~ msgstr "Poczta"
-
-#~ msgid "Public building"
-#~ msgstr "Budynek użyteczności publicznej"
-
-#~ msgid "Police"
-#~ msgstr "Policja"
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
+msgstr ""
 
 #~ msgid ""
 #~ "This map has been rendered on %s and may be incomplete or inaccurate."
