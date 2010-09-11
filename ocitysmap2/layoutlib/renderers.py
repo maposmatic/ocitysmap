@@ -324,8 +324,9 @@ class Renderer:
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
-        Returns a list of tuples (paper name, width in mm, height in mm). Paper
-        sizes are represented in portrait mode.
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok). Paper sizes are represented in
+        portrait mode.
         """
         raise NotImplementedError
 
@@ -710,8 +711,9 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
 
-        Returns a list of tuples (paper name, width in mm, height in mm). Paper
-        sizes are represented in portrait mode.
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok). Paper sizes are represented in
+        portrait mode.
         """
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
         paper_width_mm = int(geo_width_m/1000.0 * resolution_km_in_mm)
@@ -780,8 +782,9 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
-        Returns a list of tuples (paper name, width in mm, height in mm). Paper
-        sizes are represented in portrait mode.
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok). Paper sizes are represented in
+        portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
             bounding_box, zoom_level, resolution_km_in_mm, None)
@@ -817,8 +820,9 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
-        Returns a list of tuples (paper name, width in mm, height in mm). Paper
-        sizes are represented in portrait mode.
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok). Paper sizes are represented in
+        portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
             bounding_box, zoom_level, resolution_km_in_mm, 'side')
@@ -854,17 +858,19 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
-        Returns a list of tuples (paper name, width in mm, height in mm). Paper
-        sizes are represented in portrait mode.
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok). Paper sizes are represented in
+        portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
             bounding_box, zoom_level, resolution_km_in_mm, 'bottom')
 
 
 # The renderers registry
-_RENDERERS = [ SinglePageRendererNoIndex,
+_RENDERERS = [ SinglePageRendererIndexBottom,
                SinglePageRendererIndexOnSide,
-               SinglePageRendererIndexBottom ]
+               SinglePageRendererNoIndex,
+                ]
 
 def get_renderer_class_by_name(name):
     """Retrieves a renderer class, by name."""

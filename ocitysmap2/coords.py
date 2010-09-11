@@ -86,7 +86,7 @@ class BoundingBox:
     @staticmethod
     def parse_latlon_strtuple(points):
         """Returns a BoundingBox object from a tuple of strings
-        [("lat1, lon1"), ("lat2", "lon2")]"""
+        [("lat1,lon1"), ("lat2,lon2")]"""
         (lat1, long1) = points[0].split(',')
         (lat2, long2) = points[1].split(',')
         return BoundingBox(lat1, long1, lat2, long2)

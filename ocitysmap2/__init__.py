@@ -127,12 +127,13 @@ class Stylesheet:
     contains information pointing to the Mapnik stylesheet and other styling
     parameters.
     """
+    DEFAULT_ZOOM_LEVEL = 16
 
     def __init__(self):
         self.name        = None # str
         self.path        = None # str
         self.description = '' # str
-        self.zoom_level = 16
+        self.zoom_level  = Stylesheet.DEFAULT_ZOOM_LEVEL
 
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
@@ -177,7 +178,7 @@ class Stylesheet:
             raise ValueError, \
                     'OCitySMap configuration does not contain any stylesheet!'
 
-        return [Stylesheet.create_from_config_section(parser, name)
+        return [Stylesheet.create_from_config_section(parser, name.strip())
                 for name in styles.split(',')]
 
 class OCitySMap:
@@ -188,23 +189,18 @@ class OCitySMap:
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
 
-    DEFAULT_ZOOM_LEVEL = 16
     DEFAULT_RESOLUTION_KM_IN_MM = 150
     DEFAULT_RENDERING_PNG_DPI = 300
 
     STYLESHEET_REGISTRY = []
 
-    def __init__(self, config_files=None,
-                 grid_table_prefix=None):
+    def __init__(self, config_files=None):
         """Instanciate a new configured OCitySMap instance.
 
         Args:
             config_file (string or list or None): path, or list of paths to
                 the OCitySMap configuration file(s). If None, sensible defaults
                 are tried.
-            grid_table_prefix (string): a prefix for the grid map areas PostGIS
-                table, which is useful when multiple renderings run
-                concurrently.
         """
 
         if config_files is None:
@@ -221,7 +217,6 @@ class OCitySMap:
             raise IOError, 'None of the configuration files could be read!'
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
-        self._grid_table_prefix = '%sgrid_squares' % (grid_table_prefix or '')
         self.__db = None
 
         # Read stylesheet configuration
