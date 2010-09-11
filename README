@@ -5,21 +5,24 @@ ocitysmap generates a city street map, using the OpenStreetMap project's data
 and the MapNik map renderer. The generated maps are vector graphics images,
 including a street index and city grid.
 
-For example, for a simple Sanguinet rendering, run:
+For example, for a simple Chevreuse rendering, run:
 
- ./ocitysmap-render -f png -c Sanguinet
+ ./ocitysmap2-render -t "Ceci n'est pas Paris" --polygon-osmid=-943886
 
-Since several cities can have the same name, it is possible to render
-according to a polygon OSM id:
+Alternatively you may specify a bounding box rather than an OSM ID:
 
- ./ocitysmap-render -f png -t Brunoy --polygon-osmid -114189
+ ./ocitysmap-render -t "Ceci n'est pas Paris" -b 48.7268,1.9946 48.6801,2.0742
 
-Alternatively you may specify a bounding box rather than a City:
+This is useful when OpenStreetMap does not contain the administrative
+boundary of the city you want to render. To determine the OSM ID
+and/or the bounding box of cities from their name, please use the
+nominatim service: http://nominatim.openstreetmap.org/
 
- ./ocitysmap-render -f png -b 44.4883,-1.0901 44.4778,-1.0637
+By default, the maps are generated in PDF format with the street index
+at the bottom, with an additional CSV containing the street index. To
+see the available options to change this behavior, please run:
 
-This is useful when OpenStreetMap does not contain the administrative boundary
-of the city.
+  ./ocitysmap-render --help
 
 See INSTALL for installation instructions.
 
