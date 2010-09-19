@@ -90,7 +90,7 @@ import i18n
 from indexlib.indexer import StreetIndex
 from indexlib.commons import IndexDoesNotFitError
 
-from layoutlib import renderers
+from layoutlib import PAPER_SIZES, renderers
 import layoutlib.commons
 
 LOG = logging.getLogger('ocitysmap')
@@ -344,7 +344,7 @@ SELECT ST_AsText(ST_LongestLine(
         return renderers.get_renderers()
 
     def get_all_paper_sizes(self):
-        return renderers.get_paper_sizes()
+        return PAPER_SIZES
 
     def render(self, config, renderer_name, output_formats, file_prefix):
         """Renders a job with the given rendering configuration, using the

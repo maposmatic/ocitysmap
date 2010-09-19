@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import math
 import datetime
 import cairo
 import mapnik
@@ -440,6 +441,10 @@ class SinglePageRenderer(Renderer):
         elif index_position == 'bottom':
             paper_height_mm /= (1. -
                                 SinglePageRenderer.MAX_INDEX_OCCUPATION_RATIO)
+
+        # Transform the values into integers
+        paper_width_mm  = int(math.ceil(paper_width_mm))
+        paper_height_mm = int(math.ceil(paper_height_mm))
 
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
