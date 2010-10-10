@@ -91,7 +91,7 @@ import coords
 import i18n
 
 from indexlib.indexer import StreetIndex
-from indexlib.commons import IndexDoesNotFitError
+from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 
 from layoutlib import PAPER_SIZES, renderers
 import layoutlib.commons
@@ -421,9 +421,13 @@ SELECT ST_AsText(ST_LongestLine(
         assert config.polygon_wkt is not None
 
         # Prepare the index
-        street_index = StreetIndex(self._db,
-                                   config.polygon_wkt,
-                                   config.i18n)
+        try:
+            street_index = StreetIndex(self._db,
+                                       config.polygon_wkt,
+                                       config.i18n)
+        except IndexEmptyError:
+            LOG.warning("Designated area leads to an empty index")
+            street_index = None
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
@@ -435,7 +439,7 @@ SELECT ST_AsText(ST_LongestLine(
             renderer = renderer_cls(config, tmpdir, street_index)
 
             # Update the street_index to reflect the grid's actual position
-            if renderer.grid:
+            if renderer.grid and street_index:
                 street_index.apply_grid(renderer.grid)
 
             # Perform the actual rendering to the Cairo devices
@@ -449,7 +453,8 @@ SELECT ST_AsText(ST_LongestLine(
                                   "constructor. Backtrace follows...")
 
             # Also dump the CSV street index
-            street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
+            if street_index:
+                street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
         finally:
             self._cleanup_tempdir(tmpdir)
 
