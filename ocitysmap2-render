@@ -65,7 +65,7 @@ def main():
                       default="My Map")
     parser.add_option('--polygon-osmid', dest='polygon_osmid', metavar='OSMID',
                       help='OSM id representing the polygon of the city '
-                      'to render.'),
+                      'to render.', type="int"),
     parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
                       metavar='LAT1,LON1 LAT2,LON2',
                       help='Bounding box (EPSG: 4326).')
@@ -131,10 +131,9 @@ def main():
     osmid = None
     if options.polygon_osmid:
         try:
-            osmid = int(options.polygon_osmid)
             bbox  = BoundingBox.parse_wkt(
-                mapper.get_geographic_info([osmid])[0][1])
-        except ValueError:
+                mapper.get_geographic_info(options.polygon_osmid)[0])
+        except LookupError:
             parser.error('Invalid polygon OSM id!\n')
 
     # Parse stylesheet (defaults to 1st one)

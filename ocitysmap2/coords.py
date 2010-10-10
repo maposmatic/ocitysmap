@@ -24,6 +24,8 @@
 
 import math
 
+import shapely.wkt
+
 EARTH_RADIUS = 6370986 # meters
 
 
@@ -79,9 +81,12 @@ class BoundingBox:
     def parse_wkt(wkt):
         """Returns a BoundingBox object created from the coordinates of a
         polygon given in WKT format."""
-        coords = [p.split(' ') for p in wkt[9:].split(',')]
-        return BoundingBox(coords[1][1], coords[1][0],
-                           coords[3][1], coords[3][0])
+        try:
+            geom_envelope = shapely.wkt.loads(wkt).bounds
+        except Exception, rx:
+            raise ValueError("Invalid input WKT: %s" % ex)
+        return BoundingBox(geom_envelope[1], geom_envelope[0],
+                           geom_envelope[3], geom_envelope[2])
 
     @staticmethod
     def parse_latlon_strtuple(points):

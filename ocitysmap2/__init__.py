@@ -84,6 +84,9 @@ import psycopg2
 import re
 import tempfile
 
+import shapely
+import shapely.wkt
+
 import coords
 import i18n
 
@@ -287,44 +290,71 @@ SELECT ST_AsText(ST_LongestLine(
                 os.rmdir(os.path.join(root, name))
         os.rmdir(tmpdir)
 
-    def get_geographic_info(self, osmids):
-        """Return a list of tuples (one tuple for each specified ID in
-        osmids) where each tuple contains (osmid, WKT_envelope,
-        WKT_buildarea)"""
+    def _get_geographic_info(self, osmid, table):
+        """Return the area for the given osm id in the given table, or raise
+        LookupError when not found
+
+        Args:
+            osmid (integer): OSM ID
+            table (str): either 'polygon' or 'line'
+
+        Return:
+            Geos geometry object
+        """
 
         # Ensure all OSM IDs are integers, bust cast them back to strings
         # afterwards.
-        osmids = map(str, map(int, osmids))
-        LOG.debug('Looking up bounding box and contour of OSM IDs %s...'
-                  % osmids)
+        LOG.debug('Looking up bounding box and contour of OSM ID %d...'
+                  % osmid)
 
         cursor = self._db.cursor()
-        cursor.execute("""select osm_id,
-                              st_astext(st_transform(st_envelope(way), 4002)),
-                              st_astext(st_transform(st_buildarea(way), 4002))
-                            from planet_osm_polygon where osm_id in (%s);""" %
-                       ', '.join(osmids))
+        cursor.execute("""select
+                            st_astext(st_transform(st_buildarea(st_union(way)),
+                                                   4002))
+                          from planet_osm_%s where osm_id = %d
+                          group by osm_id;""" %
+                       (table, osmid))
         records = cursor.fetchall()
-
         try:
-            return map(lambda x: (x[0], x[1].strip(), x[2].strip()), records)
-        except (KeyError, IndexError, AttributeError):
-            raise AssertionError, 'Invalid database structure!'
+            ((wkt,),) = records
+        except ValueError:
+            raise LookupError("OSM ID %d not found in table %s" %
+                              (osmid, table))
 
-    def _get_shade_wkt(self, bounding_box, polygon):
-        """Creates a shade area for bounding_box with an inner hole for the
-        given polygon."""
-        regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
-        matches = regexp_polygon.match(polygon)
-        if not matches:
-            LOG.error('Administrative boundary looks invalid!')
-            return None
-        inside = matches.groups()[0]
+        return shapely.wkt.loads(wkt)
 
-        bounding_box = bounding_box.create_expanded(0.05, 0.05)
-        poly = "MULTIPOLYGON(((%s)),((%s)))" % \
-                (bounding_box.as_wkt(with_polygon_statement = False), inside)
-        return poly
+    def get_geographic_info(self, osmid):
+        """Return a tuple (WKT_envelope, WKT_buildarea) or raise
+        LookupError when not found
+
+        Args:
+            osmid (integer): OSM ID
+
+        Return:
+            tuple (WKT bbox, WKT area)
+        """
+        found = False
+
+        # Scan polygon table:
+        try:
+            polygon_geom = self._get_geographic_info(osmid, 'polygon')
+            found = True
+        except LookupError:
+            polygon_geom = shapely.Polygon()
+
+        # Scan line table:
+        try:
+            line_geom = self._get_geographic_info(osmid, 'line')
+            found = True
+        except LookupError:
+            line_geom = shapely.Polygon()
+
+        # Merge results:
+        if not found:
+            raise LookupError("No such OSM id: %d" % osmid)
+
+        result = polygon_geom.union(line_geom)
+        return (result.envelope.wkt, result.wkt)
 
     def get_all_style_configurations(self):
         """Returns the list of all available stylesheet configurations (list of
@@ -372,18 +402,16 @@ SELECT ST_AsText(ST_LongestLine(
 
         # Determine bounding box and WKT of interest
         if config.osmid:
-            try:
-                osmid_geo_info = self.get_geographic_info([config.osmid])[0]
-            except IndexError:
-                raise AssertionError, 'OSM ID not found in the database!'
+            osmid_bbox, osmid_area \
+                = self.get_geographic_info(config.osmid)
 
             # Define the bbox if not already defined
             if not config.bounding_box:
                 config.bounding_box \
-                    = coords.BoundingBox.parse_wkt(osmid_geo_info[1])
+                    = coords.BoundingBox.parse_wkt(osmid_bbox)
 
             # Update the polygon WKT of interest
-            config.polygon_wkt = osmid_geo_info[2]
+            config.polygon_wkt = osmid_area
         else:
             # No OSM ID provided => use specified bbox
             config.polygon_wkt = config.bounding_box.as_wkt()

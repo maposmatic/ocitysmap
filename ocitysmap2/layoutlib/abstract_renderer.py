@@ -33,6 +33,7 @@ from ocitysmap2.maplib.map_canvas import MapCanvas
 from ocitysmap2.maplib.grid import Grid
 import commons
 from ocitysmap2 import maplib
+import shapely.wkt
 
 import logging
 
@@ -221,7 +222,7 @@ class Renderer:
            draw_contour_shade (bool): whether to draw a shade around
                the area of interest or not.
 
-        Return the MapCanvas object.
+        Return the MapCanvas object or raise ValueError.
         """
 
         # Prepare the map canvas
@@ -230,18 +231,16 @@ class Renderer:
                            graphical_ratio)
 
         if draw_contour_shade:
-            # Determine the shade WKT
-            regexp_polygon = re.compile('^POLYGON\(\(([^)]*)\)\)$')
-            matches = regexp_polygon.match(self.rc.polygon_wkt)
-            if not matches:
-                LOG.error('Administrative boundary looks invalid!')
-                return None
-            inside = matches.groups()[0]
+            # Area to keep visible
+            interior = shapely.wkt.loads(self.rc.polygon_wkt)
 
+            # Surroundings to gray-out
             bounding_box \
                 = canvas.get_actual_bounding_box().create_expanded(0.05, 0.05)
-            shade_wkt = "MULTIPOLYGON(((%s)),((%s)))" % \
-                (bounding_box.as_wkt(with_polygon_statement = False), inside)
+            exterior = shapely.wkt.loads(bounding_box.as_wkt())
+
+            # Determine the shade WKT
+            shade_wkt = exterior.difference(interior).wkt
 
             # Prepare the shade SHP
             shade_shape = maplib.shapes.PolyShapeFile(
