@@ -128,7 +128,6 @@ def main():
             parser.error('Invalid bounding box!\n')
 
     # Parse OSM id when given
-    osmid = None
     if options.polygon_osmid:
         try:
             bbox  = BoundingBox.parse_wkt(
@@ -196,7 +195,7 @@ def main():
     # Prepare the rendering config
     rc              = ocitysmap2.RenderingConfiguration()
     rc.title        = options.output_title
-    rc.osmid        = osmid
+    rc.osmid        = options.polygon_osmid or None # Force to None if absent
     rc.bounding_box = bbox
     rc.language     = options.language
     rc.stylesheet   = stylesheet
