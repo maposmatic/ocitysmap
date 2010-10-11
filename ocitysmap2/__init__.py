@@ -86,6 +86,7 @@ import tempfile
 
 import shapely
 import shapely.wkt
+import shapely.geometry
 
 import coords
 import i18n
@@ -340,14 +341,14 @@ SELECT ST_AsText(ST_LongestLine(
             polygon_geom = self._get_geographic_info(osmid, 'polygon')
             found = True
         except LookupError:
-            polygon_geom = shapely.Polygon()
+            polygon_geom = shapely.geometry.Polygon()
 
         # Scan line table:
         try:
             line_geom = self._get_geographic_info(osmid, 'line')
             found = True
         except LookupError:
-            line_geom = shapely.Polygon()
+            line_geom = shapely.geometry.Polygon()
 
         # Merge results:
         if not found:
