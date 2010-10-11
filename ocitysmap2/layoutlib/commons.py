@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
-# Copyright (C) 2009  David Decotigny
-# Copyright (C) 2009  Frédéric Lehobey
-# Copyright (C) 2009  David Mentré
-# Copyright (C) 2009  Maxime Petazzoni
-# Copyright (C) 2009  Thomas Petazzoni
-# Copyright (C) 2009  Gaël Utard
+# Copyright (C) 2010  David Decotigny
+# Copyright (C) 2010  Frédéric Lehobey
+# Copyright (C) 2010  Pierre Mauduit
+# Copyright (C) 2010  David Mentré
+# Copyright (C) 2010  Maxime Petazzoni
+# Copyright (C) 2010  Thomas Petazzoni
+# Copyright (C) 2010  Gaël Utard
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -21,12 +22,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""OCitySMap.
+# PT/metrics conversion routines
+PT_PER_INCH = 72.0
 
-Provide documentation here.
-"""
+def convert_pt_to_dots(pt, dpi = PT_PER_INCH):
+    return float(pt * dpi) / PT_PER_INCH
 
-__author__ = 'The Hackfest2009 team'
-__version__ = '0.1'
-
-raise DeprecationWarning, 'OCitysmap v%s will soon disappear!' % __version__
+def convert_mm_to_pt(mm):
+    return ((mm/10.0) / 2.54) * 72

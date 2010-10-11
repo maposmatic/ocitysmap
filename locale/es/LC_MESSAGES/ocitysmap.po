@@ -6,75 +6,84 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-11 22:31+0100\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
 "PO-Revision-Date: 2010-03-13 16:44+0100\n"
 "Last-Translator: Jean-Guilhem Cailton <jgc@arkemie.com>\n"
 "Language-Team: ES <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:144
 msgid "Places of worship"
 msgstr "Lugares de culto"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:145
 msgid "Place of worship"
 msgstr "Lugar de culto"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
-#: ocitysmap/street_index.py:287
-msgid "Education"
-msgstr "Educación"
-
-#: ocitysmap/street_index.py:283
+#: ocitysmap2/indexlib/indexer.py:146
 msgid "Kindergarten"
 msgstr "Jardín infantil"
 
-#: ocitysmap/street_index.py:284
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr "Educación"
+
+#: ocitysmap2/indexlib/indexer.py:147
 msgid "School"
 msgstr "Escuela"
 
-#: ocitysmap/street_index.py:285
+#: ocitysmap2/indexlib/indexer.py:148
 msgid "College"
 msgstr "Centro de estudios de grado medio"
 
-#: ocitysmap/street_index.py:286
+#: ocitysmap2/indexlib/indexer.py:149
 msgid "University"
 msgstr "Universidad"
 
-#: ocitysmap/street_index.py:287
+#: ocitysmap2/indexlib/indexer.py:150
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
-msgid "Public buildings"
-msgstr "Edificios publicos"
-
-#: ocitysmap/street_index.py:288
+#: ocitysmap2/indexlib/indexer.py:151
 msgid "Town hall"
 msgstr "Municipalidad"
 
-#: ocitysmap/street_index.py:289
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr "Edificios publicos"
+
+#: ocitysmap2/indexlib/indexer.py:152
 msgid "Post office"
 msgstr "Oficina de correos"
 
-#: ocitysmap/street_index.py:290
+#: ocitysmap2/indexlib/indexer.py:154
 msgid "Public building"
 msgstr "Edificio publico"
 
-#: ocitysmap/street_index.py:291
+#: ocitysmap2/indexlib/indexer.py:155
 msgid "Police"
 msgstr "Policía"
 
-#: ocitysmap/draw_utils.py:150
-#, python-format
-msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr "Este mapa ha sido generado el %s y puede ser incompleto o inexacto."
-
-#: ocitysmap/draw_utils.py:155
+#: ocitysmap2/layoutlib/renderers.py:555
+#, fuzzy
 msgid ""
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. "
 "You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr "Tu puedes contribuir a mejorar este mapa. Ver http://wiki.openstreetmap.org"
+msgstr ""
+"Tu puedes contribuir a mejorar este mapa. Ver http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
+msgstr ""
+
+#~ msgid ""
+#~ "This map has been rendered on %s and may be incomplete or inaccurate."
+#~ msgstr "Este mapa ha sido generado el %s y puede ser incompleto o inexacto."
