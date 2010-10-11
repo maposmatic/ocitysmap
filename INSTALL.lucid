@@ -240,5 +240,5 @@ are using. They have been tested on several x86_64 hosts.
 
 12. Run OCitySMap
 
-    ./ocitysmap2-render -t "Ceci n'est pas Paris" --polygon-osmid=-943886
+    ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886
 

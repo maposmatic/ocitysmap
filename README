@@ -7,7 +7,7 @@ including a street index and city grid.
 
 For example, for a simple Chevreuse rendering, run:
 
- ./ocitysmap2-render -t "Ceci n'est pas Paris" --polygon-osmid=-943886
+ ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886
 
 Alternatively you may specify a bounding box rather than an OSM ID:
 
