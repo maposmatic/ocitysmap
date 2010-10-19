@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-09-11 15:43+CEST\n"
-"PO-Revision-Date: 2010-01-12 09:24-0300\n"
+"PO-Revision-Date: 2010-10-19 14:12-0300\n"
 "Last-Translator: Rodrigo de Avila <rodrigo@avila.net.br>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
 "MIME-Version: 1.0\n"
@@ -28,8 +28,10 @@ msgstr "Local de adoração"
 msgid "Kindergarten"
 msgstr "Creche"
 
-#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
-#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:146
+#: ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148
+#: ocitysmap2/indexlib/indexer.py:149
 #: ocitysmap2/indexlib/indexer.py:150
 msgid "Education"
 msgstr "Educação"
@@ -54,8 +56,10 @@ msgstr "Biblioteca"
 msgid "Town hall"
 msgstr "Prefeitura Municipal"
 
-#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
-#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+#: ocitysmap2/indexlib/indexer.py:151
+#: ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153
+#: ocitysmap2/indexlib/indexer.py:155
 msgid "Public buildings"
 msgstr "Prédios públicos"
 
@@ -72,21 +76,19 @@ msgid "Police"
 msgstr "Polícia"
 
 #: ocitysmap2/layoutlib/renderers.py:555
-#, fuzzy
 msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
-"OpenStreetMap.org and contributors (cc-by-sa).\n"
-"This map has been rendered on %(date)s and may be incomplete or innacurate. "
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
 msgstr ""
-"Você pode contribuir para melhorar este mapa. Veja como em http://wiki."
-"openstreetmap.org"
+"Copyright © %(year)d desenvolvedores do MapOSMatic/OCitySMap. Dados do mapa © %(year)d OpenStreetMap.org e contribuintes (cc-by-sa).\n"
+"Este mapa foi renderizado em %(date)s e pode estar incompleto ou incorreto. Você pode ajudar a melhorar este mapa. Veja como em http://wiki.openstreetmap.org"
 
 #: ocitysmap2/layoutlib/renderers.py:898
 msgid "Test gettext"
-msgstr ""
+msgstr "Testando o gettext"
 
 #~ msgid ""
 #~ "This map has been rendered on %s and may be incomplete or inaccurate."
 #~ msgstr ""
 #~ "Este mapa foi renderizado em %s e pode estar incompleto ou incorreto."
+
