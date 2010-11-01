@@ -25,6 +25,7 @@
 import math
 import datetime
 import cairo
+import locale
 import mapnik
 import pango
 import pangocairo
@@ -261,6 +262,7 @@ class SinglePageRenderer(Renderer):
            font_face (str): Pango font specification.
            notice (str): Optional notice to replace the default.
         """
+
         today = datetime.date.today()
         notice = notice or \
             _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
@@ -271,8 +273,14 @@ class SinglePageRenderer(Renderer):
               u'You can contribute to improve this map. '
               u'See http://wiki.openstreetmap.org')
 
-        notice = notice % {'year': today.year,
-                           'date': today.strftime("%d %B %Y")}
+        # We need the correct locale to be set for strftime().
+        prev_locale = locale.getlocale(locale.LC_TIME)
+        locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
+        try:
+            notice = notice % {'year': today.year,
+                               'date': today.strftime("%d %B %Y")}
+        finally:
+            locale.setlocale(locale.LC_TIME, prev_locale)
 
         ctx.save()
         pc = pangocairo.CairoContext(ctx)

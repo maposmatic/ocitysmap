@@ -51,7 +51,12 @@ class i18n_template_code_CODE(i18n):
     def __init__(self, language, locale_path):
         """Install the _() function for the chosen locale other
            object initialisation"""
-        self.language = str(language) # FIXME: why do we have unicode here?
+
+        # It's important to convert to str() here because the map_language
+        # value coming from the database is Unicode, but setlocale() needs a
+        # non-unicode string as the locale name, otherwise it thinks it's a
+        # locale tuple.
+        self.language = str(language)
         _install_language(language, locale_path)
 
     def language_code(self):
