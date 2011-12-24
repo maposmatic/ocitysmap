@@ -1,2 +1,5 @@
 *~
 *.mo
+/ocitysmap.conf.mine
+/support/planet-update-daily.sh
+/support/shoreline-update.sh
