@@ -8,6 +8,7 @@ msgstr ""
 "PO-Revision-Date: 2010-10-29 23:55+0300\n"
 "Last-Translator: Yauhen Kharuzhy <jekhor@gmail.com>\n"
 "Language-Team: Belarusian <kde-i18n-doc@kde.org>\n"
+"Language: be\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -72,15 +73,16 @@ msgstr "Міліцыя"
 
 #: ocitysmap2/layoutlib/renderers.py:555
 msgid ""
-"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers. Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"This map has been rendered on %(date)s and may be incomplete or innacurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. "
+"You can contribute to improve this map. See http://wiki.openstreetmap.org"
 msgstr ""
-"Copyright \302\251 %(year)d распрацоўшчыкі MapOSMatic/OCitySMap. Звесткі мапы \302\251 %(year)d OpenStreetMap.org і ўдзельнікаў (cc-by-sa).\n"
-"Гэтая мапа была створана %(date)s і можа быць няпоўнай альбо недакладнай. Вы можаце паўдзельнічаць у яе паляпшэнні. Глядзіце http://wiki."
-"openstreetmap.org"
+"Copyright © %(year)d распрацоўшчыкі MapOSMatic/OCitySMap. Звесткі мапы © "
+"%(year)d OpenStreetMap.org і ўдзельнікаў (cc-by-sa).\n"
+"Гэтая мапа была створана %(date)s і можа быць няпоўнай альбо недакладнай. Вы "
+"можаце паўдзельнічаць у яе паляпшэнні. Глядзіце http://wiki.openstreetmap.org"
 
 #: ocitysmap2/layoutlib/renderers.py:898
 msgid "Test gettext"
 msgstr "Тэст gettext"
-
-

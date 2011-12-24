@@ -10,10 +10,10 @@ msgstr ""
 "PO-Revision-Date: 2010-12-23 21:54+0100\n"
 "Last-Translator: malenki <translate@malenki.ch>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Generated-By: pygettext.py 1.5\n"
 
 #: ocitysmap2/indexlib/indexer.py:144
@@ -28,10 +28,8 @@ msgstr "Anbetungsstätte"
 msgid "Kindergarten"
 msgstr "Kindergarten"
 
-#: ocitysmap2/indexlib/indexer.py:146
-#: ocitysmap2/indexlib/indexer.py:147
-#: ocitysmap2/indexlib/indexer.py:148
-#: ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
 #: ocitysmap2/indexlib/indexer.py:150
 msgid "Education"
 msgstr "Bildungseinrichtungen"
@@ -56,10 +54,8 @@ msgstr "Bibliothek"
 msgid "Town hall"
 msgstr "Rathaus"
 
-#: ocitysmap2/indexlib/indexer.py:151
-#: ocitysmap2/indexlib/indexer.py:152
-#: ocitysmap2/indexlib/indexer.py:153
-#: ocitysmap2/indexlib/indexer.py:155
+#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
 msgid "Public buildings"
 msgstr "Öffentliche Einrichtungen"
 
@@ -77,11 +73,15 @@ msgstr "Polizei"
 
 #: ocitysmap2/layoutlib/renderers.py:555
 msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"This map has been rendered on %(date)s and may be incomplete or innacurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. "
+"You can contribute to improve this map. See http://wiki.openstreetmap.org"
 msgstr ""
-"Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler. Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (cc-by-sa).\n"
-"Dieser Plan wurde am %(date)s erstellt und kann ungenau oder unvollständig sein.\n"
+"Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler. Kartendaten © %(year)d "
+"OpenStreetMap.org und Mitwirkende (cc-by-sa).\n"
+"Dieser Plan wurde am %(date)s erstellt und kann ungenau oder unvollständig "
+"sein.\n"
 "Sie können helfen, diesen Plan zu verbessern.\n"
 " Siehe http://www.openstreetmap.de/faq.html"
 
