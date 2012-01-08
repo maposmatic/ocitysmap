@@ -366,7 +366,9 @@ from (
               st_intersection(%(wkb_limits)s, way) as village_contour
        from planet_osm_point
        where trim(name) != ''
-             and (place = 'locality' or place = 'hamlet')
+             and (place = 'locality'
+                  or place = 'hamlet'
+                  or place = 'isolated_dwelling')
              and ST_intersects(way, %(wkb_limits)s)
      ) as foo
 order by village_name""" \
