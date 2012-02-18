@@ -91,8 +91,7 @@ are using. They have been tested on several x86_64 hosts.
     osm2pgsql is the tool that takes OSM data as input, and creates a
     PostGIS database from it. At the time of the writing of this
     document, the osm2pgsql packaged in Debian/Ubuntu is not recent
-    enough, so we grab a fresh version from SVN (we used revision
-    17318).
+    enough, so we grab a fresh version from SVN.
 
     a. If needed, install SVN
 
@@ -101,7 +100,7 @@ are using. They have been tested on several x86_64 hosts.
     b. Grab osm2pgsql code
 
     svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
-    # Tested revisions: r27755
+    # Tested revisions: r27862
 
     c. Install the build dependencies
 
@@ -205,7 +204,7 @@ are using. They have been tested on several x86_64 hosts.
     svn co \
         http://svn.openstreetmap.org/applications/rendering/mapnik \
         mapnik2-osm
-    # Tested revision: r27848
+    # Tested revision: r27862
 
     b. Installation of static data
 
