@@ -23,7 +23,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import mapnik2
+try:
+    import mapnik2 as mapnik
+except ImportError:
+    import mapnik
 import os
 
 from ocitysmap2 import coords
@@ -52,7 +55,7 @@ class MapCanvas:
             graphical_ratio (float): ratio of the map area (width/height).
         """
 
-        self._proj = mapnik2.Projection(_MAPNIK_PROJECTION)
+        self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
 
         # This is where the magic of the map canvas happens. Given an original
         # bounding box and a graphical ratio for the output, the bounding box
@@ -65,7 +68,7 @@ class MapCanvas:
                 orig_envelope.width(), orig_envelope.height(),
                 graphical_ratio)
 
-        envelope = mapnik2.Box2d(off_x, off_y, off_x+width, off_y+height)
+        envelope = mapnik.Box2d(off_x, off_y, off_x+width, off_y+height)
 
         self._geo_bbox = self._inverse_envelope(envelope)
         g_height, g_width = self._geo_bbox.get_pixel_size_for_zoom_factor(
@@ -76,8 +79,8 @@ class MapCanvas:
 
         # Create the Mapnik map with the corrected width and height and zoom to
         # the corrected bounding box ('envelope' in the Mapnik jargon)
-        self._map = mapnik2.Map(g_width, g_height, _MAPNIK_PROJECTION)
-        mapnik2.load_map(self._map, stylesheet.path)
+        self._map = mapnik.Map(g_width, g_height, _MAPNIK_PROJECTION)
+        mapnik.load_map(self._map, stylesheet.path)
         self._map.zoom_to_box(envelope)
 
         # Added shapes to render
@@ -114,7 +117,7 @@ class MapCanvas:
                 (opaque).
             line_width (float): line width for the features that will be drawn.
         """
-        col = mapnik2.Color(str_color)
+        col = mapnik.Color(str_color)
         col.a = int(255 * alpha)
         self._shapes.append({'shape_file': shape_file,
                              'color': col,
@@ -142,33 +145,33 @@ class MapCanvas:
         shape_file.flush()
 
         shpid = os.path.basename(shape_file.get_filepath())
-        s,r = mapnik2.Style(), mapnik2.Rule()
-        r.symbols.append(mapnik2.PolygonSymbolizer(color))
-        r.symbols.append(mapnik2.LineSymbolizer(color, line_width))
+        s,r = mapnik.Style(), mapnik.Rule()
+        r.symbols.append(mapnik.PolygonSymbolizer(color))
+        r.symbols.append(mapnik.LineSymbolizer(color, line_width))
         s.rules.append(r)
 
         self._map.append_style('style_%s' % shpid, s)
-        layer = mapnik2.Layer(shpid)
-        layer.datasource = mapnik2.Shapefile(file=shape_file.get_filepath())
+        layer = mapnik.Layer(shpid)
+        layer.datasource = mapnik.Shapefile(file=shape_file.get_filepath())
         layer.styles.append('style_%s' % shpid)
 
         self._map.layers.append(layer)
 
     def _project_envelope(self, bbox):
         """Project the given bounding box into the rendering projection."""
-        envelope = mapnik2.Box2d(bbox.get_top_left()[1],
-                                 bbox.get_top_left()[0],
-                                 bbox.get_bottom_right()[1],
-                                 bbox.get_bottom_right()[0])
-        c0 = self._proj.forward(mapnik2.Coord(envelope.minx, envelope.miny))
-        c1 = self._proj.forward(mapnik2.Coord(envelope.maxx, envelope.maxy))
-        return mapnik2.Box2d(c0.x, c0.y, c1.x, c1.y)
+        envelope = mapnik.Box2d(bbox.get_top_left()[1],
+                                bbox.get_top_left()[0],
+                                bbox.get_bottom_right()[1],
+                                bbox.get_bottom_right()[0])
+        c0 = self._proj.forward(mapnik.Coord(envelope.minx, envelope.miny))
+        c1 = self._proj.forward(mapnik.Coord(envelope.maxx, envelope.maxy))
+        return mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
 
     def _inverse_envelope(self, envelope):
         """Inverse the given cartesian envelope (in 900913) back to a 4002
         bounding box."""
-        c0 = self._proj.inverse(mapnik2.Coord(envelope.minx, envelope.miny))
-        c1 = self._proj.inverse(mapnik2.Coord(envelope.maxx, envelope.maxy))
+        c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
+        c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
 if __name__ == '__main__':
@@ -195,6 +198,6 @@ if __name__ == '__main__':
         'blue', 0.3)
 
     canvas.render()
-    mapnik2.render_to_file(canvas.get_rendered_map(), '/tmp/mymap.png', 'png')
+    mapnik.render_to_file(canvas.get_rendered_map(), '/tmp/mymap.png', 'png')
 
     print "Generated /tmp/mymap.png"

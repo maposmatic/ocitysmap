@@ -26,7 +26,10 @@ import math
 import datetime
 import cairo
 import locale
-import mapnik2
+try:
+    import mapnik2 as mapnik
+except ImportError:
+    import mapnik
 import pango
 import pangocairo
 
@@ -370,7 +373,7 @@ class SinglePageRenderer(Renderer):
                     / rendered_map.width,
                   map_coords_dots[3]
                     / rendered_map.height)
-        mapnik2.render(rendered_map, ctx)
+        mapnik.render(rendered_map, ctx)
         ctx.restore()
 
         # Draw a rectangle around the map
