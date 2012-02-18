@@ -31,7 +31,7 @@ are using. They have been tested on several x86_64 hosts.
 
  4. Enable PostGIS on the database
 
-    PostGIS is in fact a set of functions and datatypes for
+    PostGIS is in fact a set of functions and data types for
     PostgreSQL, and every PostgreSQL database needing these features
     must be initialized as follows. We do this initialization of the
     database with superuser privileges, and then later fix the table
@@ -50,10 +50,11 @@ are using. They have been tested on several x86_64 hosts.
 
     sudo aptitude install postgresql-8.4-postgis
 
-    If nothing happends, you may have to check the output of
-    "apt-get policy postgresql-8.4-postgis" and adjust your apt preferences.
-    A sensible default preferences configuration file for this repository
-    could be:
+    If nothing happens, you may have to check the output of "apt-get
+    policy postgresql-8.4-postgis" and adjust your apt preferences.  A
+    sensible default preferences configuration file for this
+    repository could be:
+
       Package: *
       Pin: release o=LP-PPA-ubuntugis-ubuntugis-unstable
       Pin-Priority: 700
@@ -161,7 +162,7 @@ are using. They have been tested on several x86_64 hosts.
 
     a. Install the dependencies
 
-    # Base dependencyes (.7.1)
+    # Base dependencies (0.7.0 by default on lucid, a good start)
     sudo apt-get build-dep python-mapnik
 
     # Upgrade to libboost >= 1.41
@@ -185,6 +186,8 @@ are using. They have been tested on several x86_64 hosts.
 
     tar xvjf mapnik-2.0.0.tar.bz2
     cd mapnik-2.0.0
+
+    (any version >= 2.0.0 should follow the same scheme)
 
     python scons/scons.py configure INPUT_PLUGINS=all \
       OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
@@ -225,7 +228,7 @@ are using. They have been tested on several x86_64 hosts.
 
     c. Enabling unifont
 
-    In order to get correct rendering for Korean, Chineese or Japanese
+    In order to get correct rendering for Korean, Chinese or Japanese
     character, the unifont font must be used. In order do enable it:
 
     sudo aptitude install ttf-unifont
