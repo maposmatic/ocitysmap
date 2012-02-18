@@ -80,18 +80,7 @@ are using. They have been tested on several x86_64 hosts.
               -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql \
               -d maposmatic
 
-    e. Add the intarray extension for diff files support (osc)
-
-    NOTE: DO NOT DO THIS WITH RECENT VERSIONS OF osm2pgsql (>= r26020).
-          Since osm2pgsql r26020, external intarray is not supported
-          (http://trac.openstreetmap.org/changeset/26020).
-
-    sudo -u postgres \
-         psql \
-              -f /usr/share/postgresql/8.4/contrib/_int.sql \
-              -d maposmatic
-
-    f. Change the owner of the new tables to maposmatic
+    e. Change the owner of the new tables to maposmatic
 
     echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
           ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
@@ -112,7 +101,7 @@ are using. They have been tested on several x86_64 hosts.
     b. Grab osm2pgsql code
 
     svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
-    # Tested revisions: r22641 (with local intarray), r27755 (without intarray)
+    # Tested revisions: r27755
 
     c. Install the build dependencies
 
