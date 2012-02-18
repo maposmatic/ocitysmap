@@ -156,7 +156,7 @@ are using. They have been tested on several x86_64 hosts.
 
  8. Install Mapnik
 
-    We need Mapnik 0.7.1, which is not yet available in stable
+    We need Mapnik 2.0.0, which is not yet available in stable
     Debian/Ubuntu, so we need to compile it from source.
 
     a. Install the dependencies
@@ -184,7 +184,7 @@ are using. They have been tested on several x86_64 hosts.
     c. Compile and install Mapnik 2
 
     tar xvjf mapnik-2.0.0.tar.bz2
-    cd mapnik-0.7.1
+    cd mapnik-2.0.0
 
     python scons/scons.py configure INPUT_PLUGINS=all \
       OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
@@ -226,9 +226,12 @@ are using. They have been tested on several x86_64 hosts.
     c. Enabling unifont
 
     In order to get correct rendering for Korean, Chineese or Japanese
-    character, the unifont font must be used. In order do enable it,
-    edit inc/fontset-settings.xml.inc.template, and uncomment the following
-    line :
+    character, the unifont font must be used. In order do enable it:
+
+    sudo aptitude install ttf-unifont
+
+    Then edit inc/fontset-settings.xml.inc.template and uncomment the
+    following line :
 
     	  <Font face_name="unifont Medium" />
 
