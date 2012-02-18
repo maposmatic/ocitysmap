@@ -41,24 +41,21 @@ distributions, minor adaptations might be needed.
 
     b. Add the low-level PostGIS infrastructure
 
-    sudo -u postgres \
-         psql \
-              -f /usr/share/postgresql/8.4/contrib/postgis.sql \
-              -d maposmatic
+    sudo -u postgres psql \
+        -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql \
+        -d maposmatic
 
     c. Add the list of spatial referential systems
 
-    sudo -u postgres \
-         psql \
-              -f /usr/share/postgresql/8.4/contrib/spatial_ref_sys.sql \
-              -d maposmatic
+    sudo -u postgres psql \
+        -f /usr/share/postgresql/8.4/contrib/spatial_ref_sys.sql \
+        -d maposmatic
 
     d. Add the intarray extension for diff files support (osc)
 
-    sudo -u postgres \
-         psql \
-              -f /usr/share/postgresql/8.4/contrib/_int.sql \
-              -d maposmatic
+    sudo -u postgres psql \
+        -f /usr/share/postgresql/8.4/contrib/_int.sql \
+        -d maposmatic
 
     e. Change the owner of the new tables to maposmatic
 
@@ -89,7 +86,7 @@ distributions, minor adaptations might be needed.
 
  8. Install Mapnik
 
-    sudo aptitude install python-mapnik
+    sudo aptitude install python-mapnik2 libmapnik2-2.0 libmapnik2-dev
 
  9. Resume to step 10. of the general INSTALL file.
 
