@@ -149,9 +149,9 @@ def main():
             stylesheet = mapper.get_stylesheet_by_name(options.stylesheet)
         except LookupError, ex:
             parser.error("%s. Available stylesheets: %s."
-                         % (ex, ', '.join(map(lambda s: "%s (%s)"
-                                              % (s.name, s.description),
-                                              mapper.STYLESHEET_REGISTRY))))
+                 % (ex, ', '.join(map(lambda s: "%s (%s)"
+                          % (s.name, s.description),
+                          mapper.STYLESHEET_REGISTRY))))
 
     # Parse rendering layout
     if options.layout is None:
@@ -161,21 +161,20 @@ def main():
             cls_renderer = ocitysmap2.layoutlib.renderers.get_renderer_class_by_name(options.layout)
         except LookupError, ex:
             parser.error("%s\nAvailable layouts: %s."
-                         % (ex, ', '.join(map(lambda lo: "%s (%s)"
-                                              % (lo.name, lo.description),
-                                              ocitysmap2.layoutlib.renderers.get_renderers()))))
+                 % (ex, ', '.join(map(lambda lo: "%s (%s)"
+                          % (lo.name, lo.description),
+                          ocitysmap2.layoutlib.renderers.get_renderers()))))
 
     # Parse paper size
     if (options.paper_format != 'first') \
             and options.paper_format not in KNOWN_PAPER_SIZE_NAMES:
         parser.error("Invalid paper format. Allowed formats = first, %s"
-                     % KNOWN_PAPER_SIZE_NAMES)
+                     % ', '.join(KNOWN_PAPER_SIZE_NAMES))
 
     # Determine actual paper size
-    compat_papers \
-        = sorted(cls_renderer.get_compatible_paper_sizes(bbox,
-                                                         stylesheet.zoom_level),
-                 key = lambda p: p[1])
+    compat_papers = sorted(cls_renderer.get_compatible_paper_sizes(bbox,
+         stylesheet.zoom_level),
+         key = lambda p: p[1])
     if not compat_papers:
         parser.error("No paper size compatible with this rendering.")
 
