@@ -46,6 +46,9 @@ def main():
         map(lambda r: "%s (%s)" % (r.name, r.description),
             ocitysmap2.layoutlib.renderers.get_renderers())
 
+    # Known paper orientations
+    KNOWN_PAPER_ORIENTATIONS = ['portrait', 'landscape']
+
     usage = '%prog [options] [-b <lat1,long1 lat2,long2>|--osmid <osmid>]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
@@ -89,6 +92,9 @@ def main():
                       'or one of %s.'\
                           % ', '.join(KNOWN_PAPER_SIZE_NAMES),
                       default='first')
+    parser.add_option('--orientation', metavar='ORIENTATION',
+                      help='Either "portrait" or "landscape".',
+                      default='portrait')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -187,10 +193,19 @@ def main():
                 break
     if not paper_descr:
         parser.error("Requested paper format not compatible with rendering. Compatible paper formats are: %s."
-                     % ', '.join(map(lambda p: "%s (%.1fx%.1fcm²)" %
-                                     (p[0], p[1]/10., p[2]/10.),
-                                     compat_papers)))
+             % ', '.join(map(lambda p: "%s (%.1fx%.1fcm²)"
+                % (p[0], p[1]/10., p[2]/10.),
+                compat_papers)))
     assert paper_descr[3] or paper_descr[4] # Portrait or Landscape accepted
+
+    # Validate requested orientation
+    if options.orientation not in KNOWN_PAPER_ORIENTATIONS:
+        parser.error("Invalid paper orientation. Allowed orientations: %s"
+                     % KNOWN_PAPER_ORIENTATIONS)
+
+    if (options.orientation == 'portrait' and not paper_descr[3]) or \
+        (options.orientation == 'landscape' and not paper_descr[4]):
+        parser.error("Requested paper orientation %s not compatible with this rendering at this paper size." % options.orientation)
 
     # Prepare the rendering config
     rc              = ocitysmap2.RenderingConfiguration()
@@ -199,12 +214,10 @@ def main():
     rc.bounding_box = bbox
     rc.language     = options.language
     rc.stylesheet   = stylesheet
-    if paper_descr[3]:
-        # Portrait allowed, used in priority
+    if options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr[1]
         rc.paper_height_mm = paper_descr[2]
     else:
-        # Rotate sheet -> landscape
         rc.paper_width_mm  = paper_descr[2]
         rc.paper_height_mm = paper_descr[1]
 
