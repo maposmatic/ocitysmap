@@ -264,3 +264,91 @@ are using. They have been tested on several x86_64 hosts.
     ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-411354  # Contern, LU
     ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
 
+Appendix: installation of the MapQuest stylesheet
+-------------------------------------------------
+
+The above instructions, at step 10, describe how to set up ocitysmap
+with the default Mapnik stylesheet for OpenStreetMap. It is possible
+to install other stylesheets, such as the stylesheets made available
+by MapQuest. The instructions below detail how to install those
+additional stylesheets, making the assumption that ocitysmap is
+properly configured and running with the default OSM stylesheet.
+
+First, grab the MapQuest stylesheets:
+
+ git clone git://github.com/MapQuest/MapQuest-Mapnik-Style.git
+
+ (version tested: 9d6c5503194c58fc1f9f760b4e5af8a1602dfb30)
+
+Go into the MapQuest-Mapnik-Style directory, in which we will do all
+the configuration.
+
+First, those stylesheets require the same "world boundaries"
+information as the original OSM stylesheet, so we are going to share
+these informations by creating a symbolic link:
+
+ ln -s /path/to/original/osm/stylesheet/world_boundaries world_boundaries
+
+In addition to those world boundaries, the MapQuest stylesheets need a
+few other files. Download the corresponding tarball:
+
+ wget http://developer.mapquest.com/content/static/geotiffs/mercator_tiffs.tar
+
+Unpack this archive, and put the four mq_world_mercator_*.tiff files
+directory into the world_boundaries/ directory (this directory is
+shared with the original OSM stylesheet, but this is not a problem as
+the mq_world_mercator_*.tiff files are not used by the original OSM
+stylesheet).
+
+Now, to the configuration of the stylesheet itself:
+
+ cp mapquest_inc/datasource-settings.xml.inc.template mapquest_inc/datasource-settings.xml.inc
+ vi mapquest_inc/datasource-settings.xml.inc
+
+Adjust your database details appropriately. The "estimate_extent"
+value should be "false", and the "extent" value should be
+-20037508,-19929239,20037508,19929239.
+
+Next configuration file:
+
+ cp mapquest_inc/fontset-settings.xml.inc.template mapquest_inc/fontset-settings.xml.inc
+ vi mapquest_inc/fontset-settings.xml.inc
+
+Not much to change here, the default value is fine. If you want to use
+the same font for the original OSM stylesheet and the MapQuest one,
+replace "Arial" by "DejaVu".
+
+Next (and final) configuration file:
+
+ cp mapquest_inc/settings.xml.inc.template mapquest_inc/settings.xml.inc
+ vi mapquest_inc/settings.xml.inc
+
+And set the following values:
+
+ * symbols to "mapquest_symbols" (the directory in the MapQuest
+   stylesheet where the icons and other related elements are stored)
+
+ * osm2pgsql_projection to "&srs900913;"
+
+ * world_boundaries to "world_boundaries" (the directory in the
+   MapQuest stylesheet where the world boundaries data can be found)
+
+ * prefix to "planet_osm". This is the prefix of the OSM tables in the
+   PostGIS database.
+
+The final step is to integrate this new stylesheet in ocitysmap. To do
+so, edit your ocitysmap.conf file, and add a new stylesheet section,
+like:
+
+[mapquest_eu]
+name: MapQuestEu
+description: MapQuest Europe stylesheet
+path: /path/to/MapQuest-Mapnik-Style/mapquest-eu.xml
+
+Don't forget to add "mapquest_eu" to the available_stylesheets
+variable, which lists all available stylesheets.
+
+Note that in addition to the MapQuest Europe stylesheet
+(mapquest-eu.xml), the Git repository also contains the MapQuest US
+and MapQuest UK stylesheets (mapquest-us.xml and mapquest-uk.xml),
+that you can similarly add to your ocitysmap.conf file.
