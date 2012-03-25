@@ -447,6 +447,7 @@ SELECT ST_AsText(ST_LongestLine(
             # Update the street_index to reflect the grid's actual position
             if renderer.grid and street_index:
                 street_index.apply_grid(renderer.grid)
+                street_index.group_identical_grid_locations()
 
             # Perform the actual rendering to the Cairo devices
             for output_format in output_formats:

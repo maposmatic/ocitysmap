@@ -45,11 +45,13 @@ class IndexCategory:
     """
     name = None
     items = None
+    is_street = False
 
-    def __init__(self, name, items = None):
+    def __init__(self, name, items=None, is_street=True):
         assert name is not None
-        self.name  = name
+        self.name = name
         self.items = items or list()
+        self.is_street = is_street
 
     def __str__(self):
         return '<%s (%s)>' % (self.name, map(str, self.items))
@@ -196,7 +198,6 @@ class IndexItem:
         else:
             self.location_str = "%s-%s" % (min(ep1_label, ep2_label),
                                            max(ep1_label, ep2_label))
-
 
 if __name__ == "__main__":
     import cairo

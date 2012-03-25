@@ -76,6 +76,7 @@ if __name__ == '__main__':
     # Map index to grid
     grid = Grid(bbox, rtl = False)
     street_index.apply_grid(grid)
+    street_index.group_identical_grid_locations()
 
     index = StreetIndexRenderer(i18nMock(False), street_index.categories)
 
@@ -121,6 +122,7 @@ if __name__ == '__main__':
     # Map index to grid
     grid = Grid(bbox, rtl = True)
     street_index.apply_grid(grid)
+    street_index.group_identical_grid_locations()
 
     index = StreetIndexRenderer(i18nMock(True), street_index.categories)
     _render('height', 'top')

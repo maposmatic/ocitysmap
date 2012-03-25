@@ -28,6 +28,7 @@ import locale
 import psycopg2
 import csv
 import datetime
+from itertools import groupby
 
 import commons
 from ocitysmap2 import coords
@@ -81,12 +82,30 @@ class StreetIndex:
            compute the location strings
 
         Returns:
-           Nothing, but self._categories will have been modified !
+           Nothing, but self._categories has been modified!
         """
         for category in self._categories:
             for item in category.items:
                 item.update_location_str(grid)
 
+    def group_identical_grid_locations(self):
+        """
+        Group locations whith the same name and the same position on the grid.
+
+        Returns:
+           Nothing, but self._categories has been modified!
+        """
+        categories = []
+        for category in self._categories:
+            if category.is_street:
+                categories.append(category)
+                continue
+            grouped_items = []
+            sort_key = lambda item:(item.label, item.location_str)
+            items = sorted(category.items, key=sort_key)
+            for label, same_items in groupby(items, key=sort_key):
+                grouped_items.append(same_items.next())
+            category.items = grouped_items
 
     def write_to_csv(self, title, output_filename):
         # TODO: implement writing the index to CSV
@@ -283,7 +302,8 @@ from
             # Get the current IndexCategory object, or create one if
             # different than previous
             if (not result or result[-1].name != catname):
-                current_category = commons.IndexCategory(catname)
+                current_category = commons.IndexCategory(catname,
+                                                         is_street=False)
                 result.append(current_category)
             else:
                 current_category = result[-1]
