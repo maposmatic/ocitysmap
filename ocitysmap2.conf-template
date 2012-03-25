@@ -3,6 +3,8 @@ host=localhost
 user=maposmatic
 password=mysecurepasswd
 dbname=maposmatic
+# Optional database port, defaults to 5432
+# port=5432
 
 [rendering]
 # List of available stylesheets, each needs to be described by an eponymous

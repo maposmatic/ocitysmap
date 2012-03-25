@@ -235,14 +235,19 @@ class OCitySMap:
 
         # Database connection
         datasource = dict(self._parser.items('datasource'))
-        LOG.info('Connecting to database %s on %s as %s...' %
-                 (datasource['dbname'], datasource['host'],
+        # The port is not a mandatory configuration option, so make
+        # sure we define a default value.
+        if not datasource.has_key('port'):
+            datasource['port'] = 5432
+        LOG.info('Connecting to database %s on %s:%s as %s...' %
+                 (datasource['dbname'], datasource['host'], datasource['port'],
                   datasource['user']))
 
         db = psycopg2.connect(user=datasource['user'],
                               password=datasource['password'],
                               host=datasource['host'],
-                              database=datasource['dbname'])
+                              database=datasource['dbname'],
+                              port=datasource['port'])
 
         # Force everything to be unicode-encoded, in case we run along Django
         # (which loads the unicode extensions for psycopg2)
