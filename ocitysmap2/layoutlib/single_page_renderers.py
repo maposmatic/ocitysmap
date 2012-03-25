@@ -254,7 +254,8 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
 
-    def _draw_copyright_notice(self, ctx, w_dots, h_dots, notice=None):
+    def _draw_copyright_notice(self, ctx, w_dots, h_dots, notice=None,
+                               osm_date=None):
         """
         Draw a copyright notice at current location and within the
         given w_dots*h_dots rectangle.
@@ -271,8 +272,8 @@ class SinglePageRenderer(Renderer):
             _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
               u'Map data © %(year)d OpenStreetMap.org '
               u'and contributors (cc-by-sa).\n'
-              u'This map has been rendered on %(date)s and may be '
-              u'incomplete or innacurate. '
+              u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. '
+              u'The map may be incomplete or inaccurate. '
               u'You can contribute to improve this map. '
               u'See http://wiki.openstreetmap.org')
 
@@ -280,8 +281,14 @@ class SinglePageRenderer(Renderer):
         prev_locale = locale.getlocale(locale.LC_TIME)
         locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
         try:
+            if osm_date is None:
+                osm_date_str = _(u'unknown')
+            else:
+                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
+
             notice = notice % {'year': today.year,
-                               'date': today.strftime("%d %B %Y")}
+                               'date': today.strftime("%d %B %Y"),
+                               'osmdate': osm_date_str}
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
 
@@ -297,7 +304,7 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
 
-    def render(self, cairo_surface, dpi):
+    def render(self, cairo_surface, dpi, osm_date):
         """Renders the map, the index and all other visual map features on the
         given Cairo surface.
 
@@ -410,7 +417,8 @@ class SinglePageRenderer(Renderer):
 
         # Draw the copyright notice
         self._draw_copyright_notice(ctx, usable_area_width_dots,
-                                    copyright_margin_dots)
+                                    copyright_margin_dots,
+                                    osm_date=osm_date)
         ctx.restore()
 
         # TODO: map scale

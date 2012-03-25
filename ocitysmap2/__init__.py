@@ -362,6 +362,18 @@ SELECT ST_AsText(ST_LongestLine(
         result = polygon_geom.union(line_geom)
         return (result.envelope.wkt, result.wkt)
 
+    def get_osm_database_last_update(self):
+        cursor = self._db.cursor()
+        query = "select last_update from maposmatic_admin;"
+        try:
+            cursor.execute(query)
+        except psycopg2.ProgrammingError:
+            self._db.rollback()
+            return None
+        # Extract datetime object. It is located as the first element
+        # of a tuple, itself the first element of an array.
+        return cursor.fetchall()[0][0]
+
     def get_all_style_configurations(self):
         """Returns the list of all available stylesheet configurations (list of
         Stylesheet objects)."""
@@ -435,6 +447,8 @@ SELECT ST_AsText(ST_LongestLine(
             LOG.warning("Designated area leads to an empty index")
             street_index = None
 
+        osm_date = self.get_osm_database_last_update()
+
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         try:
@@ -453,7 +467,8 @@ SELECT ST_AsText(ST_LongestLine(
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 try:
-                    self._render_one(renderer, output_format, output_filename)
+                    self._render_one(renderer, output_format, output_filename,
+                                     osm_date)
                 except IndexDoesNotFitError:
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
@@ -465,7 +480,7 @@ SELECT ST_AsText(ST_LongestLine(
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, renderer, output_format, output_filename):
+    def _render_one(self, renderer, output_format, output_filename, osm_date):
         LOG.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
@@ -511,7 +526,7 @@ SELECT ST_AsText(ST_LongestLine(
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
-        renderer.render(surface, dpi)
+        renderer.render(surface, dpi, osm_date)
 
         LOG.debug('Writing %s...' % output_filename)
         if output_format == 'png':
