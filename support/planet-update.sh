@@ -94,6 +94,11 @@ rep=`cat ${OSMOSIS_STATE} |\
 	tr 'T' ' ' |\
 	xargs -I{} date --utc --date "{}" +"%Y-%m-%d %H:%M:%S"`
 log "Update complete, now at ${rep} UTC (replication lag is `${HOME}/replag.sh`)."
+
+# Update the maposmatic_admin table with the last update timestamp of
+# the OSM data
+echo "UPDATE maposmatic_admin SET last_update='${rep}';" | psql -h localhost -U maposmatic maposmatic2
+
 rm -f ${PID_FILE} ${CURRENT_OSC}
 
 exit 0
