@@ -61,7 +61,8 @@ class StreetIndex:
         # Build the contents of the index
         self._categories = \
             (self._list_streets(db, polygon_wkt)
-             + self._list_amenities(db, polygon_wkt))
+             + self._list_amenities(db, polygon_wkt)
+             + self._list_villages(db, polygon_wkt))
 
         if not self._categories:
             raise commons.IndexEmptyError("Nothing to index")
@@ -337,6 +338,70 @@ order by amenity_name""" \
 
         return [category for category in result if category.items]
 
+    def _list_villages(self, db, polygon_wkt):
+        """Get the list of villages inside the given polygon. Don't
+        try to map them onto the grid of squares (there location_str
+        field remains undefined).
+
+        Args:
+           db (psycopg2 DB): The GIS database
+           polygon_wkt (str): The WKT of the surrounding polygon of interest
+
+        Returns a list of commons.IndexCategory objects, with their IndexItems
+        having no specific grid square location
+        """
+
+        cursor = db.cursor()
+
+        result = []
+        current_category = commons.IndexCategory(_(u"Villages"))
+        result.append(current_category)
+
+        query = """
+select village_name,
+       st_astext(st_transform(ST_LongestLine(village_contour, village_contour),
+                              4002)) as longest_linestring
+from (
+       select name as village_name,
+              st_intersection(%(wkb_limits)s, way) as village_contour
+       from planet_osm_point
+       where trim(name) != ''
+             and (place = 'locality'
+                  or place = 'hamlet'
+                  or place = 'isolated_dwelling')
+             and ST_intersects(way, %(wkb_limits)s)
+     ) as foo
+order by village_name""" \
+            % {'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
+                              % (polygon_wkt,))}
+
+
+        # l.debug("Villages query for %s (nogrid): %s" \
+        #             % ('Villages', query))
+
+        cursor.execute(query)
+
+        for village_name, linestring in cursor.fetchall():
+            # Parse the WKT from the largest linestring in shape
+            try:
+                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                               linestring[11:-1].split(','))
+            except (ValueError, TypeError):
+                l.exception("Error parsing %s for %s/%s"
+                            % (repr(linestring), 'Villages',
+                               repr(village_name)))
+                continue
+                ## raise
+            endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
+            current_category.items.append(commons.IndexItem(village_name,
+                                                            endpoint1,
+                                                            endpoint2))
+
+        l.debug("Got %d villages for %s."
+                % (len(current_category.items), 'Villages'))
+
+        return [category for category in result if category.items]
 
 if __name__ == "__main__":
     import os

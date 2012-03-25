@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
+"POT-Creation-Date: 2011-12-31 18:58+CET\n"
 "PO-Revision-Date: 2010-10-20 11:43+0200\n"
 "Last-Translator: Joan Montané <joan--sense-spam--montane.cat>\n"
 "Language-Team: Català <joan--sense-spam--montane.cat>\n"
@@ -19,78 +19,81 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 
-#: ocitysmap2/indexlib/indexer.py:144
+#: ocitysmap2/indexlib/indexer.py:145
 msgid "Places of worship"
 msgstr "Llocs de culte"
 
-#: ocitysmap2/indexlib/indexer.py:145
+#: ocitysmap2/indexlib/indexer.py:146
 msgid "Place of worship"
 msgstr "Lloc de culte"
 
-#: ocitysmap2/indexlib/indexer.py:146
+#: ocitysmap2/indexlib/indexer.py:147
 msgid "Kindergarten"
 msgstr "Llar d'infants"
 
-#: ocitysmap2/indexlib/indexer.py:146 ocitysmap2/indexlib/indexer.py:147
-#: ocitysmap2/indexlib/indexer.py:148 ocitysmap2/indexlib/indexer.py:149
-#: ocitysmap2/indexlib/indexer.py:150
+#: ocitysmap2/indexlib/indexer.py:147 ocitysmap2/indexlib/indexer.py:148
+#: ocitysmap2/indexlib/indexer.py:149 ocitysmap2/indexlib/indexer.py:150
+#: ocitysmap2/indexlib/indexer.py:151
 msgid "Education"
 msgstr "Educació"
 
-#: ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148
 msgid "School"
 msgstr "Escola"
 
-#: ocitysmap2/indexlib/indexer.py:148
+#: ocitysmap2/indexlib/indexer.py:149
 msgid "College"
 msgstr "Institut"
 
-#: ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
 msgid "University"
 msgstr "Universitat"
 
-#: ocitysmap2/indexlib/indexer.py:150
+#: ocitysmap2/indexlib/indexer.py:151
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap2/indexlib/indexer.py:151
+#: ocitysmap2/indexlib/indexer.py:152
 msgid "Town hall"
 msgstr "Ajuntament"
 
-#: ocitysmap2/indexlib/indexer.py:151 ocitysmap2/indexlib/indexer.py:152
-#: ocitysmap2/indexlib/indexer.py:153 ocitysmap2/indexlib/indexer.py:155
+#: ocitysmap2/indexlib/indexer.py:152 ocitysmap2/indexlib/indexer.py:153
+#: ocitysmap2/indexlib/indexer.py:154 ocitysmap2/indexlib/indexer.py:156
 msgid "Public buildings"
 msgstr "Edificis públics"
 
-#: ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153
 msgid "Post office"
 msgstr "Oficina de correus"
 
-#: ocitysmap2/indexlib/indexer.py:154
+#: ocitysmap2/indexlib/indexer.py:155
 msgid "Public building"
 msgstr "Edifici públic"
 
-#: ocitysmap2/indexlib/indexer.py:155
+#: ocitysmap2/indexlib/indexer.py:156
 msgid "Police"
 msgstr "Policia"
 
-#: ocitysmap2/layoutlib/renderers.py:555
-msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
-"OpenStreetMap.org and contributors (cc-by-sa).\n"
-"This map has been rendered on %(date)s and may be incomplete or innacurate. "
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+#: ocitysmap2/indexlib/indexer.py:357
+msgid "Villages"
 msgstr ""
-"Copyright © %(year)d equip de desenvolupament del MapOSMatic/OCitySMap. Les "
-"dades del mapa són © %(year)d de l'OpenStreetMap.org i col·laboradors (cc-by-"
-"sa).\n"
-"Aquest mapa fou generat el dia (date)s i pot ser incomplet o poc precís. "
-"Podeu col·laborar en millorar aquest mapa. Visiteu http://wiki.openstreetmap."
-"org"
 
-#: ocitysmap2/layoutlib/renderers.py:898
-msgid "Test gettext"
-msgstr "Prova el gettext"
+#~ msgid ""
+#~ "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+#~ "OpenStreetMap.org and contributors (cc-by-sa).\n"
+#~ "This map has been rendered on %(date)s and may be incomplete or "
+#~ "innacurate. You can contribute to improve this map. See http://wiki."
+#~ "openstreetmap.org"
+#~ msgstr ""
+#~ "Copyright © %(year)d equip de desenvolupament del MapOSMatic/OCitySMap. "
+#~ "Les dades del mapa són © %(year)d de l'OpenStreetMap.org i col·laboradors "
+#~ "(cc-by-sa).\n"
+#~ "Aquest mapa fou generat el dia (date)s i pot ser incomplet o poc precís. "
+#~ "Podeu col·laborar en millorar aquest mapa. Visiteu http://wiki."
+#~ "openstreetmap.org"
+
+#~ msgid "Test gettext"
+#~ msgstr "Prova el gettext"
 
 #~ msgid ""
 #~ "This map has been rendered on %s and may be incomplete or inaccurate."
