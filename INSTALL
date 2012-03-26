@@ -228,6 +228,11 @@ are using. They have been tested on several x86_64 hosts.
 
     in the book-fonts, bold-fonts and oblique-fonts sections.
 
+	(on debian, mapnik2 uses only ttf-dejavu, correct fontscollectionpath
+	in /usr/lib/python2.7/dist-packages/mapnik2/paths.py, replace
+	'/usr/share/fonts/truetype/ttf-dejavu' by '/usr/share/fonts'. Bug
+	report #665798).
+
     d. Configuration
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
