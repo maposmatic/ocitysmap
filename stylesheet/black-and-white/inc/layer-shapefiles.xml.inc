@@ -20,12 +20,12 @@
       <PolygonSymbolizer fill="#f2efe9"/>
     </Rule>
 </Style>
-<!-- <Style name="coast-poly"> -->
-<!--     <Rule> -->
-<!--       &maxscale_zoom10; -->
-<!--       <PolygonSymbolizer fill="#f2efe9"/> -->
-<!--     </Rule> -->
-<!-- </Style> -->
+<Style name="coast-poly">
+    <Rule>
+      &maxscale_zoom10;
+      <PolygonSymbolizer fill="#f5f5f5"/>
+    </Rule>
+</Style>
   <!-- BUILTUP VMAP0 -->
 <Style name="builtup">
     <Rule>
@@ -41,13 +41,13 @@
       <Parameter name="file">&world_boundaries;/shoreline_300</Parameter>
     </Datasource>
 </Layer>
-<!-- <Layer name="coast-poly" status="on" srs="&srs900913;"> -->
-<!--     <StyleName>coast-poly</StyleName> -->
-<!--     <Datasource> -->
-<!--       <Parameter name="type">shape</Parameter> -->
-<!--       <Parameter name="file">&world_boundaries;/processed_p</Parameter> -->
-<!--     </Datasource> -->
-<!-- </Layer> -->
+<Layer name="coast-poly" status="on" srs="&srs900913;">
+    <StyleName>coast-poly</StyleName>
+    <Datasource>
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="file">&world_boundaries;/processed_p</Parameter>
+    </Datasource>
+</Layer>
 <Layer name="builtup" status="on" srs="&srsmercator;">
     <StyleName>builtup</StyleName>
     <Datasource>
