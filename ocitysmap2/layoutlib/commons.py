@@ -30,3 +30,6 @@ def convert_pt_to_dots(pt, dpi = PT_PER_INCH):
 
 def convert_mm_to_pt(mm):
     return ((mm/10.0) / 2.54) * 72
+
+def convert_pt_to_mm(pt):
+    return (float(pt) * 10.0 * 2.54) / 72

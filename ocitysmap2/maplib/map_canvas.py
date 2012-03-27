@@ -47,13 +47,17 @@ class MapCanvas:
     their respective alpha levels.
     """
 
-    def __init__(self, stylesheet, bounding_box, _width, _height, dpi):
+    def __init__(self, stylesheet, bounding_box, _width, _height, dpi,
+                 extend_bbox_to_ratio=True):
         """Initialize the map canvas for rendering.
 
         Args:
             stylesheet (Stylesheet): map stylesheet.
             bounding_box (coords.BoundingBox): geographic bounding box.
             graphical_ratio (float): ratio of the map area (width/height).
+            extend_bbox_to_ratio (boolean): allow MapCanvas to extend
+            the bounding box to make it match the ratio of the
+            provided rendering area. Needed by SinglePageRenderer.
         """
 
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
@@ -65,19 +69,22 @@ class MapCanvas:
         orig_envelope = self._project_envelope(bounding_box)
         graphical_ratio = _width / _height
 
-        off_x, off_y, width, height = self._fix_bbox_ratio(
+        if extend_bbox_to_ratio:
+            off_x, off_y, width, height = self._fix_bbox_ratio(
                 orig_envelope.minx, orig_envelope.miny,
                 orig_envelope.width(), orig_envelope.height(),
                 graphical_ratio)
 
-        envelope = mapnik.Box2d(off_x, off_y, off_x+width, off_y+height)
+            envelope = mapnik.Box2d(off_x, off_y, off_x+width, off_y+height)
+            self._geo_bbox = self._inverse_envelope(envelope)
+            l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
+                    (bounding_box, self._geo_bbox, graphical_ratio))
+        else:
+            envelope = orig_envelope
+            self._geo_bbox = bounding_box
 
-        self._geo_bbox = self._inverse_envelope(envelope)
         g_width  = int(convert_pt_to_dots(_width, dpi))
         g_height = int(convert_pt_to_dots(_height, dpi))
-
-        l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
-                (bounding_box, self._geo_bbox, graphical_ratio))
 
         # Create the Mapnik map with the corrected width and height and zoom to
         # the corrected bounding box ('envelope' in the Mapnik jargon)
