@@ -557,31 +557,31 @@
       <Filter>[highway]='motorway_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#506077" stroke-width="8"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="8"/>
     </Rule>
     <Rule>
      <Filter>[highway] = 'trunk_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#477147" stroke-width="11.5"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11.5"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'primary_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;      
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#8d4346" stroke-width="11.5"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11.5"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'secondary_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#a37b48" stroke-width="11.5" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11.5" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'tertiary_link' and not [tunnel]='yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#bbb" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11" stroke-linecap="round"/>
     </Rule>
 </Style>
 <Style name="minor-roads-casing">
@@ -589,43 +589,43 @@
       <Filter>[highway] = 'motorway' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#506077" stroke-width="10"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="12"/>
     </Rule>
     <Rule>
      <Filter>[highway] = 'trunk' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#477147" stroke-width="11.5"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="13.5"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'primary' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;      
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#8d4346" stroke-width="11.5"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="13.5"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'secondary' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#a37b48" stroke-width="11.5" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="13.5" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>([highway] = 'residential' or [highway] = 'unclassified' or [highway] = 'road') and not [tunnel]='yes'</Filter>
       &maxscale_zoom16;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#bbb" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'tertiary' and not [tunnel]='yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#bbb" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="11" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'service' and not ([service]='INT-minor' or [tunnel]='yes')</Filter>
       &maxscale_zoom16;
       &minscale_zoom18;
-      <LineSymbolizer stroke-linejoin="round" stroke="#999" stroke-width="7" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="black" stroke-width="7" stroke-linecap="round"/>
    </Rule>
    <Rule>
       <Filter>[highway] = 'service' and [tunnel]='yes'</Filter>
@@ -661,31 +661,31 @@
       <Filter>[highway] = 'motorway_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#809bc0" stroke-width="6.5" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="white" stroke-width="6.5" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'trunk_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#a9dba9" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="white" stroke-width="11" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'primary_link' and not [tunnel] = 'yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#ec989a" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="white" stroke-width="11" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'secondary_link' and not [tunnel]='yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#fed7a5" stroke-width="11" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="white" stroke-width="11" stroke-linecap="round"/>
     </Rule>
     <Rule>
       <Filter>[highway] = 'tertiary_link' and not [tunnel]='yes'</Filter>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <LineSymbolizer stroke-linejoin="round" stroke="#ffffb3" stroke-width="9.4" stroke-linecap="round"/>
+      <LineSymbolizer stroke-linejoin="round" stroke="white" stroke-width="9.4" stroke-linecap="round"/>
     </Rule>
 </Style>
 <Style name="minor-roads-fill"> 
