@@ -3,3 +3,6 @@
 /ocitysmap.conf.mine
 /support/planet-update-daily.sh
 /support/shoreline-update.sh
+/stylesheet/black-and-white/inc/datasource-settings.xml.inc
+/stylesheet/black-and-white/inc/fontset-settings.xml.inc
+/stylesheet/black-and-white/inc/settings.xml.inc
