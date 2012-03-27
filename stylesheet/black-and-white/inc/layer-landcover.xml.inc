@@ -21,17 +21,17 @@
     <Rule>
       &maxscale_zoom14;
       <Filter>([landuse] = 'cemetery' or [landuse] = 'grave_yard' or [amenity]='grave_yard') and [religion] = 'jewish'</Filter>
-      <PolygonPatternSymbolizer file="&symbols;/cemetery_jewish.18.png" />
+      <PolygonPatternSymbolizer file="&symbols;/maposmatic_grave.png" />
     </Rule>
     <Rule>
       &maxscale_zoom14;
       <Filter>([landuse] = 'cemetery' or [landuse] = 'grave_yard' or [amenity]='grave_yard') and [religion] = 'christian'</Filter>
-      <PolygonPatternSymbolizer file="&symbols;/grave_yard.png" />
+      <PolygonPatternSymbolizer file="&symbols;/maposmatic_grave.png" />
     </Rule>
     <Rule>
       &maxscale_zoom14;
       <Filter>([landuse] = 'cemetery' or [landuse] = 'grave_yard' or [amenity]='grave_yard') and [religion] = 'INT-generic'</Filter>
-      <PolygonPatternSymbolizer file="&symbols;/grave_yard_generic.png" />
+      <PolygonPatternSymbolizer file="&symbols;/maposmatic_grave.png" />
     </Rule>
     <Rule>
       &maxscale_zoom10;
