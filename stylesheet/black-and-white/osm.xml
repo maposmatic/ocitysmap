@@ -5,31 +5,31 @@
 ]>
 <Map background-color="#f5f5f5" srs="&srs900913;" minimum-version="2.0.0">
   &fontset-settings;
-<Style name="turning_circle-casing">
-    <Rule>
-      &maxscale_zoom15;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='tertiary'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-tert-casing.18.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='residential' or [int_tc_type]='unclassified'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-uncl-casing.18.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='service'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-uncl-casing.14.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='living_street'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.18.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
+<!-- <Style name="turning_circle-casing"> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom15; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='tertiary'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-tert-casing.18.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='residential' or [int_tc_type]='unclassified'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-uncl-casing.18.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='service'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-uncl-casing.14.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='living_street'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.18.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
     <!-- <Rule> -->
     <!--   &maxscale_zoom17; -->
     <!--   <Filter>[int_tc_type]='tertiary'</Filter> -->
@@ -50,32 +50,32 @@
     <!--   <Filter>[int_tc_type]='living_street'</Filter> -->
     <!--   <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.24.png" allow-overlap="true" ignore-placement="true"/> -->
     <!-- </Rule> -->
-</Style>
-<Style name="turning_circle-fill">
-    <Rule>
-      &maxscale_zoom15;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='tertiary'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-tert-fill.16.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='residential' or [int_tc_type]='unclassified'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.16.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='service'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.12.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
-    <Rule>
-      &maxscale_zoom16;
-      &minscale_zoom16;
-      <Filter>[int_tc_type]='living_street'</Filter>
-      <PointSymbolizer file="&symbols;/turning_circle-livs-fill.16.png" allow-overlap="true" ignore-placement="true"/>
-    </Rule>
+<!-- </Style> -->
+<!-- <Style name="turning_circle-fill"> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom15; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='tertiary'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-tert-fill.16.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='residential' or [int_tc_type]='unclassified'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.16.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='service'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-uncl-fill.12.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
+<!--     <Rule> -->
+<!--       &maxscale_zoom16; -->
+<!--       &minscale_zoom16; -->
+<!--       <Filter>[int_tc_type]='living_street'</Filter> -->
+<!--       <PointSymbolizer file="&symbols;/turning_circle-livs-fill.16.png" allow-overlap="true" ignore-placement="true"/> -->
+<!--     </Rule> -->
     <!-- <Rule> -->
     <!--   &maxscale_zoom17; -->
     <!--   <Filter>[int_tc_type]='tertiary'</Filter> -->
@@ -96,7 +96,7 @@
     <!--   <Filter>[int_tc_type]='living_street'</Filter> -->
     <!--   <PointSymbolizer file="&symbols;/turning_circle-livs-fill.22.png" allow-overlap="true" ignore-placement="true"/> -->
     <!-- </Rule> -->
-</Style>
+<!-- </Style> -->
 <Style name="highway-area-casing">
    <Rule>
       <Filter>[highway] = 'residential' or [highway]='unclassified'</Filter>
@@ -1759,29 +1759,29 @@
       &datasource-settings;
     </Datasource>
 </Layer>
-<Layer name="turning_circle-casing" status="on" srs="&osm2pgsql_projection;">
-    <StyleName>turning_circle-casing</StyleName>    
-    <Datasource>
-      <Parameter name="table">
-      (select distinct on (p.way) p.way as way,l.highway as int_tc_type
-       from &prefix;_point p
-       join &prefix;_line l
-        on ST_DWithin(p.way,l.way,&dwithin_node_way;)
-       join (values
-        ('tertiary',1),
-        ('unclassified',2),
-        ('residential',3),
-        ('living_street',4),
-        ('service',5)
-       ) as v (highway,prio)
-        on v.highway=l.highway
-       where p.highway='turning_circle'
-       order by p.way,v.prio
-      ) as turning_circle
-      </Parameter>
-      &datasource-settings;
-    </Datasource>
-</Layer>
+<!-- <Layer name="turning_circle-casing" status="on" srs="&osm2pgsql_projection;"> -->
+<!--     <StyleName>turning_circle-casing</StyleName>     -->
+<!--     <Datasource> -->
+<!--       <Parameter name="table"> -->
+<!--       (select distinct on (p.way) p.way as way,l.highway as int_tc_type -->
+<!--        from &prefix;_point p -->
+<!--        join &prefix;_line l -->
+<!--         on ST_DWithin(p.way,l.way,&dwithin_node_way;) -->
+<!--        join (values -->
+<!--         ('tertiary',1), -->
+<!--         ('unclassified',2), -->
+<!--         ('residential',3), -->
+<!--         ('living_street',4), -->
+<!--         ('service',5) -->
+<!--        ) as v (highway,prio) -->
+<!--         on v.highway=l.highway -->
+<!--        where p.highway='turning_circle' -->
+<!--        order by p.way,v.prio -->
+<!--       ) as turning_circle -->
+<!--       </Parameter> -->
+<!--       &datasource-settings; -->
+<!--     </Datasource> -->
+<!-- </Layer> -->
 <Layer name="footbikecycle-tunnels" status="on" srs="&osm2pgsql_projection;">
     <StyleName>footbikecycle-tunnels</StyleName>
     <Datasource>
@@ -1890,29 +1890,29 @@
       &datasource-settings;
     </Datasource>
 </Layer>
-<Layer name="turning_circle-fill" status="on" srs="&osm2pgsql_projection;">
-    <StyleName>turning_circle-fill</StyleName>    
-    <Datasource>
-      <Parameter name="table">
-      (select distinct on (p.way) p.way as way,l.highway as int_tc_type
-       from &prefix;_point p
-       join &prefix;_line l
-        on ST_DWithin(p.way,l.way,&dwithin_node_way;)
-       join (values
-        ('tertiary',1),
-        ('unclassified',2),
-        ('residential',3),
-        ('living_street',4),
-        ('service',5)
-       ) as v (highway,prio)
-        on v.highway=l.highway
-       where p.highway='turning_circle'
-       order by p.way,v.prio
-      ) as turning_circle
-      </Parameter>
-      &datasource-settings;
-    </Datasource>
-</Layer>
+<!-- <Layer name="turning_circle-fill" status="on" srs="&osm2pgsql_projection;"> -->
+<!--     <StyleName>turning_circle-fill</StyleName>     -->
+<!--     <Datasource> -->
+<!--       <Parameter name="table"> -->
+<!--       (select distinct on (p.way) p.way as way,l.highway as int_tc_type -->
+<!--        from &prefix;_point p -->
+<!--        join &prefix;_line l -->
+<!--         on ST_DWithin(p.way,l.way,&dwithin_node_way;) -->
+<!--        join (values -->
+<!--         ('tertiary',1), -->
+<!--         ('unclassified',2), -->
+<!--         ('residential',3), -->
+<!--         ('living_street',4), -->
+<!--         ('service',5) -->
+<!--        ) as v (highway,prio) -->
+<!--         on v.highway=l.highway -->
+<!--        where p.highway='turning_circle' -->
+<!--        order by p.way,v.prio -->
+<!--       ) as turning_circle -->
+<!--       </Parameter> -->
+<!--       &datasource-settings; -->
+<!--     </Datasource> -->
+<!-- </Layer> -->
 &layer-ferry-routes;
 &layer-aerialways;
 <Layer name="roads" status="on" srs="&osm2pgsql_projection;">
