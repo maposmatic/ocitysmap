@@ -122,6 +122,13 @@ class IndexItem:
                 % (repr(self.label), self.endpoint1, self.endpoint2,
                    repr(self.location_str), repr(self.page_number)))
 
+    def min_drawing_width(self, layout, em):
+        layout.set_text(self.label)
+        label_w = float(layout.get_size()[0]) / pango.SCALE
+        layout.set_text(self.location_str)
+        location_w = float(layout.get_size()[0]) / pango.SCALE
+        return (label_w + location_w + 2 * em)
+
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
         """Draw this index item to the provided Cairo context. It prints the
@@ -142,14 +149,9 @@ class IndexItem:
         """
 
         if not self.location_str:
-            square_str = '???'
+            location_str = '???'
         else:
-            square_str = self.location_str
-
-        if self.page_number is None:
-            location_str = square_str
-        else:
-            location_str = "%d, %s" % (self.page_number, square_str)
+            location_str = self.location_str
 
         ctx.save()
         if not rtl:
@@ -210,6 +212,14 @@ class IndexItem:
         else:
             self.location_str = "%s-%s" % (min(ep1_label, ep2_label),
                                            max(ep1_label, ep2_label))
+
+        if self.page_number is not None:
+            if grid.rtl:
+                self.location_str = "%s, %d" % (self.location_str,
+                                                self.page_number)
+            else:
+                self.location_str = "%d, %s" % (self.page_number,
+                                                self.location_str)
 
 if __name__ == "__main__":
     import cairo
