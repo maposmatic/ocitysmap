@@ -106,13 +106,13 @@ class IndexItem:
     location_str = None # str or None
     page_number  = None # integer or None. Only used by multi-page renderer.
 
-    def __init__(self, label, endpoint1, endpoint2):
+    def __init__(self, label, endpoint1, endpoint2, page_number=None):
         assert label is not None
         self.label        = label
         self.endpoint1    = endpoint1
         self.endpoint2    = endpoint2
         self.location_str = None
-        self.page_number  = None
+        self.page_number  = page_number
 
     def __str__(self):
         return '%s...%s' % (self.label, self.location_str)

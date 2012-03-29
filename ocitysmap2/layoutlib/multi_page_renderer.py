@@ -218,7 +218,7 @@ class MultiPageRenderer(Renderer):
             # Create the index for the current page
             index = StreetIndex(self.db,
                                 bb_inner.as_wkt(),
-                                self.rc.i18n)
+                                self.rc.i18n, page_number=(i + 1))
 
             index.apply_grid(map_grid)
             indexes.append(index)
@@ -236,9 +236,6 @@ class MultiPageRenderer(Renderer):
         all_categories_others  = []
         for page_number, idx in enumerate(indexes):
             for cat in idx.categories:
-                # Mark each IndexItem with its page number
-                for item in cat.items:
-                    item.page_number = (page_number + 1)
                 # Split in two lists depending on the category type
                 # (street or other)
                 if cat.is_street:

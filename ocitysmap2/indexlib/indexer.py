@@ -45,7 +45,7 @@ l = logging.getLogger('ocitysmap')
 
 class StreetIndex:
 
-    def __init__(self, db, polygon_wkt, i18n):
+    def __init__(self, db, polygon_wkt, i18n, page_number=None):
         """
         Prepare the index of the streets inside the given WKT. This
         constructor will perform all the SQL queries.
@@ -58,6 +58,7 @@ class StreetIndex:
         Note: All the arguments have to be provided !
         """
         self._i18n = i18n
+        self._page_number = page_number
 
         # Build the contents of the index
         self._categories = \
@@ -229,7 +230,8 @@ class StreetIndex:
             endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(commons.IndexItem(street_name,
                                                             endpoint1,
-                                                            endpoint2))
+                                                            endpoint2,
+                                                            self._page_number))
 
         return result
 
@@ -349,7 +351,8 @@ order by amenity_name""" \
                 endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
                 current_category.items.append(commons.IndexItem(amenity_name,
                                                                 endpoint1,
-                                                                endpoint2))
+                                                                endpoint2,
+                                                                self._page_number))
 
             l.debug("Got %d amenities for %s/%s."
                     % (len(current_category.items), catname, db_amenity))
@@ -415,7 +418,8 @@ order by village_name""" \
             endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(commons.IndexItem(village_name,
                                                             endpoint1,
-                                                            endpoint2))
+                                                            endpoint2,
+                                                            self._page_number))
 
         l.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
