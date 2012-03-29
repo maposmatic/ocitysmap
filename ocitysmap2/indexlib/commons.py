@@ -146,10 +146,10 @@ class IndexItem:
         else:
             square_str = self.location_str
 
-        if self.page_number:
-            location_str = "%d, %s" % (self.page_number, square_str)
-        else:
+        if self.page_number is None:
             location_str = square_str
+        else:
+            location_str = "%d, %s" % (self.page_number, square_str)
 
         ctx.save()
         if not rtl:
