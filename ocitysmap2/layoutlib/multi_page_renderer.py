@@ -70,7 +70,8 @@ class MultiPageRenderer(Renderer):
                                        (2 * Renderer.PRINT_SAFE_MARGIN_PT))
 
         scale_denom = 10000
-        OUTTER_MARGIN_MM = 10
+        GRAYED_MARGIN_MM  = 10
+        OVERLAP_MARGIN_MM = 20
 
         print self.rc.bounding_box.as_javascript("original", "#00ff00")
 
@@ -80,16 +81,17 @@ class MultiPageRenderer(Renderer):
 
         # Extend the bounding box to take into account the lost outter
         # margin
-        off_x  = orig_envelope.minx - (OUTTER_MARGIN_MM * scale_denom) / 1000
-        off_y  = orig_envelope.miny - (OUTTER_MARGIN_MM * scale_denom) / 1000
-        width  = orig_envelope.width() + (2 * OUTTER_MARGIN_MM * scale_denom) / 1000
-        height = orig_envelope.height() + (2 * OUTTER_MARGIN_MM * scale_denom) / 1000
+        off_x  = orig_envelope.minx - (GRAYED_MARGIN_MM * scale_denom) / 1000
+        off_y  = orig_envelope.miny - (GRAYED_MARGIN_MM * scale_denom) / 1000
+        width  = orig_envelope.width() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
+        height = orig_envelope.height() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
 
         # Calculate the total width and height of paper needed to
         # render the geographical area at the current scale.
         total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
         total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
-        outter_margin_pt = commons.convert_mm_to_pt(OUTTER_MARGIN_MM)
+        grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
+        overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
 
         # Calculate the number of pages needed in both directions
         if total_width_pt < self._usable_area_width_pt:
@@ -97,14 +99,14 @@ class MultiPageRenderer(Renderer):
         else:
             nb_pages_width = \
                 (float(total_width_pt - self._usable_area_width_pt) / \
-                     (self._usable_area_width_pt - outter_margin_pt)) + 1
+                     (self._usable_area_width_pt - overlap_margin_pt)) + 1
 
         if total_height_pt < self._usable_area_height_pt:
             nb_pages_height = 1
         else:
             nb_pages_height = \
                 (float(total_height_pt - self._usable_area_height_pt) / \
-                     (self._usable_area_height_pt - outter_margin_pt)) + 1
+                     (self._usable_area_height_pt - overlap_margin_pt)) + 1
 
         # Round up the number of pages needed so that we have integer
         # number of pages
@@ -113,9 +115,9 @@ class MultiPageRenderer(Renderer):
 
         # Calculate the entire paper area available
         total_width_pt_after_extension = \
-            self._usable_area_width_pt + (self._usable_area_width_pt - outter_margin_pt) * (nb_pages_width - 1)
+            self._usable_area_width_pt + (self._usable_area_width_pt - overlap_margin_pt) * (nb_pages_width - 1)
         total_height_pt_after_extension = \
-            self._usable_area_height_pt + (self._usable_area_height_pt - outter_margin_pt) * (nb_pages_height - 1)
+            self._usable_area_height_pt + (self._usable_area_height_pt - overlap_margin_pt) * (nb_pages_height - 1)
 
         # Convert this paper area available in the number of Mercator
         # meters that can we rendered on the map
@@ -143,7 +145,8 @@ class MultiPageRenderer(Renderer):
         # amount of Mercator meters we can render in this area.
         usable_area_merc_m_width  = commons.convert_pt_to_mm(self._usable_area_width_pt) * scale_denom / 1000
         usable_area_merc_m_height = commons.convert_pt_to_mm(self._usable_area_height_pt) * scale_denom / 1000
-        outter_margin_merc_m      = (OUTTER_MARGIN_MM * scale_denom) / 1000
+        grayed_margin_merc_m      = (GRAYED_MARGIN_MM * scale_denom) / 1000
+        overlap_margin_merc_m     = (OVERLAP_MARGIN_MM * scale_denom) / 1000
 
         # Calculate all the bounding boxes that correspond to the
         # geographical area that will be rendered on each sheet of
@@ -151,16 +154,16 @@ class MultiPageRenderer(Renderer):
         bboxes = []
         for j in reversed(range(0, nb_pages_height)):
             for i in range(0, nb_pages_width):
-                cur_x = off_x + i * (usable_area_merc_m_width - outter_margin_merc_m)
-                cur_y = off_y + j * (usable_area_merc_m_height - outter_margin_merc_m)
+                cur_x = off_x + i * (usable_area_merc_m_width - overlap_margin_merc_m)
+                cur_y = off_y + j * (usable_area_merc_m_height - overlap_margin_merc_m)
                 envelope = mapnik.Box2d(cur_x, cur_y,
                                         cur_x+usable_area_merc_m_width,
                                         cur_y+usable_area_merc_m_height)
 
-                envelope_inner = mapnik.Box2d(cur_x + outter_margin_merc_m,
-                                              cur_y + outter_margin_merc_m,
-                                              cur_x + usable_area_merc_m_width  - outter_margin_merc_m,
-                                              cur_y + usable_area_merc_m_height - outter_margin_merc_m)
+                envelope_inner = mapnik.Box2d(cur_x + grayed_margin_merc_m,
+                                              cur_y + grayed_margin_merc_m,
+                                              cur_x + usable_area_merc_m_width  - grayed_margin_merc_m,
+                                              cur_y + usable_area_merc_m_height - grayed_margin_merc_m)
 
                 bboxes.append((self._inverse_envelope(envelope),
                                self._inverse_envelope(envelope_inner)))
