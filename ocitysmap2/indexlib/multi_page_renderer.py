@@ -56,17 +56,6 @@ class MultiPageStreetIndexRenderer:
     def render(self, dpi = UTILS.PT_PER_INCH):
         self.ctx.save()
 
-        # Draw a filled rectangle as the background (to be removed,
-        # only for debugging purposes)
-        self.ctx.save()
-        self.ctx.set_source_rgb(.98,.98,.98)
-        self.ctx.rectangle(UTILS.convert_pt_to_dots(self.rendering_area_x, dpi),
-                           UTILS.convert_pt_to_dots(self.rendering_area_y, dpi),
-                           self.rendering_area_w,
-                           self.rendering_area_h)
-        self.ctx.fill()
-        self.ctx.restore()
-
         # Create a PangoCairo context for drawing to Cairo
         pc = pangocairo.CairoContext(self.ctx)
 
