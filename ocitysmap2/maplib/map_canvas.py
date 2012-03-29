@@ -30,6 +30,7 @@ except ImportError:
 import os
 
 from ocitysmap2 import coords
+from layoutlib.commons import convert_pt_to_dots
 import shapes
 
 l = logging.getLogger('ocitysmap')
@@ -46,7 +47,7 @@ class MapCanvas:
     their respective alpha levels.
     """
 
-    def __init__(self, stylesheet, bounding_box, graphical_ratio):
+    def __init__(self, stylesheet, bounding_box, _width, _height, dpi):
         """Initialize the map canvas for rendering.
 
         Args:
@@ -62,6 +63,7 @@ class MapCanvas:
         # is adjusted (extended) to fill the destination zone. See
         # _fix_bbox_ratio for more details on how this is done.
         orig_envelope = self._project_envelope(bounding_box)
+        graphical_ratio = _width / _height
 
         off_x, off_y, width, height = self._fix_bbox_ratio(
                 orig_envelope.minx, orig_envelope.miny,
@@ -71,8 +73,8 @@ class MapCanvas:
         envelope = mapnik.Box2d(off_x, off_y, off_x+width, off_y+height)
 
         self._geo_bbox = self._inverse_envelope(envelope)
-        g_height, g_width = self._geo_bbox.get_pixel_size_for_zoom_factor(
-                stylesheet.zoom_level)
+        g_width  = int(convert_pt_to_dots(_width, dpi))
+        g_height = int(convert_pt_to_dots(_height, dpi))
 
         l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
                 (bounding_box, self._geo_bbox, graphical_ratio))

@@ -55,7 +55,7 @@ class SinglePageRenderer(Renderer):
 
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
-    def __init__(self, rc, tmpdir,
+    def __init__(self, rc, tmpdir, dpi,
                  street_index = None, index_position = 'side'):
         """
         Create the renderer.
@@ -130,8 +130,9 @@ class SinglePageRenderer(Renderer):
 
         # Prepare the map
         self._map_canvas = self._create_map_canvas(
-            float(self._map_coords[2]) / # W
-            float(self._map_coords[3]) ) # H
+            float(self._map_coords[2]),  # W
+            float(self._map_coords[3]),  # H
+            dpi )
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas)
@@ -376,10 +377,6 @@ class SinglePageRenderer(Renderer):
         # Draw the rescaled Map
         ctx.save()
         rendered_map = self._map_canvas.get_rendered_map()
-        ctx.scale(map_coords_dots[2]
-                    / rendered_map.width,
-                  map_coords_dots[3]
-                    / rendered_map.height)
         mapnik.render(rendered_map, ctx)
         ctx.restore()
 
@@ -491,7 +488,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
     name = 'plain'
     description = 'Full-page layout without index.'
 
-    def __init__(self, rc, tmpdir, street_index):
+    def __init__(self, rc, tmpdir, dpi, street_index):
         """
         Create the renderer.
 
@@ -500,7 +497,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            street_index (StreetIndex): None or the street index object.
         """
-        SinglePageRenderer.__init__(self, rc, tmpdir, None, None)
+        SinglePageRenderer.__init__(self, rc, tmpdir, dpi, None, None)
 
 
     @staticmethod

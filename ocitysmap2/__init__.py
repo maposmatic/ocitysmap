@@ -61,7 +61,7 @@ The layout name is the renderer's key name. You can get the list of all
 supported renderers with ocitysmap.get_all_renderers(). The output_formats is a
 list of output formats. For now, the following formats are supported:
 
-    * PNG at 300dpi
+    * PNG at 72dpi
     * PDF
     * SVG
     * SVGZ (gzipped-SVG)
@@ -193,8 +193,7 @@ class OCitySMap:
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15
 
-    DEFAULT_RESOLUTION_KM_IN_MM = 150
-    DEFAULT_RENDERING_PNG_DPI = 300
+    DEFAULT_RENDERING_PNG_DPI = 72
 
     STYLESHEET_REGISTRY = []
 
@@ -456,19 +455,13 @@ SELECT ST_AsText(ST_LongestLine(
 
             # Prepare the generic renderer
             renderer_cls = renderers.get_renderer_class_by_name(renderer_name)
-            renderer = renderer_cls(config, tmpdir, street_index)
-
-            # Update the street_index to reflect the grid's actual position
-            if renderer.grid and street_index:
-                street_index.apply_grid(renderer.grid)
-                street_index.group_identical_grid_locations()
 
             # Perform the actual rendering to the Cairo devices
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 try:
-                    self._render_one(renderer, output_format, output_filename,
-                                     osm_date)
+                    self._render_one(config, tmpdir, renderer_cls, street_index,
+                                     output_format, output_filename, osm_date)
                 except IndexDoesNotFitError:
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
@@ -480,7 +473,9 @@ SELECT ST_AsText(ST_LongestLine(
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, renderer, output_format, output_filename, osm_date):
+    def _render_one(self, config, tmpdir, renderer_cls, street_index,
+                    output_format, output_filename, osm_date):
+
         LOG.info('Rendering to %s format...' % output_format.upper())
 
         factory = None
@@ -524,6 +519,13 @@ SELECT ST_AsText(ST_LongestLine(
         else:
             raise ValueError, \
                 'Unsupported output format: %s!' % output_format.upper()
+
+        renderer = renderer_cls(config, tmpdir, dpi, street_index)
+
+        # Update the street_index to reflect the grid's actual position
+        if renderer.grid and street_index:
+            street_index.apply_grid(renderer.grid)
+            street_index.group_identical_grid_locations()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
 

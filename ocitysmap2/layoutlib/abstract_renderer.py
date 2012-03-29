@@ -212,7 +212,7 @@ class Renderer:
 
         ctx.restore()
 
-    def _create_map_canvas(self, graphical_ratio,
+    def _create_map_canvas(self, width, height, dpi,
                            draw_contour_shade = True):
         """
         Create a new MapCanvas object.
@@ -228,7 +228,7 @@ class Renderer:
         # Prepare the map canvas
         canvas = MapCanvas(self.rc.stylesheet,
                            self.rc.bounding_box,
-                           graphical_ratio)
+                           width, height, dpi)
 
         if draw_contour_shade:
             # Area to keep visible
