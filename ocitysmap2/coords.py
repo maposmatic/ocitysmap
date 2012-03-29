@@ -155,6 +155,20 @@ class BoundingBox:
 
         return (int(math.ceil(pix_y)), int(math.ceil(pix_x)))
 
+    def as_javascript(self, name=None, color=None):
+        if name:
+            name_str = ", \"%s\"" % name
+        else:
+            name_str = ""
+
+        if color:
+            color_str = ", { color: \"%s\" }" % color
+        else:
+            color_str = ""
+
+        return 'BoundingBox(%f,%f,%f,%f%s%s)' % \
+            (self._lat1, self._long1, self._lat2, self._long2,
+             name_str, color_str)
 
 if __name__ == "__main__":
     wkt = 'POINT(2.0333 48.7062132250362)'
