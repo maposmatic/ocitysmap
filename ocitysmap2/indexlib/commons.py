@@ -104,6 +104,7 @@ class IndexItem:
     endpoint1    = None # coords.Point
     endpoint2    = None # coords.Point
     location_str = None # str or None
+    page_number  = None # integer or None. Only used by multi-page renderer.
 
     def __init__(self, label, endpoint1, endpoint2):
         assert label is not None
@@ -111,14 +112,15 @@ class IndexItem:
         self.endpoint1    = endpoint1
         self.endpoint2    = endpoint2
         self.location_str = None
+        self.page_number  = None
 
     def __str__(self):
         return '%s...%s' % (self.label, self.location_str)
 
     def __repr__(self):
-        return ('IndexItem(%s, %s, %s, %s)'
+        return ('IndexItem(%s, %s, %s, %s, %s)'
                 % (repr(self.label), self.endpoint1, self.endpoint2,
-                   repr(self.location_str)))
+                   repr(self.location_str), repr(self.page_number)))
 
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
