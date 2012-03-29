@@ -372,7 +372,8 @@ order by amenity_name""" \
         cursor = db.cursor()
 
         result = []
-        current_category = commons.IndexCategory(_(u"Villages"))
+        current_category = commons.IndexCategory(_(u"Villages"),
+                                                 is_street=False)
         result.append(current_category)
 
         query = """
