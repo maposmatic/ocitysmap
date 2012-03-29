@@ -141,6 +141,16 @@ class IndexItem:
             baseline_y (int): Y axis coordinate of the baseline.
         """
 
+        if not self.location_str:
+            square_str = '???'
+        else:
+            square_str = self.location_str
+
+        if self.page_number:
+            location_str = "%d, %s" % (self.page_number, square_str)
+        else:
+            location_str = square_str
+
         ctx.save()
         if not rtl:
             _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
@@ -150,12 +160,12 @@ class IndexItem:
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
-                                                        self.location_str or '???')
+                                                        location_str)
         else:
             _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
                                                          fascent, fheight,
                                                          baseline_x, baseline_y,
-                                                         self.location_str or '???')
+                                                         location_str)
             line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
