@@ -39,6 +39,7 @@ from abstract_renderer import Renderer
 from ocitysmap2.maplib.map_canvas import MapCanvas
 from ocitysmap2.maplib.grid import Grid
 from indexlib.indexer import StreetIndex
+from indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
 
 import ocitysmap2
 import commons
@@ -227,7 +228,7 @@ class MultiPageRenderer(Renderer):
             indexes.append(index)
             self.pages.append((map_canvas, map_grid))
 
-        self.index_data = self._merge_page_indexes(indexes)
+        self.index_categories = self._merge_page_indexes(indexes)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -354,6 +355,17 @@ class MultiPageRenderer(Renderer):
             ctx.restore()
 
             cairo_surface.show_page()
+
+        mpsir = MultiPageStreetIndexRenderer(self.rc.i18n,
+                                             ctx, cairo_surface,
+                                             self.index_categories,
+                                             (Renderer.PRINT_SAFE_MARGIN_PT,
+                                              Renderer.PRINT_SAFE_MARGIN_PT,
+                                              self._usable_area_width_pt,
+                                              self._usable_area_height_pt))
+
+        mpsir.render()
+
         cairo_surface.flush()
         print "I'm rendering"
         pass
