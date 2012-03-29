@@ -65,9 +65,6 @@ class StreetIndex:
              + self._list_amenities(db, polygon_wkt)
              + self._list_villages(db, polygon_wkt))
 
-        if not self._categories:
-            raise commons.IndexEmptyError("Nothing to index")
-
     @property
     def categories(self):
         return self._categories
