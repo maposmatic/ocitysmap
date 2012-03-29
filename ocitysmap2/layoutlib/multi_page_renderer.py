@@ -68,9 +68,6 @@ class MultiPageRenderer(Renderer):
     def __init__(self, *args, **kwargs):
         Renderer.__init__(self, *args, **kwargs)
 
-        print "One page width  (in mm) : %f" % self.rc.paper_width_mm
-        print "One page height (in mm) : %f" % self.rc.paper_height_mm
-
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
@@ -85,7 +82,8 @@ class MultiPageRenderer(Renderer):
         GRAYED_MARGIN_MM  = 10
         OVERLAP_MARGIN_MM = 20
 
-        print self.rc.bounding_box.as_javascript("original", "#00ff00")
+        # Debug: show original bounding box as JS code
+        # print self.rc.bounding_box.as_javascript("original", "#00ff00")
 
         # Convert the original Bounding box into Mercator meters
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
@@ -151,7 +149,8 @@ class MultiPageRenderer(Renderer):
         envelope = mapnik.Box2d(off_x, off_y, off_x + width, off_y + height)
         self._geo_bbox = self._inverse_envelope(envelope)
 
-        print self._geo_bbox.as_javascript("extended", "#0f0f0f")
+        # Debug: show transformed bounding box as JS code
+        # print self._geo_bbox.as_javascript("extended", "#0f0f0f")
 
         # Convert the usable area on each sheet of paper into the
         # amount of Mercator meters we can render in this area.
@@ -180,19 +179,17 @@ class MultiPageRenderer(Renderer):
                 bboxes.append((self._inverse_envelope(envelope),
                                self._inverse_envelope(envelope_inner)))
 
-        for i, (bb, bb_inner) in enumerate(bboxes):
-            print bb.as_javascript(name="p%d" % i)
+        # Debug: show per-page bounding boxes as JS code
+        # for i, (bb, bb_inner) in enumerate(bboxes):
+        #    print bb.as_javascript(name="p%d" % i)
 
         # Create the map canvas for each page
         self.pages = []
         indexes = []
-        print "List of all bboxes"
         for i, (bb, bb_inner) in enumerate(bboxes):
 
             # Create the gray shape around the map
             exterior = shapely.wkt.loads(bb.as_wkt())
-            print bb.as_javascript("before-%d" % i, "#ff0000")
-            print bb_inner.as_javascript("after-%d" % i, "#00ff00")
             interior = shapely.wkt.loads(bb_inner.as_wkt())
             shade_wkt = exterior.difference(interior).wkt
             shade = maplib.shapes.PolyShapeFile(
@@ -205,7 +202,7 @@ class MultiPageRenderer(Renderer):
             grid_shape = map_grid.generate_shape_file(
                 os.path.join(self.tmpdir, 'grid%d.shp' % i))
 
-            # Create one canvas for each page
+            # Create one canvas for the current page
             map_canvas = MapCanvas(self.rc.stylesheet,
                                    bb, graphical_ratio=None)
 
@@ -216,18 +213,17 @@ class MultiPageRenderer(Renderer):
                                       self.rc.stylesheet.grid_line_width)
 
             map_canvas.render()
+            self.pages.append((map_canvas, map_grid))
 
+            # Create the index for the current page
             index = StreetIndex(self.db,
                                 bb_inner.as_wkt(),
                                 self.rc.i18n)
 
             index.apply_grid(map_grid)
-
-            print index
-
             indexes.append(index)
-            self.pages.append((map_canvas, map_grid))
 
+        # Merge all indexes
         self.index_categories = self._merge_page_indexes(indexes)
 
     def _merge_page_indexes(self, indexes):
@@ -367,8 +363,6 @@ class MultiPageRenderer(Renderer):
         mpsir.render()
 
         cairo_surface.flush()
-        print "I'm rendering"
-        pass
 
     # Convert a length in geometric meters (in the real life) into a
     # length in paper millimiters (as drawn on the map).

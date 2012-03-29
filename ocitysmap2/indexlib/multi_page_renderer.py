@@ -54,7 +54,6 @@ class MultiPageStreetIndexRenderer:
         return layout, fascent, fheight, em
 
     def render(self, dpi = UTILS.PT_PER_INCH):
-        print self.index_categories
         self.ctx.save()
 
         # Draw a filled rectangle as the background (to be removed,
@@ -149,7 +148,6 @@ class MultiPageStreetIndexRenderer:
                         delta_x  = orig_delta_x
                         self.surface.show_page()
 
-                print street.label
                 street.draw(self._i18n.isrtl(), self.ctx, pc, label_layout,
                             UTILS.convert_pt_to_dots(label_fascent, dpi),
                             UTILS.convert_pt_to_dots(label_fheight, dpi),
