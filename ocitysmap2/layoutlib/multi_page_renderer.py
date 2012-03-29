@@ -34,6 +34,7 @@ import coords
 from abstract_renderer import Renderer
 
 from ocitysmap2.maplib.map_canvas import MapCanvas
+from ocitysmap2.maplib.grid import Grid
 
 import ocitysmap2
 import commons
@@ -63,6 +64,10 @@ class MultiPageRenderer(Renderer):
         print "One page width  (in mm) : %f" % self.rc.paper_width_mm
         print "One page height (in mm) : %f" % self.rc.paper_height_mm
 
+        self._grid_legend_margin_pt = \
+            min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
+                Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
+
         # Compute the usable area per page
         self._usable_area_width_pt = (self.paper_width_pt -
                                       (2 * Renderer.PRINT_SAFE_MARGIN_PT))
@@ -90,7 +95,7 @@ class MultiPageRenderer(Renderer):
         # render the geographical area at the current scale.
         total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
         total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
-        grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
+        self.grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
         overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
 
         # Calculate the number of pages needed in both directions
@@ -172,9 +177,11 @@ class MultiPageRenderer(Renderer):
             print bb.as_javascript(name="p%d" % i)
 
         # Create the map canvas for each page
-        self.canvas = []
+        self.pages = []
         print "List of all bboxes"
         for i, (bb, bb_inner) in enumerate(bboxes):
+
+            # Create the gray shape around the map
             exterior = shapely.wkt.loads(bb.as_wkt())
             print bb.as_javascript("before-%d" % i, "#ff0000")
             print bb_inner.as_javascript("after-%d" % i, "#00ff00")
@@ -185,21 +192,24 @@ class MultiPageRenderer(Renderer):
                 'shade%d' % i)
             shade.add_shade_from_wkt(shade_wkt)
 
+            # Create the grid
+            map_grid = Grid(bb_inner, self.rc.i18n.isrtl())
+            grid_shape = map_grid.generate_shape_file(
+                os.path.join(self.tmpdir, 'grid%d.shp' % i))
+
             # Create one canvas for each page
             map_canvas = MapCanvas(self.rc.stylesheet,
                                    bb, graphical_ratio=None)
 
             map_canvas.add_shape_file(shade)
+            map_canvas.add_shape_file(grid_shape,
+                                      self.rc.stylesheet.grid_line_color,
+                                      self.rc.stylesheet.grid_line_alpha,
+                                      self.rc.stylesheet.grid_line_width)
+
             map_canvas.render()
 
-            self.canvas.append(map_canvas)
-
-        self.map_coords = (Renderer.PRINT_SAFE_MARGIN_PT,
-                           Renderer.PRINT_SAFE_MARGIN_PT,
-                           self._usable_area_width_pt,
-                           self._usable_area_height_pt)
-
-        print self.canvas
+            self.pages.append((map_canvas, map_grid))
 
     def _project_envelope(self, bbox):
         """Project the given bounding box into the rendering projection."""
@@ -220,7 +230,7 @@ class MultiPageRenderer(Renderer):
 
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
-        for i, c in enumerate(self.canvas):
+        for i, (canvas, grid) in enumerate(self.pages):
             ctx.save()
 
             # Prepare to draw the map at the right location
@@ -228,7 +238,7 @@ class MultiPageRenderer(Renderer):
                           commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
 
             ctx.save()
-            rendered_map = c.get_rendered_map()
+            rendered_map = canvas.get_rendered_map()
             ctx.scale(commons.convert_pt_to_dots(self._usable_area_width_pt)
                       / rendered_map.width,
                       commons.convert_pt_to_dots(self._usable_area_height_pt)
@@ -241,6 +251,18 @@ class MultiPageRenderer(Renderer):
             ctx.translate(commons.convert_pt_to_dots(self._usable_area_width_pt),
                           commons.convert_pt_to_dots(self._usable_area_height_pt))
             Renderer._draw_centered_text(ctx, str(i + 1), 0, 0)
+            ctx.restore()
+
+            ctx.save()
+            ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
+                          commons.convert_pt_to_dots(self.grayed_margin_pt))
+
+            # Place the vertical and horizontal square labels
+            self._draw_labels(ctx, grid,
+                              commons.convert_pt_to_dots(self._usable_area_width_pt)  - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                              commons.convert_pt_to_dots(self._usable_area_height_pt) - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                              commons.convert_pt_to_dots(self._grid_legend_margin_pt))
+
             ctx.restore()
 
             ctx.restore()
