@@ -327,41 +327,23 @@ shared with the original OSM stylesheet, but this is not a problem as
 the mq_world_mercator_*.tiff files are not used by the original OSM
 stylesheet).
 
-Now, to the configuration of the stylesheet itself:
+Now, to the configuration of the stylesheet itself (use the
+.inc.template files):
 
- cp mapquest_inc/datasource-settings.xml.inc.template mapquest_inc/datasource-settings.xml.inc
- vi mapquest_inc/datasource-settings.xml.inc
-
-Adjust your database details appropriately. The "estimate_extent"
-value should be "false", and the "extent" value should be
--20037508,-19929239,20037508,19929239.
-
-Next configuration file:
-
- cp mapquest_inc/fontset-settings.xml.inc.template mapquest_inc/fontset-settings.xml.inc
- vi mapquest_inc/fontset-settings.xml.inc
+ vi mapquest_inc/fontset-settings.xml.inc.template
 
 Not much to change here, the default value is fine. If you want to use
 the same font for the original OSM stylesheet and the MapQuest one,
 replace "Arial" by "DejaVu".
 
-Next (and final) configuration file:
+Create the .inc files from the templates:
 
- cp mapquest_inc/settings.xml.inc.template mapquest_inc/settings.xml.inc
- vi mapquest_inc/settings.xml.inc
-
-And set the following values:
-
- * symbols to "mapquest_symbols" (the directory in the MapQuest
-   stylesheet where the icons and other related elements are stored)
-
- * osm2pgsql_projection to "&srs900913;"
-
- * world_boundaries to "world_boundaries" (the directory in the
-   MapQuest stylesheet where the world boundaries data can be found)
-
- * prefix to "planet_osm". This is the prefix of the OSM tables in the
-   PostGIS database.
+ python /path/to/mapnik2-osm/generate_xml.py --inc mapquest_inc \
+                                             --symbols mapquest_symbols \
+                                             --dbname maposmatic \
+                                             --host 'localhost' \
+                                             --user maposmatic --port 5432 \
+                                             --password 'ereiamjh'
 
 The final step is to integrate this new stylesheet in ocitysmap. To do
 so, edit your ocitysmap.conf file, and add a new stylesheet section,
