@@ -37,6 +37,8 @@ from ocitysmap2.maplib.map_canvas import MapCanvas
 
 import ocitysmap2
 import commons
+import shapely.wkt
+from ocitysmap2 import maplib
 
 LOG = logging.getLogger('ocitysmap')
 PAGE_STR = " - Page %(page_number)d"
@@ -68,13 +70,9 @@ class MultiPageRenderer(Renderer):
                                        (2 * Renderer.PRINT_SAFE_MARGIN_PT))
 
         scale_denom = 10000
-        OUTTER_MARGIN_MM = 20
+        OUTTER_MARGIN_MM = 10
 
-        print 'BoundingBox(%f,%f,%f,%f,"original", {color: "#00ff00"})' % \
-            (self.rc.bounding_box.get_top_left()[0],
-             self.rc.bounding_box.get_top_left()[1],
-             self.rc.bounding_box.get_bottom_right()[0],
-             self.rc.bounding_box.get_bottom_right()[1])
+        print self.rc.bounding_box.as_javascript("original", "#00ff00")
 
         # Convert the original Bounding box into Mercator meters
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
@@ -139,11 +137,7 @@ class MultiPageRenderer(Renderer):
         envelope = mapnik.Box2d(off_x, off_y, off_x + width, off_y + height)
         self._geo_bbox = self._inverse_envelope(envelope)
 
-        print 'BoundingBox(%f,%f,%f,%f,"extended", {color: "#0f0f0f"})' % \
-            (self._geo_bbox.get_top_left()[0],
-             self._geo_bbox.get_top_left()[1],
-             self._geo_bbox.get_bottom_right()[0],
-             self._geo_bbox.get_bottom_right()[1])
+        print self._geo_bbox.as_javascript("extended", "#0f0f0f")
 
         # Convert the usable area on each sheet of paper into the
         # amount of Mercator meters we can render in this area.
@@ -162,24 +156,37 @@ class MultiPageRenderer(Renderer):
                 envelope = mapnik.Box2d(cur_x, cur_y,
                                         cur_x+usable_area_merc_m_width,
                                         cur_y+usable_area_merc_m_height)
-                bboxes.append(self._inverse_envelope(envelope))
 
-        for i, bb in enumerate(bboxes):
-            print 'BoundingBox(%f,%f,%f,%f,"p%d")' % \
-                (bb.get_top_left()[0],
-                 bb.get_top_left()[1],
-                 bb.get_bottom_right()[0],
-                 bb.get_bottom_right()[1], i)
+                envelope_inner = mapnik.Box2d(cur_x + outter_margin_merc_m,
+                                              cur_y + outter_margin_merc_m,
+                                              cur_x + usable_area_merc_m_width  - outter_margin_merc_m,
+                                              cur_y + usable_area_merc_m_height - outter_margin_merc_m)
+
+                bboxes.append((self._inverse_envelope(envelope),
+                               self._inverse_envelope(envelope_inner)))
+
+        for i, (bb, bb_inner) in enumerate(bboxes):
+            print bb.as_javascript(name="p%d" % i)
 
         # Create the map canvas for each page
         self.canvas = []
         print "List of all bboxes"
-        for bb in bboxes:
-            print bb
+        for i, (bb, bb_inner) in enumerate(bboxes):
+            exterior = shapely.wkt.loads(bb.as_wkt())
+            print bb.as_javascript("before-%d" % i, "#ff0000")
+            print bb_inner.as_javascript("after-%d" % i, "#00ff00")
+            interior = shapely.wkt.loads(bb_inner.as_wkt())
+            shade_wkt = exterior.difference(interior).wkt
+            shade = maplib.shapes.PolyShapeFile(
+                bb, os.path.join(self.tmpdir, 'shape%d.shp' % i),
+                'shade%d' % i)
+            shade.add_shade_from_wkt(shade_wkt)
+
             # Create one canvas for each page
             map_canvas = MapCanvas(self.rc.stylesheet,
                                    bb, graphical_ratio=None)
 
+            map_canvas.add_shape_file(shade)
             map_canvas.render()
 
             self.canvas.append(map_canvas)
