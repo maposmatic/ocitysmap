@@ -346,8 +346,8 @@ Create the .inc files from the templates:
                                              --password 'ereiamjh'
 
 The final step is to integrate this new stylesheet in ocitysmap. To do
-so, edit your ocitysmap.conf file, and add a new stylesheet section,
-like:
+so, edit your ~/.ocitysmap.conf file, and add a new stylesheet
+section, like:
 
 [mapquest_eu]
 name: MapQuestEu
