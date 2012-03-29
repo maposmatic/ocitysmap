@@ -217,7 +217,7 @@ class MultiPageRenderer(Renderer):
 
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
-        for c in self.canvas:
+        for i, c in enumerate(self.canvas):
             ctx.save()
 
             # Prepare to draw the map at the right location
@@ -231,6 +231,13 @@ class MultiPageRenderer(Renderer):
                       commons.convert_pt_to_dots(self._usable_area_height_pt)
                       / rendered_map.height)
             mapnik.render(rendered_map, ctx)
+            ctx.restore()
+
+            # Render the page number
+            ctx.save()
+            ctx.translate(commons.convert_pt_to_dots(self._usable_area_width_pt),
+                          commons.convert_pt_to_dots(self._usable_area_height_pt))
+            Renderer._draw_centered_text(ctx, str(i + 1), 0, 0)
             ctx.restore()
 
             ctx.restore()
