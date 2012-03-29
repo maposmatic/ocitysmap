@@ -59,8 +59,8 @@ class MultiPageStreetIndexRenderer:
         # Create a PangoCairo context for drawing to Cairo
         pc = pangocairo.CairoContext(self.ctx)
 
-        header_fd = pango.FontDescription("Georgia Bold 14")
-        label_fd  = pango.FontDescription("DejaVu 10")
+        header_fd = pango.FontDescription("Georgia Bold 12")
+        label_fd  = pango.FontDescription("DejaVu 8")
 
         header_layout, header_fascent, header_fheight, header_em = \
             self._create_layout_with_font(pc, header_fd)
