@@ -55,7 +55,7 @@ class SinglePageRenderer(Renderer):
 
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
-    def __init__(self, rc, tmpdir, dpi,
+    def __init__(self, db, rc, tmpdir, dpi,
                  street_index = None, index_position = 'side'):
         """
         Create the renderer.
@@ -67,7 +67,7 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
         """
-        Renderer.__init__(self, rc, tmpdir, street_index)
+        Renderer.__init__(self, db, rc, tmpdir, street_index)
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
@@ -489,7 +489,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
     name = 'plain'
     description = 'Full-page layout without index.'
 
-    def __init__(self, rc, tmpdir, dpi, street_index):
+    def __init__(self, db, rc, tmpdir, dpi, street_index):
         """
         Create the renderer.
 
@@ -498,7 +498,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            street_index (StreetIndex): None or the street index object.
         """
-        SinglePageRenderer.__init__(self, rc, tmpdir, dpi, None, None)
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, None, None)
 
 
     @staticmethod
@@ -527,7 +527,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
     name = 'single_page_index_side'
     description = 'Full-page layout with the index on the side.'
 
-    def __init__(self, rc, tmpdir, dpi, street_index):
+    def __init__(self, db, rc, tmpdir, dpi, street_index):
         """
         Create the renderer.
 
@@ -536,8 +536,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            street_index (StreetIndex): None or the street index object.
         """
-        SinglePageRenderer.__init__(self, rc, tmpdir, dpi, street_index, 'side')
-
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, street_index, 'side')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
@@ -565,7 +564,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
     name = 'single_page_index_bottom'
     description = 'Full-page layout with the index at the bottom.'
 
-    def __init__(self, rc, tmpdir, dpi, street_index):
+    def __init__(self, db, rc, tmpdir, dpi, street_index):
         """
         Create the renderer.
 
@@ -574,8 +573,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            street_index (StreetIndex): None or the street index object.
         """
-        SinglePageRenderer.__init__(self, rc, tmpdir, dpi, street_index, 'bottom')
-
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, street_index, 'bottom')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,

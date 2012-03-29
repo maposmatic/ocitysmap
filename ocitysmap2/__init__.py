@@ -520,7 +520,7 @@ SELECT ST_AsText(ST_LongestLine(
             raise ValueError, \
                 'Unsupported output format: %s!' % output_format.upper()
 
-        renderer = renderer_cls(config, tmpdir, dpi, street_index)
+        renderer = renderer_cls(self._db, config, tmpdir, dpi, street_index)
 
         # Update the street_index to reflect the grid's actual position
         if renderer.grid and street_index:

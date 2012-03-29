@@ -58,7 +58,7 @@ class Renderer:
     # on the rendered map of a kilometer
     DEFAULT_KM_IN_MM = 100
 
-    def __init__(self, rc, tmpdir, street_index):
+    def __init__(self, db, rc, tmpdir, street_index):
         """
         Create the renderer.
 
@@ -68,6 +68,7 @@ class Renderer:
            street_index (StreetIndex): None or the street index object.
         """
         # Note: street_index may be None
+        self.db           = db
         self.rc           = rc
         self.tmpdir       = tmpdir
         self.grid         = None # The implementation is in charge of it
