@@ -30,16 +30,22 @@ import sys
 import cairo
 import mapnik
 import coords
+import locale
+
+from itertools import groupby
 
 from abstract_renderer import Renderer
 
 from ocitysmap2.maplib.map_canvas import MapCanvas
 from ocitysmap2.maplib.grid import Grid
+from indexlib.indexer import StreetIndex
 
 import ocitysmap2
 import commons
 import shapely.wkt
 from ocitysmap2 import maplib
+
+from indexlib.commons import IndexCategory
 
 LOG = logging.getLogger('ocitysmap')
 PAGE_STR = " - Page %(page_number)d"
@@ -178,6 +184,7 @@ class MultiPageRenderer(Renderer):
 
         # Create the map canvas for each page
         self.pages = []
+        indexes = []
         print "List of all bboxes"
         for i, (bb, bb_inner) in enumerate(bboxes):
 
@@ -209,7 +216,86 @@ class MultiPageRenderer(Renderer):
 
             map_canvas.render()
 
+            index = StreetIndex(self.db,
+                                bb_inner.as_wkt(),
+                                self.rc.i18n)
+
+            index.apply_grid(map_grid)
+
+            print index
+
+            indexes.append(index)
             self.pages.append((map_canvas, map_grid))
+
+        self.index_data = self._merge_page_indexes(indexes)
+
+    def _merge_page_indexes(self, indexes):
+        # First, we split street categories and "other" categories,
+        # because we sort them and we don't want to have the "other"
+        # categories intermixed with the street categories. This
+        # sorting is required for the groupby Python operator to work
+        # properly.
+        all_categories_streets = []
+        all_categories_others  = []
+        for page_number, idx in enumerate(indexes):
+            for cat in idx.categories:
+                # Mark each IndexItem with its page number
+                for item in cat.items:
+                    item.page_number = page_number
+                # Split in two lists depending on the category type
+                # (street or other)
+                if cat.is_street:
+                    all_categories_streets.append(cat)
+                else:
+                    all_categories_others.append(cat)
+
+        all_categories_streets_merged = \
+            self._merge_index_same_categories(all_categories_streets, is_street=True)
+        all_categories_others_merged = \
+            self._merge_index_same_categories(all_categories_others, is_street=False)
+
+        all_categories_merged = \
+            all_categories_streets_merged + all_categories_others_merged
+
+        return all_categories_merged
+
+    def _merge_index_same_categories(self, categories, is_street=True):
+        # Sort by categories. Now we may have several consecutive
+        # categories with the same name (i.e category for letter 'A'
+        # from page 1, category for letter 'A' from page 3).
+        categories.sort(key=lambda s:s.name)
+
+        categories_merged = []
+        for category_name,grouped_categories in groupby(categories,
+                                                        key=lambda s:s.name):
+
+            # Group the different IndexItem from categories having the
+            # same name. The groupby() function guarantees us that
+            # categories with the same name are grouped together in
+            # grouped_categories[].
+
+            grouped_items = []
+            for cat in grouped_categories:
+                grouped_items.extend(cat.items)
+
+            # Re-sort alphabetically all the IndexItem according to
+            # the street name.
+
+            prev_locale = locale.getlocale(locale.LC_COLLATE)
+            locale.setlocale(locale.LC_COLLATE, self.rc.i18n.language_code())
+            try:
+                grouped_items_sorted = \
+                    sorted(grouped_items,
+                           lambda x,y: locale.strcoll(x.label, y.label))
+            finally:
+                locale.setlocale(locale.LC_COLLATE, prev_locale)
+
+            # Rebuild a IndexCategory object with the list of merged
+            # and sorted IndexItem
+            categories_merged.append(
+                IndexCategory(category_name, grouped_items_sorted, is_street))
+
+        return categories_merged
 
     def _project_envelope(self, bbox):
         """Project the given bounding box into the rendering projection."""
