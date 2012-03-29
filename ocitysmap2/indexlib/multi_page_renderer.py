@@ -79,9 +79,19 @@ class MultiPageStreetIndexRenderer:
 
         margin = label_em
 
+        max_drawing_width = 0
+        for category in self.index_categories:
+            for street in category.items:
+                w = street.min_drawing_width(label_layout, label_em)
+                if w > max_drawing_width:
+                    max_drawing_width = w
+
+        columns_count = int(self.rendering_area_w / max_drawing_width)
+        if columns_count == 0:
+            columns_count = 1
+
         # We have three columns
-        COLUMNS_COUNT = 3
-        column_width = self.rendering_area_w / COLUMNS_COUNT
+        column_width = self.rendering_area_w / columns_count
 
         label_layout.set_width(int(UTILS.convert_pt_to_dots(
                     (column_width - margin) * pango.SCALE, dpi)))
@@ -105,7 +115,7 @@ class MultiPageStreetIndexRenderer:
                 offset_x      += delta_x
                 actual_n_cols += 1
 
-                if actual_n_cols == COLUMNS_COUNT:
+                if actual_n_cols == columns_count:
                     actual_n_cols = 0
                     offset_y = margin / 2.
                     offset_x = orig_offset_x
@@ -130,7 +140,7 @@ class MultiPageStreetIndexRenderer:
                     offset_x      += delta_x
                     actual_n_cols += 1
 
-                    if actual_n_cols == COLUMNS_COUNT:
+                    if actual_n_cols == columns_count:
                         actual_n_cols = 0
                         offset_y = margin / 2.
                         offset_x = orig_offset_x
