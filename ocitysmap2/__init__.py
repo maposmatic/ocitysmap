@@ -526,6 +526,13 @@ SELECT ST_AsText(ST_LongestLine(
                 'Unsupported output format: %s!' % output_format.upper()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
+
+        # Set a white background
+        ctx = cairo.Context(surface)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle(0, 0, renderer.paper_width_pt, renderer.paper_height_pt)
+        ctx.fill()
+
         renderer.render(surface, dpi, osm_date)
 
         LOG.debug('Writing %s...' % output_filename)
