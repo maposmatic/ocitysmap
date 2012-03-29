@@ -238,7 +238,7 @@ class MultiPageRenderer(Renderer):
             for cat in idx.categories:
                 # Mark each IndexItem with its page number
                 for item in cat.items:
-                    item.page_number = page_number
+                    item.page_number = (page_number + 1)
                 # Split in two lists depending on the category type
                 # (street or other)
                 if cat.is_street:
