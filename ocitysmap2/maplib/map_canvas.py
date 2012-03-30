@@ -146,7 +146,7 @@ class MapCanvas:
         return self._map
 
     def get_actual_bounding_box(self):
-        """Returns the actual greographic bounding box that will be rendered by
+        """Returns the actual geographic bounding box that will be rendered by
         Mapnik."""
         return self._geo_bbox
 

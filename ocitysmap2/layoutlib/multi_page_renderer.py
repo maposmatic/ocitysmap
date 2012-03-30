@@ -197,7 +197,7 @@ class MultiPageRenderer(Renderer):
         overview_bb = self._geo_bbox.create_expanded(0.001, 0.001)
         # Create the grid
         map_grid = OverviewGrid(overview_bb,
-                     [bb for bb, bb_inner in bboxes], self.rc.i18n.isrtl())
+                     [bb_inner for bb, bb_inner in bboxes], self.rc.i18n.isrtl())
 
         grid_shape = map_grid.generate_shape_file(
                     os.path.join(self.tmpdir, 'grid_overview.shp'))
@@ -221,8 +221,7 @@ class MultiPageRenderer(Renderer):
 
         map_canvas.add_shape_file(shade)
         map_canvas.add_shape_file(grid_shape,
-                                  self.rc.stylesheet.grid_line_color,
-                                  self.rc.stylesheet.grid_line_alpha,
+                                  self.rc.stylesheet.grid_line_color, 1,
                                   self.rc.stylesheet.grid_line_width)
 
         map_canvas.render()
