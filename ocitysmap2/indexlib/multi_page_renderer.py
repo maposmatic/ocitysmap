@@ -86,6 +86,10 @@ class MultiPageStreetIndexRenderer:
                 if w > max_drawing_width:
                     max_drawing_width = w
 
+        # No street to render, bail out
+        if max_drawing_width == 0:
+            return
+
         columns_count = int(self.rendering_area_w / max_drawing_width)
         if columns_count == 0:
             columns_count = 1
