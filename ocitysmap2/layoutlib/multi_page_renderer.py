@@ -32,6 +32,7 @@ try:
     import mapnik2 as mapnik
 except ImportError:
     import mapnik
+import ogr
 import coords
 import locale
 import pangocairo
@@ -165,6 +166,7 @@ class MultiPageRenderer(Renderer):
         # Calculate all the bounding boxes that correspond to the
         # geographical area that will be rendered on each sheet of
         # paper.
+        area_polygon = ogr.CreateGeometryFromWkt(self.rc.polygon_wkt)
         bboxes = []
         for j in reversed(range(0, nb_pages_height)):
             for i in range(0, nb_pages_width):
@@ -178,9 +180,11 @@ class MultiPageRenderer(Renderer):
                                               cur_y + grayed_margin_merc_m,
                                               cur_x + usable_area_merc_m_width  - grayed_margin_merc_m,
                                               cur_y + usable_area_merc_m_height - grayed_margin_merc_m)
-
-                bboxes.append((self._inverse_envelope(envelope),
-                               self._inverse_envelope(envelope_inner)))
+                inner_bb = self._inverse_envelope(envelope_inner)
+                if not area_polygon.Disjoint(ogr.CreateGeometryFromWkt(
+                                                     inner_bb.as_wkt())):
+                    bboxes.append((self._inverse_envelope(envelope),
+                                   inner_bb))
 
         # Debug: show per-page bounding boxes as JS code
         # for i, (bb, bb_inner) in enumerate(bboxes):
