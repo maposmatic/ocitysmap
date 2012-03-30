@@ -335,6 +335,14 @@ class SinglePageRenderer(Renderer):
 
         ctx = cairo.Context(cairo_surface)
 
+        # Set a white background
+        ctx.save()
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                      commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+        ctx.fill()
+        ctx.restore()
+
         ##
         ## Draw the index, when applicable
         ##
