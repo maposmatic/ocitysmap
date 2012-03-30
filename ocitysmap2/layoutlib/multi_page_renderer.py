@@ -65,8 +65,8 @@ class MultiPageRenderer(Renderer):
     description = 'A multi-page layout.'
     multipages = True
 
-    def __init__(self, *args, **kwargs):
-        Renderer.__init__(self, *args, **kwargs)
+    def __init__(self, db, rc, tmpdir, dpi, street_index):
+        Renderer.__init__(self, db, rc, tmpdir, dpi, street_index)
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
@@ -204,7 +204,9 @@ class MultiPageRenderer(Renderer):
 
             # Create one canvas for the current page
             map_canvas = MapCanvas(self.rc.stylesheet,
-                                   bb, graphical_ratio=None)
+                                   bb, self._usable_area_width_pt,
+                                   self._usable_area_height_pt, dpi,
+                                   extend_bbox_to_ratio=False)
 
             map_canvas.add_shape_file(shade)
             map_canvas.add_shape_file(grid_shape,
@@ -317,14 +319,8 @@ class MultiPageRenderer(Renderer):
             ctx.translate(commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
                           commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
 
-            ctx.save()
             rendered_map = canvas.get_rendered_map()
-            ctx.scale(commons.convert_pt_to_dots(self._usable_area_width_pt)
-                      / rendered_map.width,
-                      commons.convert_pt_to_dots(self._usable_area_height_pt)
-                      / rendered_map.height)
             mapnik.render(rendered_map, ctx)
-            ctx.restore()
 
             # Render the page number
             ctx.save()

@@ -58,7 +58,7 @@ class Renderer:
     # on the rendered map of a kilometer
     DEFAULT_KM_IN_MM = 100
 
-    def __init__(self, db, rc, tmpdir, street_index):
+    def __init__(self, db, rc, tmpdir, dpi, street_index):
         """
         Create the renderer.
 
