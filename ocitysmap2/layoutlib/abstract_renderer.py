@@ -43,8 +43,6 @@ import logging
 
 LOG = logging.getLogger('ocitysmap')
 
-OVERVIEW_PAGE_STR = "Page %(page_number)d"
-
 class Renderer:
     """
     The job of an OCitySMap layout renderer is to lay out the resulting map and
@@ -232,8 +230,7 @@ class Renderer:
               drawing area (cairo units).
         """
         ctx.save()
-
-        ctx.set_font_size(18)
+        ctx.set_font_size(14)
 
         bbox = map_canvas.get_actual_bounding_box()
         bottom_right, bottom_left, top_left, top_right = bbox.to_mercator()
@@ -250,8 +247,7 @@ class Renderer:
 
             x_percent = 100.0*(center_x - left)/coord_delta_x
             x = int(area_width_dots*x_percent/100)
-            Renderer._draw_centered_text(ctx,
-                                OVERVIEW_PAGE_STR % {'page_number':idx+2}, x, y)
+            Renderer._draw_centered_text(ctx, unicode(idx + 3), x, y)
         ctx.restore()
 
     def _create_map_canvas(self, width, height, dpi,

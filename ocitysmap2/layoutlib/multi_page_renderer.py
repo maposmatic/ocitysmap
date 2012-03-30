@@ -545,19 +545,17 @@ class MultiPageRenderer(Renderer):
             Renderer._draw_centered_text(ctx, str(i + 1), 0, 0)
             ctx.restore()
 
-            ctx.save()
-            ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
-                          commons.convert_pt_to_dots(self.grayed_margin_pt))
 
             if overview_grid:
                 # draw pages numbers
                 self._draw_overview_labels(ctx, canvas, overview_grid,
-                  commons.convert_pt_to_dots(self._usable_area_width_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                  commons.convert_pt_to_dots(self._usable_area_height_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt))
+                  commons.convert_pt_to_dots(self._usable_area_width_pt),
+                  commons.convert_pt_to_dots(self._usable_area_height_pt))
             if grid:
                 # Place the vertical and horizontal square labels
+                ctx.save()
+                ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
+                          commons.convert_pt_to_dots(self.grayed_margin_pt))
                 self._draw_labels(ctx, grid,
                   commons.convert_pt_to_dots(self._usable_area_width_pt) \
                         - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
@@ -565,7 +563,7 @@ class MultiPageRenderer(Renderer):
                         - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
                   commons.convert_pt_to_dots(self._grid_legend_margin_pt))
 
-            ctx.restore()
+                ctx.restore()
 
             ctx.restore()
 
