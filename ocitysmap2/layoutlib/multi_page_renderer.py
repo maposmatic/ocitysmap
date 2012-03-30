@@ -244,9 +244,9 @@ class MultiPageRenderer(Renderer):
             # Create the contour shade
 
             # Area to keep visible
-            interior = shapely.wkt.loads(self.rc.polygon_wkt)
+            interior_contour = shapely.wkt.loads(self.rc.polygon_wkt)
             # Determine the shade WKT
-            shade_contour_wkt = exterior.difference(interior).wkt
+            shade_contour_wkt = exterior.difference(interior_contour).wkt
             # Prepare the shade SHP
             shade_contour = maplib.shapes.PolyShapeFile(bb,
                 os.path.join(self.tmpdir, 'shade_contour%d.shp' % i),
@@ -278,8 +278,9 @@ class MultiPageRenderer(Renderer):
             self.pages.append((map_canvas, map_grid, None))
 
             # Create the index for the current page
+            inside_contour_wkt = interior_contour.intersection(interior).wkt
             index = StreetIndex(self.db,
-                                bb_inner.as_wkt(),
+                                inside_contour_wkt,
                                 self.rc.i18n, page_number=(i + 3))
 
             index.apply_grid(map_grid)
