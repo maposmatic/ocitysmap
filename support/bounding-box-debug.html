@@ -1,0 +1,63 @@
+<!--
+
+    This short HTML page is helpful to debug bounding box related
+    problems, by visualizing a set of bounding boxes on a slippy
+    map. Many bounding boxes can be added using the BoundingBox()
+    function.
+
+    Note that the OcitySMap BoundingBox object has a .as_javascript()
+    method that directly generates a string that is suitable for
+    copy/paste into this file.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leaflet Quick Start Guide Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+	  href="http://code.leafletjs.com/leaflet-0.3.1/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="../dist/leaflet.ie.css" /><![endif]-->
+  </head>
+  <body>
+    <div id="map" style="width: 100%; height: 600px"></div>
+    <script src="http://code.leafletjs.com/leaflet-0.3.1/leaflet.js"></script>
+    <script>
+var map = new L.Map('map');
+
+var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+cloudmadeAttribution = 'Map data © 2011 OpenStreetMap contributors, Imagery © 2011 CloudMade',
+cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
+
+/* Define the center of the map and the zoom level */
+map.setView(new L.LatLng(47.9947, 5.9155), 13).addLayer(cloudmade);
+
+function BoundingBox(lat1, lng1, lat2, lng2, str, color) {
+    var p1 = new L.LatLng(lat1, lng1),
+    p2 = new L.LatLng(lat1, lng2),
+    p3 = new L.LatLng(lat2, lng2),
+    p4 = new L.LatLng(lat2, lng1),
+    polygonPoints = [p1, p2, p3, p4, p1],
+    polygon = new L.Polygon(polygonPoints, color);
+
+    polygon.bindPopup(str);
+    map.addLayer(polygon);
+}
+
+/* List of bounding boxes */
+BoundingBox(48.001253,5.885540,47.984034,5.903454, "before-0", { color: "#ff0000" })
+BoundingBox(47.996253,5.890540,47.989034,5.898454, "after-0", { color: "#00ff00" })
+BoundingBox(48.001253,5.901658,47.984034,5.919572, "before-1", { color: "#ff0000" })
+BoundingBox(47.996253,5.906658,47.989034,5.914572, "after-1", { color: "#00ff00" })
+BoundingBox(48.001253,5.917775,47.984034,5.935689, "before-2", { color: "#ff0000" })
+BoundingBox(47.996253,5.922775,47.989034,5.930689, "after-2", { color: "#00ff00" })
+BoundingBox(47.985237,5.885540,47.968013,5.903454, "before-3", { color: "#ff0000" })
+BoundingBox(47.980237,5.890540,47.973013,5.898454, "after-3", { color: "#00ff00" })
+BoundingBox(47.985237,5.901658,47.968013,5.919572, "before-4", { color: "#ff0000" })
+BoundingBox(47.980237,5.906658,47.973013,5.914572, "after-4", { color: "#00ff00" })
+BoundingBox(47.985237,5.917775,47.968013,5.935689, "before-5", { color: "#ff0000" })
+BoundingBox(47.980237,5.922775,47.973013,5.930689, "after-5", { color: "#00ff00" })
+    </script>
+  </body>
+</html>
