@@ -79,14 +79,17 @@ class i18n_template_code_CODE(i18n):
 
 
 class i18n_fr_generic(i18n):
-    APPELLATIONS = [ u"Accès", u"Allée", u"Allées", u"Autoroute", u"Avenue", u"Barrage",
+    APPELLATIONS = [ u"Accès", u"Allée", u"Allées", u"Autoroute", u"Avenue",
+                     u"Avenues", u"Barrage",
                      u"Boulevard", u"Carrefour", u"Chaussée", u"Chemin",
+                     u"Chemin rural",
                      u"Cheminement", u"Cale", u"Cales", u"Cavée", u"Cité",
                      u"Clos", u"Coin", u"Côte", u"Cour", u"Cours", u"Descente",
                      u"Degré", u"Escalier",
                      u"Escaliers", u"Esplanade", u"Funiculaire",
                      u"Giratoire", u"Hameau", u"Impasse", u"Jardin",
-                     u"Jardins", u"Liaison", u"Mail", u"Montée", u"Môle",
+                     u"Jardins", u"Liaison", u"Lotissement", u"Mail",
+                     u"Montée", u"Môle",
                      u"Parc", u"Passage", u"Passerelle", u"Passerelles",
                      u"Place", u"Placette", u"Pont", u"Promenade",
                      u"Petite Avenue", u"Petite Rue", u"Quai",
