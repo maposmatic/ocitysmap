@@ -216,7 +216,8 @@ class StreetIndex:
             if (not current_category
                 or not self._i18n.first_letter_equal(street_name[0],
                                                      current_category.name)):
-                current_category = commons.IndexCategory(street_name[0])
+                current_category = commons.IndexCategory(
+                    self._i18n.upper_unaccent_string(street_name[0]))
                 result.append(current_category)
 
             # Parse the WKT from the largest linestring in shape

@@ -109,7 +109,7 @@ class i18n_fr_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -120,7 +120,7 @@ class i18n_fr_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -138,7 +138,7 @@ class i18n_fr_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_it_generic(i18n):
     APPELLATIONS = [ u"Via", u"Viale", u"Piazza", u"Scali", u"Strada", u"Largo",
@@ -153,7 +153,7 @@ class i18n_it_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -164,7 +164,7 @@ class i18n_it_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -182,7 +182,7 @@ class i18n_it_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_es_generic(i18n):
     APPELLATIONS = [ u"Avenida", u"Avinguda", u"Calle", u"Callejón",
@@ -198,7 +198,7 @@ class i18n_es_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -210,7 +210,7 @@ class i18n_es_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -229,7 +229,7 @@ class i18n_es_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_ca_generic(i18n):
 
@@ -322,7 +322,7 @@ class i18n_ca_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -335,7 +335,7 @@ class i18n_ca_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -355,7 +355,7 @@ class i18n_ca_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_pt_br_generic(i18n):
     APPELLATIONS = [ u"Aeroporto", u"Alameda", u"Área", u"Avenida",
@@ -376,7 +376,7 @@ class i18n_pt_br_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -387,7 +387,7 @@ class i18n_pt_br_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -405,7 +405,7 @@ class i18n_pt_br_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_ar_generic(i18n):
     APPELLATIONS = [ u"شارع", u"طريق", u"زقاق", u"نهج", u"جادة",
@@ -423,14 +423,14 @@ class i18n_ar_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     A_ACCENT = re.compile(ur"[اإآ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.A_ACCENT.sub("أ", s)
         return s.upper()
 
@@ -444,7 +444,7 @@ class i18n_ar_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
     def isrtl(self):
         return True
@@ -467,7 +467,7 @@ class i18n_ru_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         # usually, there are no accents in russian names, only "ё" sometimes, but
         # not as first letter
         return s.upper()
@@ -482,7 +482,7 @@ class i18n_ru_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_nl_generic(i18n):
     #
@@ -517,7 +517,7 @@ class i18n_nl_generic(i18n):
                                      "|".join(DETERMINANTS)),
                                       re.IGNORECASE | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -528,7 +528,7 @@ class i18n_nl_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -562,10 +562,10 @@ class i18n_nl_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_hr_HR(i18n):
-    # for _upper_unaccent_string
+    # for upper_unaccent_string
     C_ACCENT = re.compile(ur"[ćč]", re.IGNORECASE | re.UNICODE)
     D_ACCENT = re.compile(ur"đ|dž", re.IGNORECASE | re.UNICODE)
     N_ACCENT = re.compile(ur"nj", re.IGNORECASE | re.UNICODE)
@@ -573,7 +573,7 @@ class i18n_hr_HR(i18n):
     S_ACCENT = re.compile(ur"š", re.IGNORECASE | re.UNICODE)
     Z_ACCENT = re.compile(ur"ž", re.IGNORECASE | re.UNICODE)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.C_ACCENT.sub("c", s)
         s = self.D_ACCENT.sub("d", s)
         s = self.N_ACCENT.sub("n", s)
@@ -602,7 +602,7 @@ class i18n_hr_HR(i18n):
     def first_letter_equal(self, a, b):
         """returns True if the letters a and b are equal in the map index,
            e.g. É and E are equals in French map index"""
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_pl_generic(i18n):
 
@@ -684,7 +684,7 @@ class i18n_de_generic(i18n):
                                      "|".join(DETERMINANTS)), re.IGNORECASE
                                                                  | re.UNICODE)
 
-    # for IndexPageGenerator._upper_unaccent_string
+    # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
     A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
@@ -695,7 +695,7 @@ class i18n_de_generic(i18n):
         self.language = str(language)
         _install_language(language, locale_path)
 
-    def _upper_unaccent_string(self, s):
+    def upper_unaccent_string(self, s):
         s = self.E_ACCENT.sub("e", s)
         s = self.I_ACCENT.sub("i", s)
         s = self.A_ACCENT.sub("a", s)
@@ -720,7 +720,7 @@ class i18n_de_generic(i18n):
         return name
 
     def first_letter_equal(self, a, b):
-        return self._upper_unaccent_string(a) == self._upper_unaccent_string(b)
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
