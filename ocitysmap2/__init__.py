@@ -141,7 +141,7 @@ class Stylesheet:
 
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
-        self.grid_line_width = 3
+        self.grid_line_width = 1
 
         self.shade_color = 'black'
         self.shade_alpha = 0.1

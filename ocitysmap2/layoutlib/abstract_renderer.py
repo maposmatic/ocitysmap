@@ -290,7 +290,8 @@ class Renderer:
             # Add the shade SHP to the map
             canvas.add_shape_file(shade_shape,
                                   self.rc.stylesheet.shade_color,
-                                  self.rc.stylesheet.shade_alpha)
+                                  self.rc.stylesheet.shade_alpha,
+                                  self.rc.stylesheet.grid_line_width)
 
         return canvas
 
