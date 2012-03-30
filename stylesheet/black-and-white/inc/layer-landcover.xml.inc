@@ -277,7 +277,7 @@
     <Rule>
       <Filter>[amenity] = 'parking'</Filter>
       &maxscale_zoom15;
-      <LineSymbolizer stroke="#eeeed1" stroke-width="0.3"/>
+      <LineSymbolizer stroke="black" stroke-width="0.3"/>
     </Rule>
     <Rule>
       <Filter>[aeroway] = 'apron'</Filter>

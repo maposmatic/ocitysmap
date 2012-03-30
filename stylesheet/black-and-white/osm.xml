@@ -125,7 +125,7 @@
    <Rule>
       <Filter>[highway] = 'residential' or [highway]='unclassified'</Filter>
       &maxscale_zoom14;
-      <LineSymbolizer stroke="#999" stroke-width="1"/>
+      <LineSymbolizer stroke="black" stroke-width="1.6"/>
    </Rule>
    <Rule>
       <Filter>[highway] = 'pedestrian' or [highway]='service' or [highway]='footway' or [highway]='path'</Filter>
