@@ -260,12 +260,12 @@
       <PolygonPatternSymbolizer file="&symbols;/scrub.png" />
     </Rule>
     <Rule>
-      <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten'</Filter>
+      <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten' or [amenity]='place_of_worship' or [amenity]='library' or [amenity]='townhall' or [amenity]='post_office' or [amenity]='public_building' or [amenity]='police'</Filter>
       &maxscale_zoom10;
       <PolygonSymbolizer fill="#f0f0d8"/>
     </Rule>
     <Rule>
-      <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten'</Filter>
+      <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten' or [amenity]='place_of_worship' or [amenity]='library' or [amenity]='townhall' or [amenity]='post_office' or [amenity]='public_building' or [amenity]='police'</Filter>
       &maxscale_zoom12;
       <LineSymbolizer stroke="brown" stroke-width="0.3"/>
     </Rule>
@@ -342,7 +342,7 @@
        where landuse is not null
           or leisure is not null
           or aeroway in ('apron','aerodrome')
-          or amenity in ('parking','university','college','school','hospital','kindergarten','grave_yard')
+          or amenity in ('parking','university','college','school','hospital','kindergarten','grave_yard','place_of_worship','library','townhall','post_office','public_building','police')
           or military in ('barracks','danger_area')
           or "natural" in ('field','beach','desert','heath','mud','grassland','wood','sand','scrub')
           or power in ('station','sub_station','generator')

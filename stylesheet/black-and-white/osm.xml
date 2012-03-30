@@ -468,7 +468,7 @@
       <TextSymbolizer size="9" fill="#000033" fontset-name="bold-fonts" halo-radius="1" wrap-width="16" placement="interior">[name]</TextSymbolizer>
     </Rule>
     <Rule>
-      <Filter>[amenity] = 'school' or [amenity] = 'college'</Filter>
+      <Filter>[amenity] = 'school' or [amenity] = 'college' or [amenity]='townhall'</Filter>
       &maxscale_zoom15;
       <TextSymbolizer size="9" fill="#000033" fontset-name="book-fonts" halo-radius="1" wrap-width="14" placement="interior">[name]</TextSymbolizer>
     </Rule>
