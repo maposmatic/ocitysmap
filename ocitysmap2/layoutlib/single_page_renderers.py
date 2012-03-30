@@ -377,6 +377,7 @@ class SinglePageRenderer(Renderer):
         # Draw the rescaled Map
         ctx.save()
         rendered_map = self._map_canvas.get_rendered_map()
+        LOG.debug('Map scale: 1/%f' % rendered_map.scale_denominator())
         mapnik.render(rendered_map, ctx)
         ctx.restore()
 
