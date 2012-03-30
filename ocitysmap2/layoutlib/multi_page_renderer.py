@@ -32,7 +32,6 @@ try:
     import mapnik2 as mapnik
 except ImportError:
     import mapnik
-import ogr
 import coords
 import locale
 import pangocairo
@@ -166,7 +165,7 @@ class MultiPageRenderer(Renderer):
         # Calculate all the bounding boxes that correspond to the
         # geographical area that will be rendered on each sheet of
         # paper.
-        area_polygon = ogr.CreateGeometryFromWkt(self.rc.polygon_wkt)
+        area_polygon = shapely.wkt.loads(self.rc.polygon_wkt)
         bboxes = []
         for j in reversed(range(0, nb_pages_height)):
             for i in range(0, nb_pages_width):
@@ -181,8 +180,8 @@ class MultiPageRenderer(Renderer):
                                               cur_x + usable_area_merc_m_width  - grayed_margin_merc_m,
                                               cur_y + usable_area_merc_m_height - grayed_margin_merc_m)
                 inner_bb = self._inverse_envelope(envelope_inner)
-                if not area_polygon.Disjoint(ogr.CreateGeometryFromWkt(
-                                                     inner_bb.as_wkt())):
+                if not area_polygon.disjoint(shapely.wkt.loads(
+                                                inner_bb.as_wkt())):
                     bboxes.append((self._inverse_envelope(envelope),
                                    inner_bb))
 
@@ -281,7 +280,7 @@ class MultiPageRenderer(Renderer):
             # Create the index for the current page
             index = StreetIndex(self.db,
                                 bb_inner.as_wkt(),
-                                self.rc.i18n, page_number=(i + 1))
+                                self.rc.i18n, page_number=(i + 3))
 
             index.apply_grid(map_grid)
             indexes.append(index)
