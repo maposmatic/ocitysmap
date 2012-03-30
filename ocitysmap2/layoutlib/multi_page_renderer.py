@@ -33,6 +33,7 @@ import coords
 import locale
 import pangocairo
 import pango
+import datetime
 
 from itertools import groupby
 
@@ -230,6 +231,9 @@ class MultiPageRenderer(Renderer):
         # Merge all indexes
         self.index_categories = self._merge_page_indexes(indexes)
 
+        # Prepare the small map for the front page
+        self._front_page_map = self._prepare_front_page_map(dpi)
+
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
         # because we sort them and we don't want to have the "other"
@@ -312,32 +316,40 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _render_front_page(self, ctx, cairo_surface, dpi):
+    def _prepare_front_page_map(self, dpi):
+        front_page_map_w = \
+            self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+        front_page_map_h = \
+            (self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT) / 2
 
-        ctx.save()
+        # Create the nice small map
+        front_page_map = \
+            MapCanvas(self.rc.stylesheet,
+                      self.rc.bounding_box,
+                      front_page_map_w,
+                      front_page_map_h,
+                      dpi,
+                      extend_bbox_to_ratio=True)
 
-        # Draw a nice grey rectangle covering the whole page
-        ctx.set_source_rgb(.85,.85,.85)
-        ctx.rectangle(Renderer.PRINT_SAFE_MARGIN_PT,
-                      Renderer.PRINT_SAFE_MARGIN_PT,
-                      self._usable_area_width_pt,
-                      self._usable_area_height_pt)
-        ctx.fill()
+        # Add the shape that greys out everything that is outside of
+        # the administrative boundary.
+        exterior = shapely.wkt.loads(front_page_map.get_actual_bounding_box().as_wkt())
+        interior = shapely.wkt.loads(self.rc.polygon_wkt)
+        shade_wkt = exterior.difference(interior).wkt
+        shade = maplib.shapes.PolyShapeFile(self.rc.bounding_box,
+                os.path.join(self.tmpdir, 'shape_overview_cover.shp'),
+                             'shade-overview-cover')
+        shade.add_shade_from_wkt(shade_wkt)
+        front_page_map.add_shape_file(shade)
+        front_page_map.render()
+        return front_page_map
 
-        ctx.save()
-
-        # Translate into the working area, taking another
-        # PRINT_SAFE_MARGIN_PT inside the grey area.
-        ctx.translate(2 * Renderer.PRINT_SAFE_MARGIN_PT,
-                      2 * Renderer.PRINT_SAFE_MARGIN_PT)
-        w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
-        h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
-
+    def _render_front_page_header(self, ctx, w, h):
         # Draw a light blue block which will contain the name of the
         # city being rendered.
         blue_w = w
         blue_h = 0.3 * h
-        ctx.set_source_rgb(0.807, 0.898, 0.964)
+        ctx.set_source_rgb(.80,.80,.80)
         ctx.rectangle(0, 0, blue_w, blue_h)
         ctx.fill()
 
@@ -361,31 +373,116 @@ class MultiPageRenderer(Renderer):
         pc.show_layout(layout)
         ctx.restore()
 
-        # Create the nice small map
-        map_canvas = MapCanvas(self.rc.stylesheet,
-                               self.rc.bounding_box,
-                               w, 0.5 * h, dpi,
-                               extend_bbox_to_ratio=True)
-
-        # We will render it slightly below the title
+    def _render_front_page_map(self, ctx, dpi, w, h):
+        # We will render the map slightly below the title
+        ctx.save()
         ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
 
-        # Add the shape that greys out everything that is outside of
-        # the administrative boundary.
-        exterior = shapely.wkt.loads(map_canvas.get_actual_bounding_box().as_wkt())
-        interior = shapely.wkt.loads(self.rc.polygon_wkt)
-        shade_wkt = exterior.difference(interior).wkt
-        shade = maplib.shapes.PolyShapeFile(self.rc.bounding_box,
-                os.path.join(self.tmpdir, 'shape_overview_cover.shp'),
-                             'shade-overview-cover')
-        shade.add_shade_from_wkt(shade_wkt)
-        map_canvas.add_shape_file(shade)
-
         # Render the map !
-        map_canvas.render()
-        mapnik.render(map_canvas.get_rendered_map(), ctx)
+        mapnik.render(self._front_page_map.get_rendered_map(), ctx)
+        ctx.restore()
+
+    def _render_front_page_footer(self, ctx, w, h, osm_date):
+        ctx.save()
+
+        # Draw the footer
+        ctx.translate(0, 0.8 * h + 2 * Renderer.PRINT_SAFE_MARGIN_PT)
+
+        # Display a nice grey rectangle as the background of the
+        # footer
+        footer_w = w
+        footer_h = 0.2 * h - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+        ctx.set_source_rgb(.80,.80,.80)
+        ctx.rectangle(0, 0, footer_w, footer_h)
+        ctx.fill()
+
+        # Draw the OpenStreetMap logo to the right of the footer
+        logo_height = footer_h / 2
+        grp, logo_width = self._get_osm_logo(ctx, logo_height)
+        if grp:
+            ctx.save()
+            ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,
+                          logo_height / 2)
+            ctx.set_source(grp)
+            ctx.paint_with_alpha(0.8)
+            ctx.restore()
+
+        # Prepare the text for the left of the footer
+        today = datetime.date.today()
+        notice = \
+            _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.\n'
+              u'http://www.maposmatic.org\n\n'
+              u'Map data © %(year)d OpenStreetMap.org '
+              u'and contributors (cc-by-sa).\n'
+              u'http://www.openstreetmap.org\n\n'
+              u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n'
+              u'The map may be incomplete or inaccurate. '
+              u'You can contribute to improve this map.\n'
+              u'See http://wiki.openstreetmap.org')
+
+        # We need the correct locale to be set for strftime().
+        prev_locale = locale.getlocale(locale.LC_TIME)
+        locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
+        try:
+            if osm_date is None:
+                osm_date_str = _(u'unknown')
+            else:
+                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
+
+            notice = notice % {'year': today.year,
+                               'date': today.strftime("%d %B %Y"),
+                               'osmdate': osm_date_str}
+        finally:
+            locale.setlocale(locale.LC_TIME, prev_locale)
+
+        # Render the text
+        pc = pangocairo.CairoContext(ctx)
+        layout = pc.create_layout()
+        layout.set_width(int(footer_w * 0.7) * pango.SCALE)
+        layout.set_alignment(pango.ALIGN_LEFT)
+        fd = pango.FontDescription("Georgia Bold")
+        fd.set_size(pango.SCALE)
+        layout.set_font_description(fd)
+        layout.set_text(notice)
+        self._adjust_font_size(layout, fd, footer_w * 0.7, footer_h * 0.8)
+
+        text_x, text_y, text_w, text_h = layout.get_extents()[1]
+        ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
+                      (footer_h / 2) - (text_h / 2.0 / pango.SCALE))
+        # Hack to workaround what appears to be a Cairo bug: without
+        # drawing a rectangle here, the translation above is not taken
+        # into account for rendering the text.
+        ctx.rectangle(0, 0, 0, 0)
+        pc.show_layout(layout)
+        ctx.restore()
 
         ctx.restore()
+
+    def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
+        # Draw a nice grey rectangle covering the whole page
+        ctx.save()
+        ctx.set_source_rgb(.95,.95,.95)
+        ctx.rectangle(Renderer.PRINT_SAFE_MARGIN_PT,
+                      Renderer.PRINT_SAFE_MARGIN_PT,
+                      self._usable_area_width_pt,
+                      self._usable_area_height_pt)
+        ctx.fill()
+        ctx.restore()
+
+        # Translate into the working area, taking another
+        # PRINT_SAFE_MARGIN_PT inside the grey area.
+        ctx.save()
+        ctx.translate(2 * Renderer.PRINT_SAFE_MARGIN_PT,
+                      2 * Renderer.PRINT_SAFE_MARGIN_PT)
+        w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+        h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+
+        self._render_front_page_header(ctx, w, h)
+        self._render_front_page_map(ctx, dpi, w, h)
+        self._render_front_page_footer(ctx, w, h, osm_date)
+
         ctx.restore()
 
         cairo_surface.show_page()
@@ -393,7 +490,7 @@ class MultiPageRenderer(Renderer):
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
 
-        self._render_front_page(ctx, cairo_surface, dpi)
+        self._render_front_page(ctx, cairo_surface, dpi, osm_date)
 
         for i, (canvas, grid) in enumerate(self.pages):
             ctx.save()
