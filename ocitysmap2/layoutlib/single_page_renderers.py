@@ -67,7 +67,7 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
         """
-        Renderer.__init__(self, db, rc, tmpdir, street_index)
+        Renderer.__init__(self, db, rc, tmpdir, dpi, street_index)
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
