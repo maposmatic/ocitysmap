@@ -191,23 +191,10 @@ class MultiPageRenderer(Renderer):
         #    print bb.as_javascript(name="p%d" % i)
 
         self.pages = []
+
         # Create an overview map
 
-        # Create the gray shape around the map
-        first_bbox, last_bbox = bboxes[0][0], bboxes[-1][0]
-        overview_coord = list(first_bbox.get_top_left()) + \
-                         list(last_bbox.get_bottom_right())
-        overview_bb = coords.BoundingBox(*overview_coord
-                           ).create_expanded(0.001, 0.001)
-
-        exterior = shapely.wkt.loads(overview_bb.as_wkt())
-        interior = shapely.wkt.loads(self.rc.polygon_wkt)
-        shade_wkt = exterior.difference(interior).wkt
-        shade = maplib.shapes.PolyShapeFile(self.rc.bounding_box,
-                os.path.join(self.tmpdir, 'shape_overview.shp'),
-                             'shade-overview')
-        shade.add_shade_from_wkt(shade_wkt)
-
+        overview_bb = self._geo_bbox.create_expanded(0.001, 0.001)
         # Create the grid
         map_grid = OverviewGrid(overview_bb,
                      [bb for bb, bb_inner in bboxes], self.rc.i18n.isrtl())
@@ -217,7 +204,20 @@ class MultiPageRenderer(Renderer):
 
         # Create one canvas for the current page
         map_canvas = MapCanvas(self.rc.stylesheet,
-                               overview_bb, graphical_ratio=None)
+                               overview_bb, self._usable_area_width_pt,
+                               self._usable_area_height_pt, dpi,
+                               extend_bbox_to_ratio=True)
+
+        # Create the gray shape around the map
+        exterior = shapely.wkt.loads(map_canvas.get_actual_bounding_box()\
+                                                                .as_wkt())
+        interior = shapely.wkt.loads(self.rc.polygon_wkt)
+        shade_wkt = exterior.difference(interior).wkt
+        shade = maplib.shapes.PolyShapeFile(self.rc.bounding_box,
+                os.path.join(self.tmpdir, 'shape_overview.shp'),
+                             'shade-overview')
+        shade.add_shade_from_wkt(shade_wkt)
+
 
         map_canvas.add_shape_file(shade)
         map_canvas.add_shape_file(grid_shape,
