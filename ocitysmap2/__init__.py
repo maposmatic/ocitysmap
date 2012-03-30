@@ -521,11 +521,9 @@ SELECT ST_AsText(ST_LongestLine(
                 'Unsupported output format: %s!' % output_format.upper()
 
         renderer = renderer_cls(self._db, config, tmpdir, dpi, street_index)
-
         # Update the street_index to reflect the grid's actual position
         if renderer.grid and street_index:
             street_index.apply_grid(renderer.grid)
-            street_index.group_identical_grid_locations()
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
 
