@@ -125,6 +125,35 @@ class LineShapeFile(_ShapeFile):
         self._add_feature(line)
         return self
 
+class BoxShapeFile(LineShapeFile):
+    """
+    Shape file for Box geometries.
+    """
+
+    def add_box(self, box):
+        top_left, bottom_right = box.get_top_left(), box.get_bottom_right()
+
+        line = ogr.Geometry(type = ogr.wkbLineString)
+        line.AddPoint_2D(*list(reversed(top_left)))
+        line.AddPoint_2D(bottom_right[1], top_left[0])
+        self._add_feature(line)
+
+        line = ogr.Geometry(type = ogr.wkbLineString)
+        line.AddPoint_2D(bottom_right[1], top_left[0])
+        line.AddPoint_2D(*list(reversed(bottom_right)))
+        self._add_feature(line)
+
+        line = ogr.Geometry(type = ogr.wkbLineString)
+        line.AddPoint_2D(*list(reversed(bottom_right)))
+        line.AddPoint_2D(top_left[1], bottom_right[0])
+        self._add_feature(line)
+
+        line = ogr.Geometry(type = ogr.wkbLineString)
+        line.AddPoint_2D(top_left[1], bottom_right[0])
+        line.AddPoint_2D(*list(reversed(top_left)))
+        self._add_feature(line)
+        return self
+
 class PolyShapeFile(_ShapeFile):
     """
     Shape file for Polygon geometries.
