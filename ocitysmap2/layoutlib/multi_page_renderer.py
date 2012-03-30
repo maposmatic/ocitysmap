@@ -58,10 +58,6 @@ from indexlib.commons import IndexCategory
 LOG = logging.getLogger('ocitysmap')
 PAGE_STR = " - Page %(page_number)d"
 
-_MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
-                     "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
-                     "+nadgrids=@null +no_defs +over"
-
 class MultiPageRenderer(Renderer):
     """
     This Renderer creates a multi-pages map, with all the classic overlayed
@@ -93,7 +89,7 @@ class MultiPageRenderer(Renderer):
         # print self.rc.bounding_box.as_javascript("original", "#00ff00")
 
         # Convert the original Bounding box into Mercator meters
-        self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
+        self._proj = mapnik.Projection(coords._MAPNIK_PROJECTION)
         orig_envelope = self._project_envelope(self.rc.bounding_box)
 
         # Extend the bounding box to take into account the lost outter
@@ -225,7 +221,7 @@ class MultiPageRenderer(Renderer):
                                   self.rc.stylesheet.grid_line_width)
 
         map_canvas.render()
-        self.pages.append((map_canvas, None))
+        self.pages.append((map_canvas, None, map_grid))
 
         # Create the map canvas for each page
         indexes = []
@@ -258,7 +254,7 @@ class MultiPageRenderer(Renderer):
                                       self.rc.stylesheet.grid_line_width)
 
             map_canvas.render()
-            self.pages.append((map_canvas, map_grid))
+            self.pages.append((map_canvas, map_grid, None))
 
             # Create the index for the current page
             index = StreetIndex(self.db,
@@ -532,7 +528,7 @@ class MultiPageRenderer(Renderer):
 
         self._render_front_page(ctx, cairo_surface, dpi, osm_date)
 
-        for i, (canvas, grid) in enumerate(self.pages):
+        for i, (canvas, grid, overview_grid) in enumerate(self.pages):
             ctx.save()
 
             # Prepare to draw the map at the right location
@@ -553,8 +549,15 @@ class MultiPageRenderer(Renderer):
             ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
                           commons.convert_pt_to_dots(self.grayed_margin_pt))
 
-            # Place the vertical and horizontal square labels
+            if overview_grid:
+                # draw pages numbers
+                self._draw_overview_labels(ctx, canvas, overview_grid,
+                  commons.convert_pt_to_dots(self._usable_area_width_pt) \
+                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                  commons.convert_pt_to_dots(self._usable_area_height_pt) \
+                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt))
             if grid:
+                # Place the vertical and horizontal square labels
                 self._draw_labels(ctx, grid,
                   commons.convert_pt_to_dots(self._usable_area_width_pt) \
                         - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),

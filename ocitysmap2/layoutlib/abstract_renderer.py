@@ -26,6 +26,10 @@ import math
 import os
 import sys
 import cairo
+try:
+    import mapnik2 as mapnik
+except ImportError:
+    import mapnik
 import pango
 import re
 
@@ -38,6 +42,8 @@ import shapely.wkt
 import logging
 
 LOG = logging.getLogger('ocitysmap')
+
+OVERVIEW_PAGE_STR = "Page %(page_number)d"
 
 class Renderer:
     """
@@ -211,6 +217,41 @@ class Renderer:
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 
+        ctx.restore()
+
+    @staticmethod
+    def _draw_overview_labels(ctx, map_canvas, overview_grid,
+                     area_width_dots, area_height_dots):
+        """
+        Draw the page numbers for the overview grid.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           overview_grid (OverViewGrid): the overview grid object
+           area_width_dots/area_height_dots (numbers): size of the
+              drawing area (cairo units).
+        """
+        ctx.save()
+
+        ctx.set_font_size(18)
+
+        bbox = map_canvas.get_actual_bounding_box()
+        bottom_right, bottom_left, top_left, top_right = bbox.to_mercator()
+        bottom, left = bottom_right.y, top_left.x
+        coord_delta_y = top_left.y - bottom_right.y
+        coord_delta_x = bottom_right.x - top_left.x
+        for idx, page_bb in enumerate(overview_grid._pages_bbox):
+            p_bottom_right, p_bottom_left, p_top_left, p_top_right = \
+                                                        page_bb.to_mercator()
+            center_x = p_top_left.x+(p_top_right.x-p_top_left.x)/2
+            center_y = p_bottom_left.y+(p_top_right.y-p_bottom_right.y)/2
+            y_percent = 100 - 100.0*(center_y - bottom)/coord_delta_y
+            y = int(area_height_dots*y_percent/100)
+
+            x_percent = 100.0*(center_x - left)/coord_delta_x
+            x = int(area_width_dots*x_percent/100)
+            Renderer._draw_centered_text(ctx,
+                                OVERVIEW_PAGE_STR % {'page_number':idx+2}, x, y)
         ctx.restore()
 
     def _create_map_canvas(self, width, height, dpi,

@@ -25,6 +25,15 @@
 import math
 
 import shapely.wkt
+try:
+    import mapnik2 as mapnik
+except ImportError:
+    import mapnik
+
+_MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
+                     "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
+                     "+nadgrids=@null +no_defs +over"
+
 
 EARTH_RADIUS = 6370986 # meters
 
@@ -154,6 +163,18 @@ class BoundingBox:
                 * (2 ** (zoom + 7)) / yplan(85)
 
         return (int(math.ceil(pix_y)), int(math.ceil(pix_x)))
+
+    def to_mercator(self):
+        envelope = mapnik.Box2d(self.get_top_left()[1],
+                                self.get_top_left()[0],
+                                self.get_bottom_right()[1],
+                                self.get_bottom_right()[0])
+        _proj = mapnik.Projection(_MAPNIK_PROJECTION)
+        bottom_left = _proj.forward(mapnik.Coord(envelope.minx, envelope.miny))
+        top_right = _proj.forward(mapnik.Coord(envelope.maxx, envelope.maxy))
+        top_left = mapnik.Coord(bottom_left.x, top_right.y)
+        bottom_right = mapnik.Coord(top_right.x, bottom_left.y)
+        return (bottom_right, bottom_left, top_left, top_right)
 
     def as_javascript(self, name=None, color=None):
         if name:

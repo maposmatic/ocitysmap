@@ -34,8 +34,6 @@ class OverviewGrid:
         l.info('Laying out of overview grid on %.1fx%.1fm area...' %
                (self._width_m, self._height_m))
 
-        self._pages_wkt = [bb.as_wkt() for bb in self._pages_bbox]
-
     def generate_shape_file(self, filename):
         """Generates the grid shapefile with all the horizontal and
         vertical lines added.
@@ -52,6 +50,8 @@ class OverviewGrid:
                                  filename, 'grid')
         map(g.add_box, self._pages_bbox)
         return g
+
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
