@@ -3139,7 +3139,7 @@
     <Rule>
       <Filter>([highway] = 'unclassified' or [highway]='residential') and not [bridge]='yes'</Filter>
       &maxscale_zoom15;
-      <TextSymbolizer size="10" fill="#000" spacing="750" minimum-distance="18" fontset-name="bold-fonts" halo-radius="1">[ref]</TextSymbolizer>
+      <TextSymbolizer size="10" fill="#000" spacing="750" minimum-distance="18" fontset-name="bold-fonts" halo-radius="1" placement-type="simple" max-char-angle-delta="40" placements="X,10,9,8,7,6,5,4" avoid-edges="false">[ref]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>([aeroway] = 'runway' or [aeroway]='taxiway') and not [bridge]='yes'</Filter>
@@ -3211,25 +3211,25 @@
       <Filter>[highway] = 'unclassified' or [highway] = 'residential'</Filter>
       &maxscale_zoom15;
       &minscale_zoom15;
-      <TextSymbolizer size="8" fill="#000" spacing="300" placement="line" fontset-name="book-fonts" halo-radius="1">[name]</TextSymbolizer>
+      <TextSymbolizer size="8" fill="#000" spacing="300" placement="line" fontset-name="book-fonts" halo-radius="1" placement-type="simple" max-char-angle-delta="40" placements="X,8,7,6,5,4" avoid-edges="false">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[highway] = 'unclassified' or [highway] = 'residential'</Filter>
       &maxscale_zoom16;
       &minscale_zoom16;
-      <TextSymbolizer size="9" fill="#000" spacing="300" placement="line" fontset-name="book-fonts" halo-radius="1">[name]</TextSymbolizer>
+      <TextSymbolizer size="9" fill="#000" spacing="300" placement="line" fontset-name="book-fonts" halo-radius="1" placement-type="simple" max-char-angle-delta="40" placements="X,9,8,7,6,5,4" avoid-edges="false">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[highway] = 'unclassified' or [highway] = 'residential'</Filter>
       &maxscale_zoom17;
       &minscale_zoom18;
-      <TextSymbolizer size="11" fill="#000" spacing="400" placement="line" fontset-name="book-fonts" halo-radius="1">[name]</TextSymbolizer>
+      <TextSymbolizer size="11" fill="#000" spacing="400" placement="line" fontset-name="book-fonts" halo-radius="1" placement-type="simple" max-char-angle-delta="40" placements="X,11,10,9,8,7,6,5,4" avoid-edges="false">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
       &maxscale_zoom15;
       &minscale_zoom16;
-      <TextSymbolizer size="9" fill="#000" placement="line" fontset-name="book-fonts" halo-radius="1">[name]</TextSymbolizer>
+      <TextSymbolizer size="9" fill="#000" placement="line" fontset-name="book-fonts" halo-radius="1" placement-type="simple" max-char-angle-delta="40" placements="X,9,8,7,6,5,4" avoid-edges="false">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
