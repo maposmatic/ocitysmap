@@ -31,6 +31,8 @@ import cairo
 import mapnik
 import coords
 import locale
+import pangocairo
+import pango
 
 from itertools import groupby
 
@@ -310,8 +312,89 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
+    def _render_front_page(self, ctx, cairo_surface, dpi):
+
+        ctx.save()
+
+        # Draw a nice grey rectangle covering the whole page
+        ctx.set_source_rgb(.85,.85,.85)
+        ctx.rectangle(Renderer.PRINT_SAFE_MARGIN_PT,
+                      Renderer.PRINT_SAFE_MARGIN_PT,
+                      self._usable_area_width_pt,
+                      self._usable_area_height_pt)
+        ctx.fill()
+
+        ctx.save()
+
+        # Translate into the working area, taking another
+        # PRINT_SAFE_MARGIN_PT inside the grey area.
+        ctx.translate(2 * Renderer.PRINT_SAFE_MARGIN_PT,
+                      2 * Renderer.PRINT_SAFE_MARGIN_PT)
+        w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+        h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
+
+        # Draw a light blue block which will contain the name of the
+        # city being rendered.
+        blue_w = w
+        blue_h = 0.3 * h
+        ctx.set_source_rgb(0.807, 0.898, 0.964)
+        ctx.rectangle(0, 0, blue_w, blue_h)
+        ctx.fill()
+
+        # Prepare the title text layout
+        pc = pangocairo.CairoContext(ctx)
+        layout = pc.create_layout()
+        layout.set_width(int(0.7 * w * pango.SCALE))
+        layout.set_alignment(pango.ALIGN_CENTER)
+        fd = pango.FontDescription("Georgia Bold")
+        fd.set_size(pango.SCALE)
+        layout.set_font_description(fd)
+        layout.set_text(self.rc.title)
+        self._adjust_font_size(layout, fd, 0.7 * blue_w, 0.8 * blue_h)
+
+        # Draw the title
+        text_x, text_y, text_w, text_h = layout.get_extents()[1]
+        ctx.save()
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.translate((blue_w / 2) - (text_w / 2.0) / pango.SCALE - text_x / pango.SCALE,
+                      (blue_h / 2) - (text_h / 2.0) / pango.SCALE - text_y / pango.SCALE)
+        pc.show_layout(layout)
+        ctx.restore()
+
+        # Create the nice small map
+        map_canvas = MapCanvas(self.rc.stylesheet,
+                               self.rc.bounding_box,
+                               w, 0.5 * h, dpi,
+                               extend_bbox_to_ratio=True)
+
+        # We will render it slightly below the title
+        ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
+
+        # Add the shape that greys out everything that is outside of
+        # the administrative boundary.
+        exterior = shapely.wkt.loads(map_canvas.get_actual_bounding_box().as_wkt())
+        interior = shapely.wkt.loads(self.rc.polygon_wkt)
+        shade_wkt = exterior.difference(interior).wkt
+        shade = maplib.shapes.PolyShapeFile(self.rc.bounding_box,
+                os.path.join(self.tmpdir, 'shape_overview_cover.shp'),
+                             'shade-overview-cover')
+        shade.add_shade_from_wkt(shade_wkt)
+        map_canvas.add_shape_file(shade)
+
+        # Render the map !
+        map_canvas.render()
+        mapnik.render(map_canvas.get_rendered_map(), ctx)
+
+        ctx.restore()
+        ctx.restore()
+
+        cairo_surface.show_page()
+
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
+
+        self._render_front_page(ctx, cairo_surface, dpi)
+
         for i, (canvas, grid) in enumerate(self.pages):
             ctx.save()
 
