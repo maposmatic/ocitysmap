@@ -3475,7 +3475,7 @@
       &datasource-settings;
     </Datasource>
 </Layer>
-&layer-buildings;
+<!-- &layer-buildings; -->
 <Layer name="tracks-notunnel-nobridge" status="on" srs="&osm2pgsql_projection;">
     <StyleName>tracks-notunnel-nobridge</StyleName>
     <Datasource>
@@ -3925,7 +3925,7 @@
 &layer-amenity-stations;
 &layer-amenity-symbols;
 &layer-amenity-points;
-&layer-power;
+<!-- &layer-power; -->
 <Layer name="roads-text-ref-low-zoom" status="on" srs="&osm2pgsql_projection;">
      <StyleName>roads-text-ref-low-zoom</StyleName>
      <Datasource>
