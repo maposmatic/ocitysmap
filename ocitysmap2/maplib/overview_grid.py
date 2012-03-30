@@ -36,11 +36,6 @@ class OverviewGrid:
 
         self._pages_wkt = [bb.as_wkt() for bb in self._pages_bbox]
 
-        self.horiz_count = 1
-        self.vert_count = 1
-        self.horizontal_labels = ['plouf']
-        self.vertical_labels = ['plouf']
-
     def generate_shape_file(self, filename):
         """Generates the grid shapefile with all the horizontal and
         vertical lines added.
@@ -57,46 +52,6 @@ class OverviewGrid:
                                  filename, 'grid')
         map(g.add_box, self._pages_bbox)
         return g
-
-    def _gen_horizontal_square_label(self, x):
-        """Generates a human-readable label for the given horizontal square
-        number. For example:
-             1 -> A
-             2 -> B
-            26 -> Z
-            27 -> AA
-            28 -> AB
-            ...
-        """
-        if self.rtl:
-            x = len(self._vertical_lines) - x
-
-        label = ''
-        while x != -1:
-            label = chr(ord('A') + x % 26) + label
-            x = x/26 - 1
-        return label
-
-    def _gen_vertical_square_label(self, x):
-        """Generate a human-readable label for the given vertical square
-        number. Since we put numbers verticaly, this is simply x+1."""
-        return str(x + 1)
-
-    def get_location_str(self, lattitude, longitude):
-        """
-        Translate the given lattitude/longitude (EPSG:4326) into a
-        string of the form "CA42"
-        """
-        hdelta = min(abs(longitude - self._bbox.get_top_left()[1]),
-                     self._horiz_angle_span)
-        hlabel = self.horizontal_labels[int(hdelta / self._horiz_unit_angle)]
-
-        vdelta = min(abs(lattitude - self._bbox.get_top_left()[0]),
-                     self._vert_angle_span)
-        vlabel = self.vertical_labels[int(vdelta / self._vert_unit_angle)]
-
-        return "%s%s" % (hlabel, vlabel)
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

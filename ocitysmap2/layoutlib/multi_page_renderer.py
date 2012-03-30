@@ -225,7 +225,7 @@ class MultiPageRenderer(Renderer):
                                   self.rc.stylesheet.grid_line_width)
 
         map_canvas.render()
-        self.pages.append((map_canvas, map_grid))
+        self.pages.append((map_canvas, None))
 
         # Create the map canvas for each page
         indexes = []
@@ -554,10 +554,13 @@ class MultiPageRenderer(Renderer):
                           commons.convert_pt_to_dots(self.grayed_margin_pt))
 
             # Place the vertical and horizontal square labels
-            self._draw_labels(ctx, grid,
-                              commons.convert_pt_to_dots(self._usable_area_width_pt)  - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                              commons.convert_pt_to_dots(self._usable_area_height_pt) - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                              commons.convert_pt_to_dots(self._grid_legend_margin_pt))
+            if grid:
+                self._draw_labels(ctx, grid,
+                  commons.convert_pt_to_dots(self._usable_area_width_pt) \
+                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                  commons.convert_pt_to_dots(self._usable_area_height_pt) \
+                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                  commons.convert_pt_to_dots(self._grid_legend_margin_pt))
 
             ctx.restore()
 
