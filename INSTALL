@@ -269,7 +269,9 @@ are using. They have been tested on several x86_64 hosts.
     ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-411354  # Contern, LU
     ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
 
-13. Installation of B&W stylesheet
+
+Appendix A:  Installation of B&W stylesheet
+-------------------------------------------
 
     This step builds on step 10 "Install Mapnik-OSM" and step 11
     "Installation of OCitySMap".
@@ -291,7 +293,7 @@ are using. They have been tested on several x86_64 hosts.
                     --world_boundaries mapnik2-osm/world_boundaries \
 		    --symbols mapnik2-osm/symbols
 
-Appendix: installation of the MapQuest stylesheet
+Appendix B: installation of the MapQuest stylesheet
 -------------------------------------------------
 
 The above instructions, at step 10, describe how to set up ocitysmap
