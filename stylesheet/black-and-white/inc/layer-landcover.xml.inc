@@ -262,12 +262,12 @@
     <Rule>
       <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten' or [amenity]='place_of_worship' or [amenity]='library' or [amenity]='townhall' or [amenity]='post_office' or [amenity]='public_building' or [amenity]='police'</Filter>
       &maxscale_zoom10;
-      <PolygonSymbolizer fill="#f0f0d8"/>
+      <PolygonSymbolizer fill="lightgrey"/>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'university' or [amenity] = 'college' or [amenity] = 'school' or [amenity]='hospital' or [amenity]='kindergarten' or [amenity]='place_of_worship' or [amenity]='library' or [amenity]='townhall' or [amenity]='post_office' or [amenity]='public_building' or [amenity]='police'</Filter>
       &maxscale_zoom12;
-      <LineSymbolizer stroke="brown" stroke-width="0.3"/>
+      <LineSymbolizer stroke="black" stroke-width="0.3"/>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'parking'</Filter>
