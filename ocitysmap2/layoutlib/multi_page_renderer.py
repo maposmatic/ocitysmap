@@ -217,6 +217,7 @@ class MultiPageRenderer(Renderer):
                 os.path.join(self.tmpdir, 'shape_overview.shp'),
                              'shade-overview')
         shade.add_shade_from_wkt(shade_wkt)
+        # Create the gray shape around the map
 
 
         map_canvas.add_shape_file(shade)
@@ -236,9 +237,23 @@ class MultiPageRenderer(Renderer):
             interior = shapely.wkt.loads(bb_inner.as_wkt())
             shade_wkt = exterior.difference(interior).wkt
             shade = maplib.shapes.PolyShapeFile(
-                bb, os.path.join(self.tmpdir, 'shape%d.shp' % i),
+                bb, os.path.join(self.tmpdir, 'shade%d.shp' % i),
                 'shade%d' % i)
             shade.add_shade_from_wkt(shade_wkt)
+
+
+            # Create the contour shade
+
+            # Area to keep visible
+            interior = shapely.wkt.loads(self.rc.polygon_wkt)
+            # Determine the shade WKT
+            shade_contour_wkt = exterior.difference(interior).wkt
+            # Prepare the shade SHP
+            shade_contour = maplib.shapes.PolyShapeFile(bb,
+                os.path.join(self.tmpdir, 'shade_contour%d.shp' % i),
+                'shade_contour%d' % i)
+            shade_contour.add_shade_from_wkt(shade_contour_wkt)
+
 
             # Create the grid
             map_grid = Grid(bb_inner, self.rc.i18n.isrtl())
@@ -252,6 +267,9 @@ class MultiPageRenderer(Renderer):
                                    extend_bbox_to_ratio=False)
 
             map_canvas.add_shape_file(shade)
+            map_canvas.add_shape_file(shade_contour,
+                                  self.rc.stylesheet.shade_color,
+                                  self.rc.stylesheet.shade_alpha)
             map_canvas.add_shape_file(grid_shape,
                                       self.rc.stylesheet.grid_line_color,
                                       self.rc.stylesheet.grid_line_alpha,
