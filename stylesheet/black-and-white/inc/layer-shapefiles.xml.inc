@@ -23,7 +23,7 @@
 <Style name="coast-poly">
     <Rule>
       &maxscale_zoom10;
-      <PolygonSymbolizer fill="#f5f5f5"/>
+      <PolygonSymbolizer fill="#f2efe9"/>
     </Rule>
 </Style>
   <!-- BUILTUP VMAP0 -->
