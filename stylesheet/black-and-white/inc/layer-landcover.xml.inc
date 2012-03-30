@@ -50,12 +50,12 @@
       <Filter>[landuse] = 'cemetery' or [landuse] = 'grave_yard' or [amenity]='grave_yard'</Filter>
       <PolygonSymbolizer fill="#aacbaf"/>
     </Rule>
-    <Rule>
-      &maxscale_zoom10;
-      &minscale_zoom18;
-      <Filter>[landuse] = 'residential'</Filter>
-      <PolygonSymbolizer fill="#ddd"/>
-    </Rule>
+    <!-- <Rule> -->
+    <!--   &maxscale_zoom10; -->
+    <!--   &minscale_zoom18; -->
+    <!--   <Filter>[landuse] = 'residential'</Filter> -->
+    <!--   <PolygonSymbolizer fill="#ddd"/> -->
+    <!-- </Rule> -->
     <Rule>
       &maxscale_zoom12;
       &minscale_zoom18;
