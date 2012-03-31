@@ -352,6 +352,10 @@ path: /path/to/MapQuest-Mapnik-Style/mapquest-eu.xml
 Don't forget to add "mapquest_eu" to the available_stylesheets
 variable, which lists all available stylesheets.
 
+You can then use it in ocitysmap2-render with the -s option:
+
+  ./ocitysmap2-render -s MapQuestEu ...
+
 Note that in addition to the MapQuest Europe stylesheet
 (mapquest-eu.xml), the Git repository also contains the MapQuest US
 and MapQuest UK stylesheets (mapquest-us.xml and mapquest-uk.xml),
