@@ -173,9 +173,11 @@ class IndexItem:
                                                         baseline_x, baseline_y,
                                                         self.label)
 
-        draw_utils.draw_dotted_line(ctx, max(fheight/12, 1),
-                                    line_start + fheight/4, baseline_y,
-                                    line_end - line_start - fheight/2)
+        # In case of empty label, we don't draw the dots
+        if self.label != '':
+            draw_utils.draw_dotted_line(ctx, max(fheight/12, 1),
+                                        line_start + fheight/4, baseline_y,
+                                        line_end - line_start - fheight/2)
         ctx.restore()
 
     def update_location_str(self, grid):

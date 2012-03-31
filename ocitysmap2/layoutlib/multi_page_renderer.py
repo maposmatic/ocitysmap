@@ -347,12 +347,24 @@ class MultiPageRenderer(Renderer):
             finally:
                 locale.setlocale(locale.LC_COLLATE, prev_locale)
 
+            self._blank_duplicated_names(grouped_items_sorted)
+
             # Rebuild a IndexCategory object with the list of merged
             # and sorted IndexItem
             categories_merged.append(
                 IndexCategory(category_name, grouped_items_sorted, is_street))
 
         return categories_merged
+
+    # We set the label to empty string in case of duplicated item. In
+    # multi-page renderer we won't draw the dots in that case
+    def _blank_duplicated_names(self, grouped_items_sorted):
+        prev_label = ''
+        for item in grouped_items_sorted:
+            if prev_label == item.label:
+                item.label = ''
+            else:
+                prev_label = item.label
 
     def _project_envelope(self, bbox):
         """Project the given bounding box into the rendering projection."""
