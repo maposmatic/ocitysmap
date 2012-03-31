@@ -756,10 +756,10 @@ class MultiPageRenderer(Renderer):
     def _paper_pt_to_geo_m(self, paper_pt):
         return self._paper_mm_to_geo_m(commons.convert_pt_to_mm(paper_pt))
 
-    # In multi-page mode, we only render pdf and csv formats
+    # In multi-page mode, we only render pdf format
     @staticmethod
     def get_compatible_output_formats():
-        return [ "pdf", "csv" ]
+        return [ "pdf" ]
 
     # In multi-page mode, we only accept A4, A5 and US letter as paper
     # sizes. The goal is to render booklets, not posters.
