@@ -553,7 +553,13 @@ class MultiPageRenderer(Renderer):
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
+        """
+        Render a blank page with a nice "intentionally blank" notice
+        """
         ctx.save()
+        ctx.translate(
+                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
+                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
 
         # footer notice
         w = self._usable_area_width_pt
@@ -561,7 +567,33 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.6,.6,.6)
         Renderer._draw_centered_text(ctx, _('This page is intentionally left '\
                                             'blank.'), w/2.0, 0.95*h)
+        self._render_page_number(ctx, 2)
         cairo_surface.show_page()
+        ctx.restore()
+
+    def _render_page_number(self, ctx, page_number):
+        """
+        Render page number
+        """
+        ctx.save()
+        x_offset = 0
+        if page_number % 2:
+            x_offset += commons.convert_pt_to_dots(self._usable_area_width_pt)\
+                      - commons.convert_pt_to_dots(self.grayed_margin_pt)
+        y_offset = commons.convert_pt_to_dots(self._usable_area_height_pt)\
+                 - commons.convert_pt_to_dots(self.grayed_margin_pt)
+        ctx.translate(x_offset, y_offset)
+
+        ctx.set_source_rgba(1, 1, 1, 0.6)
+        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.grayed_margin_pt),
+                      commons.convert_pt_to_dots(self.grayed_margin_pt))
+        ctx.fill()
+
+        ctx.set_source_rgba(0, 0, 0, 1)
+        x_offset = commons.convert_pt_to_dots(self.grayed_margin_pt)/2
+        y_offset = commons.convert_pt_to_dots(self.grayed_margin_pt)/2
+        ctx.translate(x_offset, y_offset)
+        Renderer._draw_centered_text(ctx, unicode(page_number), 0, 0)
         ctx.restore()
 
     def render(self, cairo_surface, dpi, osm_date):
@@ -581,14 +613,6 @@ class MultiPageRenderer(Renderer):
             rendered_map = canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
 
-            # Render the page number
-            ctx.save()
-            ctx.translate(commons.convert_pt_to_dots(self._usable_area_width_pt),
-                          commons.convert_pt_to_dots(self._usable_area_height_pt))
-            Renderer._draw_centered_text(ctx, str(i + 2), 0, 0)
-            ctx.restore()
-
-
             if overview_grid:
                 # draw pages numbers
                 self._draw_overview_labels(ctx, canvas, overview_grid,
@@ -607,6 +631,9 @@ class MultiPageRenderer(Renderer):
                   commons.convert_pt_to_dots(self._grid_legend_margin_pt))
 
                 ctx.restore()
+
+            # Render the page number
+            self._render_page_number(ctx, i+3)
 
             ctx.restore()
 
