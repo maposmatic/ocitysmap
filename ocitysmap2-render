@@ -120,11 +120,6 @@ def main():
                                    or os.path.join(os.environ["HOME"],
                                                    '.ocitysmap.conf')])
 
-    # Output file formats
-    if not options.output_formats:
-        options.output_formats = ['pdf']
-    options.output_formats = set(options.output_formats)
-
     # Parse bounding box arguments when given
     bbox = None
     if options.bbox:
@@ -164,6 +159,18 @@ def main():
                  % (ex, ', '.join(map(lambda lo: "%s (%s)"
                           % (lo.name, lo.description),
                           ocitysmap2.layoutlib.renderers.get_renderers()))))
+
+    # Output file formats
+    if not options.output_formats:
+        options.output_formats = ['pdf']
+    options.output_formats = set(options.output_formats)
+
+    # Reject output formats that are not supported by the renderer
+    compatible_output_formats = cls_renderer.get_compatible_output_formats()
+    for format in options.output_formats:
+        if format not in compatible_output_formats:
+            parser.error("Output format %s not supported by layout %s" %
+                         (format, cls_renderer.name))
 
     # Parse paper size
     if (options.paper_format != 'first') \
