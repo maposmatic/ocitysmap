@@ -554,10 +554,23 @@ class MultiPageRenderer(Renderer):
 
         cairo_surface.show_page()
 
+    def _render_blank_page(self, ctx, cairo_surface, dpi):
+        ctx.save()
+
+        # footer notice
+        w = self._usable_area_width_pt
+        h = self._usable_area_height_pt
+        ctx.set_source_rgb(.6,.6,.6)
+        Renderer._draw_centered_text(ctx, _('This page is intentionally left '\
+                                            'blank.'), w/2.0, 0.95*h)
+        cairo_surface.show_page()
+        ctx.restore()
+
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
 
         self._render_front_page(ctx, cairo_surface, dpi, osm_date)
+        self._render_blank_page(ctx, cairo_surface, dpi)
 
         for i, (canvas, grid, overview_grid) in enumerate(self.pages):
             ctx.save()
