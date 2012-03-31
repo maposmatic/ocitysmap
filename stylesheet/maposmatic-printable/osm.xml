@@ -4041,7 +4041,7 @@
       &datasource-settings;
     </Datasource>
 </Layer>
-&layer-addressing;
+<!-- &layer-addressing; -->
 <Layer name="misc_boundaries" status="on" srs="&osm2pgsql_projection;">
     <StyleName>boundary</StyleName>
     <Datasource>
