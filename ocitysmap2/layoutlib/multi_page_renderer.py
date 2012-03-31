@@ -66,8 +66,8 @@ class MultiPageRenderer(Renderer):
     description = 'A multi-page layout.'
     multipages = True
 
-    def __init__(self, db, rc, tmpdir, dpi, street_index):
-        Renderer.__init__(self, db, rc, tmpdir, dpi, street_index)
+    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+        Renderer.__init__(self, db, rc, tmpdir, dpi, None)
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,

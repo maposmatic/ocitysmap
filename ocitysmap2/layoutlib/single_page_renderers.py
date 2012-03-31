@@ -40,6 +40,9 @@ from ocitysmap2.indexlib.renderer import StreetIndexRenderer
 
 import logging
 
+from indexlib.indexer import StreetIndex
+from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+
 LOG = logging.getLogger('ocitysmap')
 
 
@@ -55,8 +58,8 @@ class SinglePageRenderer(Renderer):
 
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
-    def __init__(self, db, rc, tmpdir, dpi,
-                 street_index = None, index_position = 'side'):
+    def __init__(self, db, rc, tmpdir, dpi, file_prefix,
+                 index_position = 'side'):
         """
         Create the renderer.
 
@@ -67,6 +70,19 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
         """
+        # Prepare the index
+        try:
+            street_index = StreetIndex(db,
+                                       rc.polygon_wkt,
+                                       rc.i18n)
+        except IndexEmptyError:
+            LOG.warning("Designated area leads to an empty index")
+            street_index = None
+
+        # Dump the CSV street index
+        if street_index:
+            street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
+
         Renderer.__init__(self, db, rc, tmpdir, dpi, street_index)
 
         self._grid_legend_margin_pt = \
@@ -136,6 +152,10 @@ class SinglePageRenderer(Renderer):
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas)
+
+        # Update the street_index to reflect the grid's actual position
+        if self.grid and street_index:
+            street_index.apply_grid(self.grid)
 
         # Commit the internal rendering stack of the map
         self._map_canvas.render()

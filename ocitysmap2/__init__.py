@@ -444,15 +444,6 @@ SELECT ST_AsText(ST_LongestLine(
         assert config.bounding_box is not None
         assert config.polygon_wkt is not None
 
-        # Prepare the index
-        try:
-            street_index = StreetIndex(self._db,
-                                       config.polygon_wkt,
-                                       config.i18n)
-        except IndexEmptyError:
-            LOG.warning("Designated area leads to an empty index")
-            street_index = None
-
         osm_date = self.get_osm_database_last_update()
 
         # Create a temporary directory for all our shape files
@@ -467,21 +458,18 @@ SELECT ST_AsText(ST_LongestLine(
             for output_format in output_formats:
                 output_filename = '%s.%s' % (file_prefix, output_format)
                 try:
-                    self._render_one(config, tmpdir, renderer_cls, street_index,
-                                     output_format, output_filename, osm_date)
+                    self._render_one(config, tmpdir, renderer_cls,
+                                     output_format, output_filename, osm_date,
+                                     file_prefix)
                 except IndexDoesNotFitError:
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
                                   "constructor. Backtrace follows...")
-
-            # Also dump the CSV street index
-            if street_index:
-                street_index.write_to_csv(config.title, '%s.csv' % file_prefix)
         finally:
             self._cleanup_tempdir(tmpdir)
 
-    def _render_one(self, config, tmpdir, renderer_cls, street_index,
-                    output_format, output_filename, osm_date):
+    def _render_one(self, config, tmpdir, renderer_cls,
+                    output_format, output_filename, osm_date, file_prefix):
 
         LOG.info('Rendering to %s format...' % output_format.upper())
 
@@ -527,10 +515,7 @@ SELECT ST_AsText(ST_LongestLine(
             raise ValueError, \
                 'Unsupported output format: %s!' % output_format.upper()
 
-        renderer = renderer_cls(self._db, config, tmpdir, dpi, street_index)
-        # Update the street_index to reflect the grid's actual position
-        if renderer.grid and street_index:
-            street_index.apply_grid(renderer.grid)
+        renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
 
         surface = factory(renderer.paper_width_pt, renderer.paper_height_pt)
 
