@@ -629,3 +629,66 @@ class MultiPageRenderer(Renderer):
             valid_sizes.append((sz[0], sz[1], sz[2], True, True))
         return valid_sizes
 
+    @classmethod
+    def _draw_overview_labels(cls, ctx, map_canvas, overview_grid,
+                     area_width_dots, area_height_dots):
+        """
+        Draw the page numbers for the overview grid.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           overview_grid (OverViewGrid): the overview grid object
+           area_width_dots/area_height_dots (numbers): size of the
+              drawing area (cairo units).
+        """
+        ctx.save()
+        ctx.set_font_size(14)
+
+        bbox = map_canvas.get_actual_bounding_box()
+        bottom_right, bottom_left, top_left, top_right = bbox.to_mercator()
+        bottom, left = bottom_right.y, top_left.x
+        coord_delta_y = top_left.y - bottom_right.y
+        coord_delta_x = bottom_right.x - top_left.x
+        w, h = None, None
+        for idx, page_bb in enumerate(overview_grid._pages_bbox):
+            p_bottom_right, p_bottom_left, p_top_left, p_top_right = \
+                                                        page_bb.to_mercator()
+            center_x = p_top_left.x+(p_top_right.x-p_top_left.x)/2
+            center_y = p_bottom_left.y+(p_top_right.y-p_bottom_right.y)/2
+            y_percent = 100 - 100.0*(center_y - bottom)/coord_delta_y
+            y = int(area_height_dots*y_percent/100)
+
+            x_percent = 100.0*(center_x - left)/coord_delta_x
+            x = int(area_width_dots*x_percent/100)
+
+            if not w or not h:
+                w = area_width_dots*(p_bottom_right.x - p_bottom_left.x
+                                                         )/coord_delta_x
+                h = area_height_dots*(p_top_right.y - p_bottom_right.y
+                                                         )/coord_delta_y
+            # Prepare the number text layout
+            pc = pangocairo.CairoContext(ctx)
+            layout = pc.create_layout()
+            layout.set_width(int(0.7 * w * pango.SCALE))
+            layout.set_alignment(pango.ALIGN_CENTER)
+            fd = pango.FontDescription("Georgia Bold")
+            fd.set_size(pango.SCALE)
+            layout.set_font_description(fd)
+
+            # adjust size with the last page number
+            layout.set_text('0'*len(unicode(len(overview_grid._pages_bbox)+3)))
+            cls._adjust_font_size(layout, fd, 0.65 * w, 0.8 * h)
+
+            # set the real text
+            layout.set_text(unicode(idx+3))
+
+            # draw
+            text_x, text_y, text_w, text_h = layout.get_extents()[1]
+            ctx.save()
+            ctx.set_source_rgba(0, 0, 0, 0.6)
+            ctx.translate(x - (text_w/2.0)/pango.SCALE - text_x/pango.SCALE,
+                          y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE)
+            pc.show_layout(layout)
+            ctx.restore()
+
+        ctx.restore()
