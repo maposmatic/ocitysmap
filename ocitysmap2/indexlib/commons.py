@@ -122,15 +122,21 @@ class IndexItem:
                 % (repr(self.label), self.endpoint1, self.endpoint2,
                    repr(self.location_str), repr(self.page_number)))
 
-    def min_drawing_width(self, layout, em):
+    def label_drawing_width(self, layout):
         layout.set_text(self.label)
-        label_w = float(layout.get_size()[0]) / pango.SCALE
-        layout.set_text(self.location_str)
-        location_w = float(layout.get_size()[0]) / pango.SCALE
-        return (label_w + location_w + 2 * em)
+        return float(layout.get_size()[0]) / pango.SCALE
 
-    def draw(self, rtl, ctx, pc, layout, fascent, fheight,
-             baseline_x, baseline_y):
+    def label_drawing_height(self, layout):
+        layout.set_text(self.label)
+        return float(layout.get_size()[1]) / pango.SCALE
+
+    def location_drawing_width(self, layout):
+        layout.set_text(self.location_str)
+        return float(layout.get_size()[0]) / pango.SCALE
+
+    def draw(self, rtl, ctx, pc, column_layout, fascent, fheight,
+             baseline_x, baseline_y,
+             label_layout=None, label_height=0, location_width=0):
         """Draw this index item to the provided Cairo context. It prints the
         label, the squares definition and the dotted line, with respect to the
         RTL setting.
@@ -140,13 +146,24 @@ class IndexItem:
             ctx (cairo.Context): the Cairo context to draw to.
             pc (pangocairo.PangoCairo): the PangoCairo context for text
                 drawing.
-            layout (pango.Layout): the Pango layout to use for text
+            column_layout (pango.Layout): the Pango layout to use for text
                 rendering, pre-configured with the appropriate font.
             fascent (int): font ascent.
             fheight (int): font height.
             baseline_x (int): X axis coordinate of the baseline.
             baseline_y (int): Y axis coordinate of the baseline.
+        Optional args (in case of label wrapping):
+            label_layout (pango.Layout): the Pango layout to use for text
+                rendering, in case the label should be wrapped
+            label_height (int): height of the big label
+            location_width (int): width of the 'location' part
         """
+
+        # Fallbacks in case we dont't have a wrapping label
+        if label_layout == None:
+            label_layout = column_layout
+        if label_height == 0:
+            label_height = fheight
 
         if not self.location_str:
             location_str = '???'
@@ -155,22 +172,24 @@ class IndexItem:
 
         ctx.save()
         if not rtl:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
+            _, _, line_start = draw_utils.draw_text_left(ctx, pc, label_layout,
                                                          fascent, fheight,
                                                          baseline_x, baseline_y,
                                                          self.label)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
+            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, column_layout,
                                                         fascent, fheight,
                                                         baseline_x, baseline_y,
                                                         location_str)
         else:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, layout,
+            _, _, line_start = draw_utils.draw_text_left(ctx, pc, column_layout,
                                                          fascent, fheight,
                                                          baseline_x, baseline_y,
                                                          location_str)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, layout,
+            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, label_layout,
                                                         fascent, fheight,
-                                                        baseline_x, baseline_y,
+                                                        (baseline_x
+                                                         + location_width),
+                                                        baseline_y,
                                                         self.label)
 
         # In case of empty label, we don't draw the dots

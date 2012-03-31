@@ -21,6 +21,7 @@ import cairo
 import ocitysmap2.layoutlib.commons as UTILS
 import pango
 import pangocairo
+import math
 
 class MultiPageStreetIndexRenderer:
     """
@@ -60,18 +61,22 @@ class MultiPageStreetIndexRenderer:
         pc = pangocairo.CairoContext(self.ctx)
 
         header_fd = pango.FontDescription("Georgia Bold 12")
-        label_fd  = pango.FontDescription("DejaVu 8")
+        label_column_fd  = pango.FontDescription("DejaVu 8")
 
         header_layout, header_fascent, header_fheight, header_em = \
             self._create_layout_with_font(pc, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-            self._create_layout_with_font(pc, label_fd)
+            self._create_layout_with_font(pc, label_column_fd)
+        column_layout, _, _, _ = \
+            self._create_layout_with_font(pc, label_column_fd)
 
         # By OCitysmap's convention, the default resolution is 72 dpi,
         # which maps to the default pangocairo resolution (96 dpi
         # according to pangocairo docs). If we want to render with
         # another resolution (different from 72), we have to scale the
         # pangocairo resolution accordingly:
+        pangocairo.context_set_resolution(column_layout.get_context(),
+                                          96.*dpi/UTILS.PT_PER_INCH)
         pangocairo.context_set_resolution(label_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
         pangocairo.context_set_resolution(header_layout.get_context(),
@@ -79,26 +84,41 @@ class MultiPageStreetIndexRenderer:
 
         margin = label_em
 
-        max_drawing_width = 0
+        # find largest label and location
+        max_label_drawing_width = 0.0
+        max_location_drawing_width = 0.0
         for category in self.index_categories:
             for street in category.items:
-                w = street.min_drawing_width(label_layout, label_em)
-                if w > max_drawing_width:
-                    max_drawing_width = w
+                w = street.label_drawing_width(label_layout)
+                if w > max_label_drawing_width:
+                    max_label_drawing_width = w
+
+                w = street.location_drawing_width(label_layout)
+                if w > max_location_drawing_width:
+                    max_location_drawing_width = w
 
         # No street to render, bail out
-        if max_drawing_width == 0:
+        if max_label_drawing_width == 0.0:
             return
 
-        columns_count = int(self.rendering_area_w / max_drawing_width)
+        # Find best number of columns
+        max_drawing_width = \
+            max_label_drawing_width + max_location_drawing_width + 2 * margin
+
+        columns_count = int(math.ceil(self.rendering_area_w / max_drawing_width))
+        # following test should not be needed. No time to prove it. ;-)
         if columns_count == 0:
             columns_count = 1
 
-        # We have three columns
+        # We have now have several columns
         column_width = self.rendering_area_w / columns_count
 
-        label_layout.set_width(int(UTILS.convert_pt_to_dots(
+        column_layout.set_width(int(UTILS.convert_pt_to_dots(
                     (column_width - margin) * pango.SCALE, dpi)))
+        label_layout.set_width(int(UTILS.convert_pt_to_dots(
+                    (column_width - margin - max_location_drawing_width
+                     - 2 * label_em)
+                    * pango.SCALE, dpi)))
         header_layout.set_width(int(UTILS.convert_pt_to_dots(
                     (column_width - margin) * pango.SCALE, dpi)))
 
@@ -106,7 +126,8 @@ class MultiPageStreetIndexRenderer:
             orig_offset_x = offset_x = margin/2.
             orig_delta_x  = delta_x  = column_width
         else:
-            orig_offset_x = offset_x = self.rendering_area_w - column_width + margin/2.
+            orig_offset_x = offset_x = \
+                self.rendering_area_w - column_width + margin/2.
             orig_delta_x  = delta_x  = - column_width
 
         actual_n_cols = 0
@@ -138,7 +159,8 @@ class MultiPageStreetIndexRenderer:
             offset_y += header_fheight
 
             for street in category.items:
-                if ( offset_y + label_fheight + margin/2.
+                label_height = street.label_drawing_height(label_layout)
+                if ( offset_y + label_height + margin/2.
                      > self.rendering_area_h ):
                     offset_y       = margin/2.
                     offset_x      += delta_x
@@ -151,16 +173,20 @@ class MultiPageStreetIndexRenderer:
                         delta_x  = orig_delta_x
                         self.surface.show_page()
 
-                street.draw(self._i18n.isrtl(), self.ctx, pc, label_layout,
+                street.draw(self._i18n.isrtl(), self.ctx, pc, column_layout,
                             UTILS.convert_pt_to_dots(label_fascent, dpi),
                             UTILS.convert_pt_to_dots(label_fheight, dpi),
                             UTILS.convert_pt_to_dots(self.rendering_area_x
                                                      + offset_x, dpi),
                             UTILS.convert_pt_to_dots(self.rendering_area_y
                                                      + offset_y
-                                                     + label_fascent, dpi))
+                                                     + label_fascent, dpi),
+                            label_layout,
+                            UTILS.convert_pt_to_dots(label_height, dpi),
+                            UTILS.convert_pt_to_dots(max_location_drawing_width,
+                                                     dpi))
 
-                offset_y += label_fheight
+                offset_y += label_height
 
 
         self.ctx.restore()
@@ -170,6 +196,7 @@ if __name__ == '__main__':
     import random
     import string
     import commons
+    import coords
 
     width = 72*21./2.54
     height = 72*29.7/2.54
@@ -178,7 +205,7 @@ if __name__ == '__main__':
 
     random.seed(42)
 
-    def rnd_str(max_len, letters = string.letters):
+    def rnd_str(max_len, letters = string.letters + ' ' * 4):
         return ''.join(random.choice(letters)
                        for i in xrange(random.randint(1, max_len)))
 
@@ -193,7 +220,7 @@ if __name__ == '__main__':
               'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
               'Schools', 'Public buildings']:
         items = []
-        for label, location_str in [(rnd_str(20).capitalize(),
+        for label, location_str in [(rnd_str(40).capitalize(),
                                      '%s%d-%s%d' \
                                          % (rnd_str(2,
                                                     string.ascii_uppercase),
@@ -214,6 +241,11 @@ if __name__ == '__main__':
         (15, 15, width - 2 * 15, height - 2 * 15)
 
     mpsir = MultiPageStreetIndexRenderer(i18nMock(False), ctxtmp, surface,
+                                         streets, rendering_area)
+    mpsir.render()
+    surface.show_page()
+
+    mpsir = MultiPageStreetIndexRenderer(i18nMock(True), ctxtmp, surface,
                                          streets, rendering_area)
     mpsir.render()
 
