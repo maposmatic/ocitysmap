@@ -51,6 +51,7 @@ import shapely.wkt
 from ocitysmap2 import maplib
 
 from indexlib.commons import IndexCategory
+import draw_utils
 
 LOG = logging.getLogger('ocitysmap')
 PAGE_STR = " - Page %(page_number)d"
@@ -624,6 +625,8 @@ class MultiPageRenderer(Renderer):
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
+        page_number = 0
+
         for i, (canvas, grid) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
@@ -645,6 +648,7 @@ class MultiPageRenderer(Renderer):
             # Render the page number
             self._render_page_number(ctx, i+4)
             #self._render_neighbour_arrows()
+            page_number = i+4
 
             cairo_surface.show_page()
         ctx.restore()
@@ -655,7 +659,8 @@ class MultiPageRenderer(Renderer):
                                              (Renderer.PRINT_SAFE_MARGIN_PT,
                                               Renderer.PRINT_SAFE_MARGIN_PT,
                                               self._usable_area_width_pt,
-                                              self._usable_area_height_pt))
+                                              self._usable_area_height_pt),
+                                             page_number + 1)
 
         mpsir.render()
 

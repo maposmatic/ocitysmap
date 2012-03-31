@@ -22,6 +22,12 @@ import ocitysmap2.layoutlib.commons as UTILS
 import pango
 import pangocairo
 import math
+import draw_utils
+from ocitysmap2.layoutlib.abstract_renderer import Renderer
+
+# FIXME: refactoring
+# We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
+PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
 class MultiPageStreetIndexRenderer:
     """
@@ -31,7 +37,8 @@ class MultiPageStreetIndexRenderer:
 
     # ctx: Cairo context
     # surface: Cairo surface
-    def __init__(self, i18n, ctx, surface, index_categories, rendering_area):
+    def __init__(self, i18n, ctx, surface, index_categories, rendering_area,
+                 page_number):
         self._i18n           = i18n
         self.ctx            = ctx
         self.surface        = surface
@@ -40,6 +47,7 @@ class MultiPageStreetIndexRenderer:
         self.rendering_area_y = rendering_area[1]
         self.rendering_area_w = rendering_area[2]
         self.rendering_area_h = rendering_area[3]
+        self.page_number      = page_number
 
     def _create_layout_with_font(self, pc, font_desc):
         layout = pc.create_layout()
@@ -53,6 +61,22 @@ class MultiPageStreetIndexRenderer:
         em = float(font_metric.get_approximate_char_width()) / pango.SCALE
 
         return layout, fascent, fheight, em
+
+    def _draw_page_number(self):
+        self.ctx.save()
+        self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
+                           Renderer.PRINT_SAFE_MARGIN_PT)
+        draw_utils.render_page_number(self.ctx, self.page_number,
+                                      self.rendering_area_w,
+                                      self.rendering_area_h,
+                                      PAGE_NUMBER_MARGIN_PT,
+                                      transparent_background = False)
+        self.ctx.restore()
+
+    def _new_page(self):
+        self.surface.show_page()
+        self.page_number = self.page_number + 1
+        self._draw_page_number()
 
     def render(self, dpi = UTILS.PT_PER_INCH):
         self.ctx.save()
@@ -104,6 +128,7 @@ class MultiPageStreetIndexRenderer:
         # Find best number of columns
         max_drawing_width = \
             max_label_drawing_width + max_location_drawing_width + 2 * margin
+        max_drawing_height = self.rendering_area_h - PAGE_NUMBER_MARGIN_PT
 
         columns_count = int(math.ceil(self.rendering_area_w / max_drawing_width))
         # following test should not be needed. No time to prove it. ;-)
@@ -133,19 +158,22 @@ class MultiPageStreetIndexRenderer:
         actual_n_cols = 0
         offset_y = margin/2.
 
+        # page number of first page
+        self._draw_page_number()
+
         for category in self.index_categories:
             if ( offset_y + header_fheight + label_fheight
-                 + margin/2. > self.rendering_area_h ):
+                 + margin/2. > max_drawing_height ):
                 offset_y       = margin/2.
                 offset_x      += delta_x
                 actual_n_cols += 1
 
                 if actual_n_cols == columns_count:
+                    self._new_page()
                     actual_n_cols = 0
                     offset_y = margin / 2.
                     offset_x = orig_offset_x
                     delta_x  = orig_delta_x
-                    self.surface.show_page()
 
             category.draw(self._i18n.isrtl(), self.ctx, pc, header_layout,
                           UTILS.convert_pt_to_dots(header_fascent, dpi),
@@ -161,17 +189,17 @@ class MultiPageStreetIndexRenderer:
             for street in category.items:
                 label_height = street.label_drawing_height(label_layout)
                 if ( offset_y + label_height + margin/2.
-                     > self.rendering_area_h ):
+                     > max_drawing_height ):
                     offset_y       = margin/2.
                     offset_x      += delta_x
                     actual_n_cols += 1
 
                     if actual_n_cols == columns_count:
+                        self._new_page()
                         actual_n_cols = 0
                         offset_y = margin / 2.
                         offset_x = orig_offset_x
                         delta_x  = orig_delta_x
-                        self.surface.show_page()
 
                 street.draw(self._i18n.isrtl(), self.ctx, pc, column_layout,
                             UTILS.convert_pt_to_dots(label_fascent, dpi),
@@ -190,7 +218,7 @@ class MultiPageStreetIndexRenderer:
 
 
         self.ctx.restore()
-        pass
+
 
 if __name__ == '__main__':
     import random
@@ -241,12 +269,13 @@ if __name__ == '__main__':
         (15, 15, width - 2 * 15, height - 2 * 15)
 
     mpsir = MultiPageStreetIndexRenderer(i18nMock(False), ctxtmp, surface,
-                                         streets, rendering_area)
+                                         streets, rendering_area, 1)
     mpsir.render()
     surface.show_page()
 
-    mpsir = MultiPageStreetIndexRenderer(i18nMock(True), ctxtmp, surface,
-                                         streets, rendering_area)
-    mpsir.render()
+    mpsir2 = MultiPageStreetIndexRenderer(i18nMock(True), ctxtmp, surface,
+                                          streets, rendering_area,
+                                          mpsir.page_number + 1)
+    mpsir2.render()
 
     surface.finish()

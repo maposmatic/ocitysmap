@@ -24,6 +24,8 @@
 
 import cairo
 import pango
+import ocitysmap2.layoutlib.commons as commons
+from ocitysmap2.layoutlib.abstract_renderer import Renderer
 
 def draw_text(ctx, pc, layout, fascent, fheight,
               baseline_x, baseline_y, text, pango_alignment):
@@ -130,3 +132,33 @@ def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.move_to(baseline_x, baseline_y)
     ctx.rel_line_to(length, 0)
     ctx.stroke()
+
+def render_page_number(ctx, page_number,
+                       usable_area_width_pt, usable_area_height_pt, margin_pt,
+                       transparent_background = True):
+    """
+    Render page number
+    """
+    ctx.save()
+    x_offset = 0
+    if page_number % 2:
+        x_offset += commons.convert_pt_to_dots(usable_area_width_pt)\
+                  - commons.convert_pt_to_dots(margin_pt)
+    y_offset = commons.convert_pt_to_dots(usable_area_height_pt)\
+             - commons.convert_pt_to_dots(margin_pt)
+    ctx.translate(x_offset, y_offset)
+
+    if transparent_background:
+        ctx.set_source_rgba(1, 1, 1, 0.6)
+    else:
+        ctx.set_source_rgba(0.8, 0.8, 0.8, 0.6)
+    ctx.rectangle(0, 0, commons.convert_pt_to_dots(margin_pt),
+                  commons.convert_pt_to_dots(margin_pt))
+    ctx.fill()
+
+    ctx.set_source_rgba(0, 0, 0, 1)
+    x_offset = commons.convert_pt_to_dots(margin_pt)/2
+    y_offset = commons.convert_pt_to_dots(margin_pt)/2
+    ctx.translate(x_offset, y_offset)
+    Renderer._draw_centered_text(ctx, unicode(page_number), 0, 0)
+    ctx.restore()
