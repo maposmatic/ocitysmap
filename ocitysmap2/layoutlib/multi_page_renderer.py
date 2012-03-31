@@ -567,33 +567,12 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.6,.6,.6)
         Renderer._draw_centered_text(ctx, _('This page is intentionally left '\
                                             'blank.'), w/2.0, 0.95*h)
-        self._render_page_number(ctx, 2)
+        draw_utils.render_page_number(ctx, 2,
+                                      self._usable_area_width_pt,
+                                      self._usable_area_height_pt,
+                                      self.grayed_margin_pt,
+                                      transparent_background = True)
         cairo_surface.show_page()
-        ctx.restore()
-
-    def _render_page_number(self, ctx, page_number):
-        """
-        Render page number
-        """
-        ctx.save()
-        x_offset = 0
-        if page_number % 2:
-            x_offset += commons.convert_pt_to_dots(self._usable_area_width_pt)\
-                      - commons.convert_pt_to_dots(self.grayed_margin_pt)
-        y_offset = commons.convert_pt_to_dots(self._usable_area_height_pt)\
-                 - commons.convert_pt_to_dots(self.grayed_margin_pt)
-        ctx.translate(x_offset, y_offset)
-
-        ctx.set_source_rgba(1, 1, 1, 0.6)
-        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.grayed_margin_pt),
-                      commons.convert_pt_to_dots(self.grayed_margin_pt))
-        ctx.fill()
-
-        ctx.set_source_rgba(0, 0, 0, 1)
-        x_offset = commons.convert_pt_to_dots(self.grayed_margin_pt)/2
-        y_offset = commons.convert_pt_to_dots(self.grayed_margin_pt)/2
-        ctx.translate(x_offset, y_offset)
-        Renderer._draw_centered_text(ctx, unicode(page_number), 0, 0)
         ctx.restore()
 
     def _render_overview_page(self, ctx, cairo_surface, dpi):
@@ -605,7 +584,11 @@ class MultiPageRenderer(Renderer):
               commons.convert_pt_to_dots(self._usable_area_width_pt),
               commons.convert_pt_to_dots(self._usable_area_height_pt))
         # Render the page number
-        self._render_page_number(ctx, 3)
+        draw_utils.render_page_number(ctx, 3,
+                                      self._usable_area_width_pt,
+                                      self._usable_area_height_pt,
+                                      self.grayed_margin_pt,
+                                      transparent_background = True)
 
         cairo_surface.show_page()
 
@@ -646,7 +629,11 @@ class MultiPageRenderer(Renderer):
             ctx.restore()
 
             # Render the page number
-            self._render_page_number(ctx, i+4)
+            draw_utils.render_page_number(ctx, i+4,
+                                          self._usable_area_width_pt,
+                                          self._usable_area_height_pt,
+                                          self.grayed_margin_pt,
+                                          transparent_background = True)
             #self._render_neighbour_arrows()
             page_number = i+4
 
