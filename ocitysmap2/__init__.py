@@ -146,6 +146,10 @@ class Stylesheet:
         self.shade_color = 'black'
         self.shade_alpha = 0.1
 
+        # shade color for town contour in multi-pages
+        self.shade_color_2 = 'white'
+        self.shade_alpha_2 = 0.4
+
     @staticmethod
     def create_from_config_section(parser, section_name):
         """Creates a Stylesheet object from the OCitySMap configuration.
@@ -173,6 +177,9 @@ class Stylesheet:
 
         assign_if_present('shade_color')
         assign_if_present('shade_alpha', float)
+
+        assign_if_present('shade_color_2')
+        assign_if_present('shade_alpha_2', float)
         return s
 
     @staticmethod

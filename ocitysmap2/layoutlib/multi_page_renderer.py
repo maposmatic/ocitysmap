@@ -241,7 +241,7 @@ class MultiPageRenderer(Renderer):
             # Area to keep visible
             interior_contour = shapely.wkt.loads(self.rc.polygon_wkt)
             # Determine the shade WKT
-            shade_contour_wkt = exterior.difference(interior_contour).wkt
+            shade_contour_wkt = interior.difference(interior_contour).wkt
             # Prepare the shade SHP
             shade_contour = maplib.shapes.PolyShapeFile(bb,
                 os.path.join(self.tmpdir, 'shade_contour%d.shp' % i),
@@ -262,8 +262,8 @@ class MultiPageRenderer(Renderer):
 
             map_canvas.add_shape_file(shade)
             map_canvas.add_shape_file(shade_contour,
-                                  self.rc.stylesheet.shade_color,
-                                  self.rc.stylesheet.shade_alpha)
+                                  self.rc.stylesheet.shade_color_2,
+                                  self.rc.stylesheet.shade_alpha_2)
             map_canvas.add_shape_file(grid_shape,
                                       self.rc.stylesheet.grid_line_color,
                                       self.rc.stylesheet.grid_line_alpha,
