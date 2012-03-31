@@ -263,22 +263,22 @@ are using. They have been tested on several x86_64 hosts.
     ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
 
 
-Appendix A:  Installation of B&W stylesheet
--------------------------------------------
+Appendix A:  Installation of maposmatic-printable stylesheet
+------------------------------------------------------------
 
     This step builds on step 10 "Install Mapnik-OSM" and step 11
     "Installation of OCitySMap".
 
-    a. Copy stylesheet/black-and-white/symbols/* (i.e. all files in
+    a. Copy stylesheet/maposmatic-printable/symbols/* (i.e. all files in
        symbols/ directory) into mapnik2-osm/symbols/ directory.
 
-    b. Add absolute path to file stylesheet/black-and-white/osm.xml into
-       ~/.ocitysmap.conf.
+    b. Add absolute path to file stylesheet/maposmatic-printable/osm.xml
+       into ~/.ocitysmap.conf.
 
     c. Configure the stylesheet with database parameters and relevant
        directories:
 
-       cd stylesheet/black-and-white/
+       cd stylesheet/maposmatic-printable/
 
        python ./generate_xml.py --dbname maposmatic --host 'localhost' \
                              --user maposmatic --port 5432 \
