@@ -577,8 +577,10 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         if reverse_text:
             ctx.rotate(math.pi)
-        ctx.set_source_rgb(1, 1, 1)
-        draw_utils.draw_simpletext_center(ctx, unicode(number), 0, 0)
+        draw_utils.draw_text_adjusted(ctx, unicode(number), 0, 0, arrow_edge,
+                        arrow_edge, max_char_number=max_digit_number,
+                        text_color=(1, 1, 1, 1), width_adjust=0.85,
+                        height_adjust=0.9)
         ctx.restore()
 
     def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,

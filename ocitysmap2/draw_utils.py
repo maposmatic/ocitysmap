@@ -168,7 +168,8 @@ def adjust_font_size(layout, fd, constraint_x, constraint_y):
     layout.set_font_description(fd)
 
 def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
-                       text_color=(0, 0, 0, 1), align=pango.ALIGN_CENTER):
+                       text_color=(0, 0, 0, 1), align=pango.ALIGN_CENTER,
+                       width_adjust=0.7, height_adjust=0.8):
     """
     Draw a text adjusted to a maximum character number
 
@@ -182,7 +183,7 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
     """
     pc = pangocairo.CairoContext(ctx)
     layout = pc.create_layout()
-    layout.set_width(int(0.7 * width * pango.SCALE))
+    layout.set_width(int(width_adjust * width * pango.SCALE))
     layout.set_alignment(align)
     fd = pango.FontDescription("Georgia Bold")
     fd.set_size(pango.SCALE)
@@ -191,20 +192,20 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
     if max_char_number:
         # adjust size with the max character number
         layout.set_text('0'*max_char_number)
-        adjust_font_size(layout, fd, 0.7*width, 0.8*height)
+        adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
 
     # set the real text
     layout.set_text(text)
     if not max_char_number:
-        adjust_font_size(layout, fd, 0.7*width, 0.8*height)
+        adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
 
     # draw
     text_x, text_y, text_w, text_h = layout.get_extents()[1]
     ctx.save()
     ctx.set_source_rgba(*text_color)
     if align == pango.ALIGN_CENTER:
-        x = x - (text_w/2.0)/pango.SCALE - text_x/pango.SCALE
-        y = y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE
+        x = x - (text_w/2.0)/pango.SCALE - int(float(text_x)/pango.SCALE)
+        y = y - (text_h/2.0)/pango.SCALE - int(float(text_y)/pango.SCALE)
     else:
         y = y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE
     ctx.translate(x, y)
