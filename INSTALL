@@ -204,7 +204,7 @@ are using. They have been tested on several x86_64 hosts.
     svn co \
         http://svn.openstreetmap.org/applications/rendering/mapnik \
         mapnik2-osm
-    # Tested revision: r27862
+    # Tested revision: r28170
 
     b. Installation of static data
 
