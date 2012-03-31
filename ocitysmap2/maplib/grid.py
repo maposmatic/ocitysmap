@@ -35,14 +35,10 @@ class Grid:
     the grid size, number and size of squares, etc.
     """
 
-    # Available and supported grid sizes, in meters.
-    AVAILABLE_GRID_SIZES_METERS = [50, 100, 250, 500]
+    # Approximative paper size of the grid squares (+/- 33%).
+    GRID_APPROX_PAPER_SIZE_MM = 40
 
-    # Number of squares under which a smaller grid size is used (until no
-    # smaller size is available).
-    GRID_COUNT_TRESHOLD = 4
-
-    def __init__(self, bounding_box, rtl=False):
+    def __init__(self, bounding_box, scale, rtl=False):
         """Creates a new grid for the given bounding box.
 
         Args:
@@ -58,14 +54,28 @@ class Grid:
         l.info('Laying out grid on %.1fx%.1fm area...' %
                (self._width_m, self._height_m))
 
-        for size in sorted(Grid.AVAILABLE_GRID_SIZES_METERS, reverse=True):
-            self.grid_size_m = size
-            self.horiz_count = self._width_m / size
-            self.vert_count = self._height_m / size
-
-            if (min(self.horiz_count, self.vert_count) >
-                Grid.GRID_COUNT_TRESHOLD):
-                break
+        # compute the terrain grid size corresponding to the targeted paper size
+        size = float(self.GRID_APPROX_PAPER_SIZE_MM) * scale / 1000
+        # compute the scientific notation of this size :
+        # size = significant * 10 ^ exponent with 1 <= significand < 10
+        exponent = math.log10(size)
+        significand = float(size) / 10 ** int(exponent)
+        # "round" this size to be 1, 2, 2.5 or 5 multiplied by a power of 10
+        if significand < 1.5:
+            significand = 1
+        elif significand < 2.25:
+            significand = 2
+        elif significand < 3.75:
+            significand = 2.5
+        elif significand < 7.5:
+            significand = 5
+        else:
+            significand = 10
+        size = significand * 10 ** int(exponent)
+        # use it
+        self.grid_size_m = size
+        self.horiz_count = self._width_m / size
+        self.vert_count = self._height_m / size
 
         self._horiz_angle_span = abs(self._bbox.get_top_left()[1] -
                                      self._bbox.get_bottom_right()[1])

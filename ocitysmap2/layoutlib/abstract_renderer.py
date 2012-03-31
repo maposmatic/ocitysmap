@@ -272,7 +272,7 @@ class Renderer:
         Return a new Grid object.
         """
         # Prepare the grid SHP
-        map_grid = Grid(canvas.get_actual_bounding_box(), self.rc.i18n.isrtl())
+        map_grid = Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale(), self.rc.i18n.isrtl())
         grid_shape = map_grid.generate_shape_file(
             os.path.join(self.tmpdir, 'grid.shp'))
 

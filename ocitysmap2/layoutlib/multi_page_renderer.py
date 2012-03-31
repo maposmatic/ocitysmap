@@ -248,16 +248,16 @@ class MultiPageRenderer(Renderer):
             shade_contour.add_shade_from_wkt(shade_contour_wkt)
 
 
-            # Create the grid
-            map_grid = Grid(bb_inner, self.rc.i18n.isrtl())
-            grid_shape = map_grid.generate_shape_file(
-                os.path.join(self.tmpdir, 'grid%d.shp' % i))
-
             # Create one canvas for the current page
             map_canvas = MapCanvas(self.rc.stylesheet,
                                    bb, self._usable_area_width_pt,
                                    self._usable_area_height_pt, dpi,
                                    extend_bbox_to_ratio=False)
+
+            # Create the grid
+            map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
+            grid_shape = map_grid.generate_shape_file(
+                os.path.join(self.tmpdir, 'grid%d.shp' % i))
 
             map_canvas.add_shape_file(shade)
             map_canvas.add_shape_file(shade_contour,

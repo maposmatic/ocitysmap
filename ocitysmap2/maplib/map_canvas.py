@@ -32,6 +32,7 @@ import os
 from ocitysmap2 import coords
 from layoutlib.commons import convert_pt_to_dots
 import shapes
+import math
 
 l = logging.getLogger('ocitysmap')
 
@@ -149,6 +150,16 @@ class MapCanvas:
         """Returns the actual geographic bounding box that will be rendered by
         Mapnik."""
         return self._geo_bbox
+
+    def get_actual_scale(self):
+        # get the scale denominator computed by mapnik
+        scale = self._map.scale_denominator()
+        # the actual scale depends on the latitude
+        lat = self._geo_bbox.get_top_left()[0]
+        scale *= math.cos(math.radians(lat))
+        # by convention, the scale denominator uses 90 ppi whereas cairo uses 72 ppi
+        scale *= float(72) / 90
+        return scale
 
     def _render_shape_file(self, shape_file, color, line_width):
         shape_file.flush()
