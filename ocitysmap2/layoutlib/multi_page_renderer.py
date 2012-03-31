@@ -729,7 +729,7 @@ class MultiPageRenderer(Renderer):
     # sizes. The goal is to render booklets, not posters.
     # The default paper size is A4 portrait
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, zoom_level,
+    def get_compatible_paper_sizes(bounding_box,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM,
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []

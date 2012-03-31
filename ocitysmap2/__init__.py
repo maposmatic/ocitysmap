@@ -137,7 +137,6 @@ class Stylesheet:
         self.name        = None # str
         self.path        = None # str
         self.description = '' # str
-        self.zoom_level  = Stylesheet.DEFAULT_ZOOM_LEVEL
 
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
@@ -169,7 +168,6 @@ class Stylesheet:
         s.name = parser.get(section_name, 'name')
         s.path = parser.get(section_name, 'path')
         assign_if_present('description')
-        assign_if_present('zoom_level', int)
 
         assign_if_present('grid_line_color')
         assign_if_present('grid_line_alpha', float)

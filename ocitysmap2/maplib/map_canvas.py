@@ -200,7 +200,6 @@ if __name__ == '__main__':
     class StylesheetMock:
         def __init__(self):
             self.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
-            self.zoom_level = 16
 
     bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
     canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210)

@@ -453,7 +453,7 @@ class SinglePageRenderer(Renderer):
         cairo_surface.flush()
 
     @staticmethod
-    def _generic_get_compatible_paper_sizes(bounding_box, zoom_level,
+    def _generic_get_compatible_paper_sizes(bounding_box,
                                             resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM, index_position = None):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
@@ -461,7 +461,6 @@ class SinglePageRenderer(Renderer):
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            zoom_level (int): the Mapnik zoom level to use, generally 16.
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
            index_position (str): None or 'side' (index on side),
@@ -533,7 +532,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
 
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, zoom_level,
+    def get_compatible_paper_sizes(bounding_box,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
@@ -541,7 +540,6 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            zoom_level (int): the Mapnik zoom level to use, generally 16.
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
@@ -550,7 +548,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, zoom_level, resolution_km_in_mm, None)
+            bounding_box, resolution_km_in_mm, None)
 
 
 class SinglePageRendererIndexOnSide(SinglePageRenderer):
@@ -569,7 +567,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, street_index, 'side')
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, zoom_level,
+    def get_compatible_paper_sizes(bounding_box,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
@@ -577,7 +575,6 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            zoom_level (int): the Mapnik zoom level to use, generally 16.
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
@@ -586,7 +583,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, zoom_level, resolution_km_in_mm, 'side')
+            bounding_box, resolution_km_in_mm, 'side')
 
 
 class SinglePageRendererIndexBottom(SinglePageRenderer):
@@ -605,7 +602,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'bottom')
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, zoom_level,
+    def get_compatible_paper_sizes(bounding_box,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
@@ -613,7 +610,6 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            zoom_level (int): the Mapnik zoom level to use, generally 16.
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
@@ -622,7 +618,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, zoom_level, resolution_km_in_mm, 'bottom')
+            bounding_box, resolution_km_in_mm, 'bottom')
 
 
 if __name__ == '__main__':
@@ -656,7 +652,6 @@ if __name__ == '__main__':
             self.grid_line_color = 'black'
             self.grid_line_alpha = 0.9
             self.grid_line_width = 2
-            self.zoom_level = 16
             self.shade_color = 'black'
             self.shade_alpha = 0.7
 

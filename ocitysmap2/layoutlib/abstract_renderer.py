@@ -266,15 +266,13 @@ class Renderer:
         return [ "png", "svgz", "pdf", "csv" ]
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, zoom_level,
-                                   resolution_km_in_mm):
+    def get_compatible_paper_sizes(bounding_box, resolution_km_in_mm):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            zoom_level (int): the Mapnik zoom level to use, generally 16.
             resolution_km_in_mm (int): size of a geographic kilometer in
                 milimeters on the rendered map.
 
