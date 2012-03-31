@@ -191,20 +191,20 @@ class MultiPageRenderer(Renderer):
         # Create an overview map
 
         overview_bb = self._geo_bbox.create_expanded(0.001, 0.001)
-        # Create the grid
+        # Create the overview grid
         map_grid = OverviewGrid(overview_bb,
                      [bb_inner for bb, bb_inner in bboxes], self.rc.i18n.isrtl())
 
         grid_shape = map_grid.generate_shape_file(
                     os.path.join(self.tmpdir, 'grid_overview.shp'))
 
-        # Create one canvas for the current page
+        # Create a canvas for the overview page
         map_canvas = MapCanvas(self.rc.stylesheet,
                                overview_bb, self._usable_area_width_pt,
                                self._usable_area_height_pt, dpi,
                                extend_bbox_to_ratio=True)
 
-        # Create the gray shape around the map
+        # Create the gray shape around the overview map
         exterior = shapely.wkt.loads(map_canvas.get_actual_bounding_box()\
                                                                 .as_wkt())
         interior = shapely.wkt.loads(self.rc.polygon_wkt)
@@ -213,8 +213,6 @@ class MultiPageRenderer(Renderer):
                 os.path.join(self.tmpdir, 'shape_overview.shp'),
                              'shade-overview')
         shade.add_shade_from_wkt(shade_wkt)
-        # Create the gray shape around the map
-
 
         map_canvas.add_shape_file(shade)
         map_canvas.add_shape_file(grid_shape,
@@ -278,7 +276,7 @@ class MultiPageRenderer(Renderer):
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             index = StreetIndex(self.db,
                                 inside_contour_wkt,
-                                self.rc.i18n, page_number=(i + 3))
+                                self.rc.i18n, page_number=(i + 4))
 
             index.apply_grid(map_grid)
             indexes.append(index)
@@ -576,8 +574,9 @@ class MultiPageRenderer(Renderer):
             ctx.save()
 
             # Prepare to draw the map at the right location
-            ctx.translate(commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                          commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+            ctx.translate(
+                    commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
+                    commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
 
             rendered_map = canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
@@ -586,7 +585,7 @@ class MultiPageRenderer(Renderer):
             ctx.save()
             ctx.translate(commons.convert_pt_to_dots(self._usable_area_width_pt),
                           commons.convert_pt_to_dots(self._usable_area_height_pt))
-            Renderer._draw_centered_text(ctx, str(i + 1), 0, 0)
+            Renderer._draw_centered_text(ctx, str(i + 2), 0, 0)
             ctx.restore()
 
 
@@ -702,7 +701,7 @@ class MultiPageRenderer(Renderer):
             cls._adjust_font_size(layout, fd, 0.65 * w, 0.8 * h)
 
             # set the real text
-            layout.set_text(unicode(idx+3))
+            layout.set_text(unicode(idx+4))
 
             # draw
             text_x, text_y, text_w, text_h = layout.get_extents()[1]
