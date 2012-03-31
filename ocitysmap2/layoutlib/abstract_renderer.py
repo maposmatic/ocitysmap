@@ -296,6 +296,10 @@ class Renderer:
         raise NotImplementedError
 
     @staticmethod
+    def get_compatible_output_formats():
+        return [ "png", "svgz", "pdf", "csv" ]
+
+    @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm):
         """Returns a list of the compatible paper sizes for the given bounding
