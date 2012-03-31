@@ -49,12 +49,11 @@ import ocitysmap2
 import commons
 import shapely.wkt
 from ocitysmap2 import maplib
+from ocitysmap2 import draw_utils
 
 from indexlib.commons import IndexCategory
-import draw_utils
 
 LOG = logging.getLogger('ocitysmap')
-PAGE_STR = " - Page %(page_number)d"
 
 class MultiPageRenderer(Renderer):
     """
@@ -423,26 +422,8 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.80,.80,.80)
         ctx.rectangle(0, 0, blue_w, blue_h)
         ctx.fill()
-
-        # Prepare the title text layout
-        pc = pangocairo.CairoContext(ctx)
-        layout = pc.create_layout()
-        layout.set_width(int(0.7 * w * pango.SCALE))
-        layout.set_alignment(pango.ALIGN_CENTER)
-        fd = pango.FontDescription("Georgia Bold")
-        fd.set_size(pango.SCALE)
-        layout.set_font_description(fd)
-        layout.set_text(self.rc.title)
-        self._adjust_font_size(layout, fd, 0.7 * blue_w, 0.8 * blue_h)
-
-        # Draw the title
-        text_x, text_y, text_w, text_h = layout.get_extents()[1]
-        ctx.save()
-        ctx.set_source_rgb(0, 0, 0)
-        ctx.translate((blue_w / 2) - (text_w / 2.0) / pango.SCALE - text_x / pango.SCALE,
-                      (blue_h / 2) - (text_h / 2.0) / pango.SCALE - text_y / pango.SCALE)
-        pc.show_layout(layout)
-        ctx.restore()
+        draw_utils.draw_text_adjusted(ctx, self.rc.title, blue_w/2, blue_h/2,
+                 blue_w, blue_h)
 
     def _render_front_page_map(self, ctx, dpi, w, h):
         # We will render the map slightly below the title
@@ -506,29 +487,9 @@ class MultiPageRenderer(Renderer):
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
 
-        # Render the text
-        pc = pangocairo.CairoContext(ctx)
-        layout = pc.create_layout()
-        layout.set_width(int(footer_w * 0.7) * pango.SCALE)
-        layout.set_alignment(pango.ALIGN_LEFT)
-        fd = pango.FontDescription("Georgia Bold")
-        fd.set_size(pango.SCALE)
-        layout.set_font_description(fd)
-        layout.set_text(notice)
-        self._adjust_font_size(layout, fd, footer_w * 0.7, footer_h * 0.8)
-
-        text_x, text_y, text_w, text_h = layout.get_extents()[1]
-        ctx.save()
-        ctx.set_source_rgb(0,0,0)
-        ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
-                      (footer_h / 2) - (text_h / 2.0 / pango.SCALE))
-        # Hack to workaround what appears to be a Cairo bug: without
-        # drawing a rectangle here, the translation above is not taken
-        # into account for rendering the text.
-        ctx.rectangle(0, 0, 0, 0)
-        pc.show_layout(layout)
-        ctx.restore()
-
+        draw_utils.draw_text_adjusted(ctx, notice,
+                Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
+                footer_h, align=pango.ALIGN_LEFT)
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
@@ -571,7 +532,7 @@ class MultiPageRenderer(Renderer):
         w = self._usable_area_width_pt
         h = self._usable_area_height_pt
         ctx.set_source_rgb(.6,.6,.6)
-        Renderer._draw_centered_text(ctx, _('This page is intentionally left '\
+        draw_utils.draw_simpletext_center(ctx, _('This page is intentionally left '\
                                             'blank.'), w/2.0, 0.95*h)
         draw_utils.render_page_number(ctx, 2,
                                       self._usable_area_width_pt,
@@ -598,7 +559,8 @@ class MultiPageRenderer(Renderer):
 
         cairo_surface.show_page()
 
-    def _draw_arrow(self, ctx, cairo_surface, number, reverse_text=False):
+    def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
+                    reverse_text=False):
         arrow_edge = self.grayed_margin_pt*.6
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
@@ -616,10 +578,11 @@ class MultiPageRenderer(Renderer):
         if reverse_text:
             ctx.rotate(math.pi)
         ctx.set_source_rgb(1, 1, 1)
-        Renderer._draw_centered_text(ctx, unicode(number), 0, 0)
+        draw_utils.draw_simpletext_center(ctx, unicode(number), 0, 0)
         ctx.restore()
 
-    def _render_neighbour_arrows(self, ctx, cairo_surface, map_number):
+    def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,
+                                 max_digit_number):
         nb_previous_pages = 4
         current_line, current_col = None, None
         for line_nb in xrange(self.nb_pages_height):
@@ -640,7 +603,7 @@ class MultiPageRenderer(Renderer):
                 ctx.translate(self._usable_area_width_pt/2,
                     commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 self._draw_arrow(ctx, cairo_surface,
-                                 north_arrow + nb_previous_pages)
+                              north_arrow + nb_previous_pages, max_digit_number)
                 ctx.restore()
                 break
 
@@ -654,7 +617,8 @@ class MultiPageRenderer(Renderer):
                       - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
-                             south_arrow + nb_previous_pages, reverse_text=True)
+                      south_arrow + nb_previous_pages, max_digit_number,
+                      reverse_text=True)
                 ctx.restore()
                 break
 
@@ -668,7 +632,7 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(-math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                                 west_arrow + nb_previous_pages)
+                               west_arrow + nb_previous_pages, max_digit_number)
                 ctx.restore()
                 break
 
@@ -683,7 +647,7 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                                 east_arrow + nb_previous_pages)
+                               east_arrow + nb_previous_pages, max_digit_number)
                 ctx.restore()
                 break
 
@@ -726,7 +690,8 @@ class MultiPageRenderer(Renderer):
                                           self._usable_area_height_pt,
                                           self.grayed_margin_pt,
                                           transparent_background = True)
-            self._render_neighbour_arrows(ctx, cairo_surface, map_number)
+            self._render_neighbour_arrows(ctx, cairo_surface, map_number,
+                                          len(unicode(len(self.pages)+4)))
 
             cairo_surface.show_page()
         ctx.restore()
@@ -813,29 +778,8 @@ class MultiPageRenderer(Renderer):
                                                          )/coord_delta_x
                 h = area_height_dots*(p_top_right.y - p_bottom_right.y
                                                          )/coord_delta_y
-            # Prepare the number text layout
-            pc = pangocairo.CairoContext(ctx)
-            layout = pc.create_layout()
-            layout.set_width(int(0.7 * w * pango.SCALE))
-            layout.set_alignment(pango.ALIGN_CENTER)
-            fd = pango.FontDescription("Georgia Bold")
-            fd.set_size(pango.SCALE)
-            layout.set_font_description(fd)
-
-            # adjust size with the last page number
-            layout.set_text('0'*len(unicode(len(overview_grid._pages_bbox)+3)))
-            cls._adjust_font_size(layout, fd, 0.65 * w, 0.8 * h)
-
-            # set the real text
-            layout.set_text(unicode(idx+4))
-
-            # draw
-            text_x, text_y, text_w, text_h = layout.get_extents()[1]
-            ctx.save()
-            ctx.set_source_rgba(0, 0, 0, 0.6)
-            ctx.translate(x - (text_w/2.0)/pango.SCALE - text_x/pango.SCALE,
-                          y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE)
-            pc.show_layout(layout)
-            ctx.restore()
+            draw_utils.draw_text_adjusted(ctx, unicode(idx+4), x, y, w, h,
+                 max_char_number=len(unicode(len(overview_grid._pages_bbox)+3)),
+                 text_color=(0, 0, 0, 0.6))
 
         ctx.restore()

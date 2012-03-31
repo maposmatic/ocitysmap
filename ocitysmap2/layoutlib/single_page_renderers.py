@@ -42,6 +42,7 @@ import logging
 
 from indexlib.indexer import StreetIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+import draw_utils
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -261,7 +262,7 @@ class SinglePageRenderer(Renderer):
         fd.set_size(pango.SCALE)
         layout.set_font_description(fd)
         layout.set_text(self.rc.title)
-        self._adjust_font_size(layout, fd, layout.get_width(), 0.8*h_dots)
+        draw_utils.adjust_font_size(layout, fd, layout.get_width(), 0.8*h_dots)
 
         # Draw the title
         ctx.save()
@@ -319,7 +320,7 @@ class SinglePageRenderer(Renderer):
         layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(notice)
-        self._adjust_font_size(layout, fd, w_dots, h_dots)
+        draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
         pc.show_layout(layout)
         ctx.restore()
 

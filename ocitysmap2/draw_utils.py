@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
-# Copyright (C) 2010  David Decotigny
-# Copyright (C) 2010  Frédéric Lehobey
-# Copyright (C) 2010  Pierre Mauduit
-# Copyright (C) 2010  David Mentré
-# Copyright (C) 2010  Maxime Petazzoni
-# Copyright (C) 2010  Thomas Petazzoni
-# Copyright (C) 2010  Gaël Utard
+# Copyright (C) 2012  David Decotigny
+# Copyright (C) 2012  Frédéric Lehobey
+# Copyright (C) 2012  Pierre Mauduit
+# Copyright (C) 2012  David Mentré
+# Copyright (C) 2012  Maxime Petazzoni
+# Copyright (C) 2012  Thomas Petazzoni
+# Copyright (C) 2012  Gaël Utard
+# Copyright (C) 2012  Étienne Loks
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,8 +25,8 @@
 
 import cairo
 import pango
+import pangocairo
 import ocitysmap2.layoutlib.commons as commons
-from ocitysmap2.layoutlib.abstract_renderer import Renderer
 
 def draw_text(ctx, pc, layout, fascent, fheight,
               baseline_x, baseline_y, text, pango_alignment):
@@ -53,7 +54,6 @@ def draw_text(ctx, pc, layout, fascent, fheight,
     ctx.move_to(baseline_x, baseline_y - fascent)
     pc.show_layout(layout)
     return width, height
-
 
 def draw_text_left(ctx, pc, layout, fascent, fheight,
                     baseline_x, baseline_y, text):
@@ -126,12 +126,96 @@ def draw_text_right(ctx, pc, layout, fascent, fheight,
             baseline_y,
             baseline_x + layout_width)
 
+def draw_simpletext_center(ctx, text, x, y):
+    """
+    Draw the given text centered at x,y.
+
+    Args:
+       ctx (cairo.Context): The cairo context to use to draw.
+       text (str): the text to draw.
+       x,y (numbers): Location of the center (cairo units).
+    """
+    ctx.save()
+    xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+    ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.show_text(text)
+    ctx.stroke()
+    ctx.restore()
+
 def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.set_line_width(line_width)
     ctx.set_dash([line_width, line_width*2])
     ctx.move_to(baseline_x, baseline_y)
     ctx.rel_line_to(length, 0)
     ctx.stroke()
+
+def adjust_font_size(layout, fd, constraint_x, constraint_y):
+    """
+    Grow the given font description (20% by 20%) until it fits in
+    designated area and then draw it.
+
+    Args:
+       layout (pango.Layout): The text block parameters.
+       fd (pango.FontDescriptor): The font object.
+       constraint_x/constraint_y (numbers): The area we want to
+           write into (cairo units).
+    """
+    while (layout.get_size()[0] / pango.SCALE < constraint_x and
+           layout.get_size()[1] / pango.SCALE < constraint_y):
+        fd.set_size(int(fd.get_size()*1.2))
+        layout.set_font_description(fd)
+    fd.set_size(int(fd.get_size()/1.2))
+    layout.set_font_description(fd)
+
+def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
+                       text_color=(0, 0, 0, 1), align=pango.ALIGN_CENTER):
+    """
+    Draw a text adjusted to a maximum character number
+
+    Args:
+       ctx (cairo.Context): The cairo context to use to draw.
+       text (str): the text to draw.
+       x/y (numbers): The position on the canvas.
+       width/height (numbers): The area we want to
+           write into (cairo units).
+       max_char_number (number): If set a maximum character number.
+    """
+    pc = pangocairo.CairoContext(ctx)
+    layout = pc.create_layout()
+    layout.set_width(int(0.7 * width * pango.SCALE))
+    layout.set_alignment(align)
+    fd = pango.FontDescription("Georgia Bold")
+    fd.set_size(pango.SCALE)
+    layout.set_font_description(fd)
+
+    if max_char_number:
+        # adjust size with the max character number
+        layout.set_text('0'*max_char_number)
+        adjust_font_size(layout, fd, 0.7*width, 0.8*height)
+
+    # set the real text
+    layout.set_text(text)
+    if not max_char_number:
+        adjust_font_size(layout, fd, 0.7*width, 0.8*height)
+
+    # draw
+    text_x, text_y, text_w, text_h = layout.get_extents()[1]
+    ctx.save()
+    ctx.set_source_rgba(*text_color)
+    if align == pango.ALIGN_CENTER:
+        x = x - (text_w/2.0)/pango.SCALE - text_x/pango.SCALE
+        y = y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE
+    else:
+        y = y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE
+    ctx.translate(x, y)
+
+    if align == pango.ALIGN_LEFT:
+        # Hack to workaround what appears to be a Cairo bug: without
+        # drawing a rectangle here, the translation above is not taken
+        # into account for rendering the text.
+        ctx.rectangle(0, 0, 0, 0)
+    pc.show_layout(layout)
+    ctx.restore()
 
 def render_page_number(ctx, page_number,
                        usable_area_width_pt, usable_area_height_pt, margin_pt,
@@ -160,5 +244,6 @@ def render_page_number(ctx, page_number,
     x_offset = commons.convert_pt_to_dots(margin_pt)/2
     y_offset = commons.convert_pt_to_dots(margin_pt)/2
     ctx.translate(x_offset, y_offset)
-    Renderer._draw_centered_text(ctx, unicode(page_number), 0, 0)
+    draw_simpletext_center(ctx, unicode(page_number), 0, 0)
     ctx.restore()
+

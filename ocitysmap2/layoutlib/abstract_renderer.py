@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
-# Copyright (C) 2010  David Decotigny
-# Copyright (C) 2010  Frédéric Lehobey
-# Copyright (C) 2010  Pierre Mauduit
-# Copyright (C) 2010  David Mentré
-# Copyright (C) 2010  Maxime Petazzoni
-# Copyright (C) 2010  Thomas Petazzoni
-# Copyright (C) 2010  Gaël Utard
+# Copyright (C) 2012  David Decotigny
+# Copyright (C) 2012  Frédéric Lehobey
+# Copyright (C) 2012  Pierre Mauduit
+# Copyright (C) 2012  David Mentré
+# Copyright (C) 2012  Maxime Petazzoni
+# Copyright (C) 2012  Thomas Petazzoni
+# Copyright (C) 2012  Gaël Utard
+# Copyright (C) 2012  Étienne Loks
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -37,6 +38,7 @@ from ocitysmap2.maplib.map_canvas import MapCanvas
 from ocitysmap2.maplib.grid import Grid
 import commons
 from ocitysmap2 import maplib
+from ocitysmap2 import draw_utils
 import shapely.wkt
 
 import logging
@@ -82,42 +84,6 @@ class Renderer:
                 commons.convert_mm_to_pt(self.rc.paper_width_mm)
         self.paper_height_pt = \
                 commons.convert_mm_to_pt(self.rc.paper_height_mm)
-
-    @staticmethod
-    def _draw_centered_text(ctx, text, x, y):
-        """
-        Draw the given text centered at x,y.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           text (str): the text to draw.
-           x,y (numbers): Location of the center (cairo units).
-        """
-        ctx.save()
-        xb, yb, tw, th, xa, ya = ctx.text_extents(text)
-        ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
-        ctx.show_text(text)
-        ctx.stroke()
-        ctx.restore()
-
-    @staticmethod
-    def _adjust_font_size(layout, fd, constraint_x, constraint_y):
-        """
-        Grow the given font description (20% by 20%) until it fits in
-        designated area and then draw it.
-
-        Args:
-           layout (pango.Layout): The text block parameters.
-           fd (pango.FontDescriptor): The font object.
-           constraint_x/constraint_y (numbers): The area we want to
-               write into (cairo units).
-        """
-        while (layout.get_size()[0] / pango.SCALE < constraint_x and
-               layout.get_size()[1] / pango.SCALE < constraint_y):
-            fd.set_size(int(fd.get_size()*1.2))
-            layout.set_font_description(fd)
-        fd.set_size(int(fd.get_size()/1.2))
-        layout.set_font_description(fd)
 
     @staticmethod
     def _get_osm_logo(ctx, height):
@@ -193,9 +159,9 @@ class Renderer:
             else:
                 continue
 
-            Renderer._draw_centered_text(ctx, label,
+            draw_utils.draw_simpletext_center(ctx, label,
                                          x, grid_legend_margin_dots/2.0)
-            Renderer._draw_centered_text(ctx, label,
+            draw_utils.draw_simpletext_center(ctx, label,
                                          x, map_area_height_dots -
                                          grid_legend_margin_dots/2.0)
 
@@ -209,9 +175,9 @@ class Renderer:
             else:
                 continue
 
-            Renderer._draw_centered_text(ctx, label,
+            draw_utils.draw_simpletext_center(ctx, label,
                                          grid_legend_margin_dots/2.0, y)
-            Renderer._draw_centered_text(ctx, label,
+            draw_utils.draw_simpletext_center(ctx, label,
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 
