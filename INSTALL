@@ -221,13 +221,6 @@ are using. They have been tested on several x86_64 hosts.
 
     sudo aptitude install ttf-unifont
 
-    Then edit inc/fontset-settings.xml.inc.template and uncomment the
-    following line :
-
-    	  <Font face_name="unifont Medium" />
-
-    in the book-fonts, bold-fonts and oblique-fonts sections.
-
 	(on debian, mapnik2 uses only ttf-dejavu, correct fontscollectionpath
 	in /usr/lib/python2.7/dist-packages/mapnik2/paths.py, replace
 	'/usr/share/fonts/truetype/ttf-dejavu' by '/usr/share/fonts'. Bug
