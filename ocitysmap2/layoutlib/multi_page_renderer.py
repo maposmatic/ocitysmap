@@ -165,7 +165,10 @@ class MultiPageRenderer(Renderer):
         # paper.
         area_polygon = shapely.wkt.loads(self.rc.polygon_wkt)
         bboxes = []
+        self.page_disposition, map_number = {}, 0
         for j in reversed(range(0, self.nb_pages_height)):
+            col = self.nb_pages_height - j - 1
+            self.page_disposition[col] = []
             for i in range(0, self.nb_pages_width):
                 cur_x = off_x + i * (usable_area_merc_m_width - overlap_margin_merc_m)
                 cur_y = off_y + j * (usable_area_merc_m_height - overlap_margin_merc_m)
@@ -180,9 +183,12 @@ class MultiPageRenderer(Renderer):
                 inner_bb = self._inverse_envelope(envelope_inner)
                 if not area_polygon.disjoint(shapely.wkt.loads(
                                                 inner_bb.as_wkt())):
+                    self.page_disposition[col].append(map_number)
+                    map_number += 1
                     bboxes.append((self._inverse_envelope(envelope),
                                    inner_bb))
-
+                else:
+                    self.page_disposition[col].append(None)
         # Debug: show per-page bounding boxes as JS code
         # for i, (bb, bb_inner) in enumerate(bboxes):
         #    print bb.as_javascript(name="p%d" % i)
@@ -592,6 +598,91 @@ class MultiPageRenderer(Renderer):
 
         cairo_surface.show_page()
 
+    def _draw_arrow(self, ctx, cairo_surface, number):
+        arrow_edge = self.grayed_margin_pt*.6
+        ctx.save()
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.translate(-arrow_edge/2, -arrow_edge*0.45)
+        ctx.line_to(0, 0)
+        ctx.line_to(0, arrow_edge)
+        ctx.line_to(arrow_edge, arrow_edge)
+        ctx.line_to(arrow_edge, 0)
+        ctx.line_to(arrow_edge/2, -arrow_edge*.25)
+        ctx.close_path()
+        ctx.fill()
+        ctx.restore()
+
+        ctx.save()
+        ctx.set_source_rgb(1, 1, 1)
+        Renderer._draw_centered_text(ctx, unicode(number), 0, 0)
+        ctx.restore()
+
+    def _render_neighbour_arrows(self, ctx, cairo_surface, map_number):
+        nb_previous_pages = 4
+        current_line, current_col = None, None
+        for line_nb in xrange(self.nb_pages_height):
+            if map_number in self.page_disposition[line_nb]:
+                current_line = line_nb
+                current_col = self.page_disposition[line_nb].index(
+                                                             map_number)
+                break
+        if current_line == None:
+            # page not referenced
+            return
+
+        # north arrow
+        for line_nb in reversed(xrange(current_line)):
+            if self.page_disposition[line_nb][current_col] != None:
+                north_arrow = self.page_disposition[line_nb][current_col]
+                ctx.save()
+                ctx.translate(self._usable_area_width_pt/2,
+                    commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                self._draw_arrow(ctx, cairo_surface,
+                                 north_arrow + nb_previous_pages)
+                ctx.restore()
+                break
+
+        # south arrow
+        for line_nb in xrange(current_line + 1, self.nb_pages_height):
+            if self.page_disposition[line_nb][current_col] != None:
+                south_arrow = self.page_disposition[line_nb][current_col]
+                ctx.save()
+                ctx.translate(self._usable_area_width_pt/2,
+                     self._usable_area_height_pt \
+                      - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                ctx.rotate(math.pi)
+                self._draw_arrow(ctx, cairo_surface,
+                                 south_arrow + nb_previous_pages)
+                ctx.restore()
+                break
+
+        # west arrow
+        for col_nb in reversed(xrange(0, current_col)):
+            if self.page_disposition[current_line][col_nb] != None:
+                west_arrow = self.page_disposition[current_line][col_nb]
+                ctx.save()
+                ctx.translate(
+                    commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                    self._usable_area_height_pt/2)
+                ctx.rotate(-math.pi/2)
+                self._draw_arrow(ctx, cairo_surface,
+                                 west_arrow + nb_previous_pages)
+                ctx.restore()
+                break
+        # east arrow
+        for col_nb in xrange(current_col + 1, self.nb_pages_width):
+            if self.page_disposition[current_line][col_nb] != None:
+                east_arrow = self.page_disposition[current_line][col_nb]
+                ctx.save()
+                ctx.translate(
+                    self._usable_area_width_pt \
+                     - commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                    self._usable_area_height_pt/2)
+                ctx.rotate(math.pi/2)
+                self._draw_arrow(ctx, cairo_surface,
+                                 east_arrow + nb_previous_pages)
+                ctx.restore()
+                break
 
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
@@ -636,6 +727,7 @@ class MultiPageRenderer(Renderer):
                                           transparent_background = True)
             #self._render_neighbour_arrows()
             page_number = i+4
+            self._render_neighbour_arrows(ctx, cairo_surface, i)
 
             cairo_surface.show_page()
         ctx.restore()
