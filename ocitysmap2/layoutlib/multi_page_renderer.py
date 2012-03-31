@@ -598,7 +598,7 @@ class MultiPageRenderer(Renderer):
 
         cairo_surface.show_page()
 
-    def _draw_arrow(self, ctx, cairo_surface, number):
+    def _draw_arrow(self, ctx, cairo_surface, number, reverse_text=False):
         arrow_edge = self.grayed_margin_pt*.6
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
@@ -613,6 +613,8 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
 
         ctx.save()
+        if reverse_text:
+            ctx.rotate(math.pi)
         ctx.set_source_rgb(1, 1, 1)
         Renderer._draw_centered_text(ctx, unicode(number), 0, 0)
         ctx.restore()
@@ -652,7 +654,7 @@ class MultiPageRenderer(Renderer):
                       - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
-                                 south_arrow + nb_previous_pages)
+                             south_arrow + nb_previous_pages, reverse_text=True)
                 ctx.restore()
                 break
 
@@ -669,6 +671,7 @@ class MultiPageRenderer(Renderer):
                                  west_arrow + nb_previous_pages)
                 ctx.restore()
                 break
+
         # east arrow
         for col_nb in xrange(current_col + 1, self.nb_pages_width):
             if self.page_disposition[current_line][col_nb] != None:
@@ -699,9 +702,7 @@ class MultiPageRenderer(Renderer):
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
-        page_number = 0
-
-        for i, (canvas, grid) in enumerate(self.pages):
+        for map_number, (canvas, grid) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
@@ -720,14 +721,12 @@ class MultiPageRenderer(Renderer):
             ctx.restore()
 
             # Render the page number
-            draw_utils.render_page_number(ctx, i+4,
+            draw_utils.render_page_number(ctx, map_number+4,
                                           self._usable_area_width_pt,
                                           self._usable_area_height_pt,
                                           self.grayed_margin_pt,
                                           transparent_background = True)
-            #self._render_neighbour_arrows()
-            page_number = i+4
-            self._render_neighbour_arrows(ctx, cairo_surface, i)
+            self._render_neighbour_arrows(ctx, cairo_surface, map_number)
 
             cairo_surface.show_page()
         ctx.restore()
@@ -739,7 +738,7 @@ class MultiPageRenderer(Renderer):
                                               Renderer.PRINT_SAFE_MARGIN_PT,
                                               self._usable_area_width_pt,
                                               self._usable_area_height_pt),
-                                             page_number + 1)
+                                              map_number+5)
 
         mpsir.render()
 
