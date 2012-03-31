@@ -468,8 +468,8 @@ class SinglePageRenderer(Renderer):
               'bottom' (index at bottom).
 
         Returns a list of tuples (paper name, width in mm, height in
-        mm, portrait_ok, landscape_ok). Paper sizes are represented in
-        portrait mode.
+        mm, portrait_ok, landscape_ok, is_default). Paper sizes are
+        represented in portrait mode.
         """
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
         paper_width_mm = int(geo_width_m/1000.0 * resolution_km_in_mm)
@@ -499,15 +499,19 @@ class SinglePageRenderer(Renderer):
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 
             if portrait_ok or landscape_ok:
-                valid_sizes.append((name, w, h, portrait_ok, landscape_ok))
+                valid_sizes.append([name, w, h, portrait_ok, landscape_ok, False])
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
-        valid_sizes.append(('Best fit',
+        valid_sizes.append(['Best fit',
                             min(paper_width_mm, paper_height_mm),
                             max(paper_width_mm, paper_height_mm),
                             paper_width_mm < paper_height_mm,
-                            paper_width_mm > paper_height_mm))
+                            paper_width_mm > paper_height_mm,
+                            False])
+
+        # select the first one as default
+        valid_sizes[0][5] = True
 
         return valid_sizes
 

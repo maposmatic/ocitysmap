@@ -762,6 +762,7 @@ class MultiPageRenderer(Renderer):
 
     # In multi-page mode, we only accept A4, A5 and US letter as paper
     # sizes. The goal is to render booklets, not posters.
+    # The default paper size is A4 portrait
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, zoom_level,
                                    resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM,
@@ -772,7 +773,7 @@ class MultiPageRenderer(Renderer):
             # Skip unsupported paper formats
             if sz[0] not in acceptable_formats:
                 continue
-            valid_sizes.append((sz[0], sz[1], sz[2], True, True))
+            valid_sizes.append((sz[0], sz[1], sz[2], True, True, sz[0] == 'A4'))
         return valid_sizes
 
     @classmethod

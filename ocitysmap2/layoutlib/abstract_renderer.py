@@ -313,7 +313,7 @@ class Renderer:
                 milimeters on the rendered map.
 
         Returns a list of tuples (paper name, width in mm, height in
-        mm, portrait_ok, landscape_ok). Paper sizes are represented in
-        portrait mode.
+        mm, portrait_ok, landscape_ok, is_default). Paper sizes are
+        represented in portrait mode.
         """
         raise NotImplementedError

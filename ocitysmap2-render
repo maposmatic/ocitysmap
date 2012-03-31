@@ -88,10 +88,9 @@ def main():
                              % (', '.join(KNOWN_RENDERERS_NAMES),
                                 KNOWN_RENDERERS_NAMES[0].split()[0])))
     parser.add_option('--paper-format', metavar='FMT',
-                      help='Either "first" for the first allowed (default), '
-                      'or one of %s.'\
+                      help='Either "default", or one of %s.'\
                           % ', '.join(KNOWN_PAPER_SIZE_NAMES),
-                      default='first')
+                      default='default')
     parser.add_option('--orientation', metavar='ORIENTATION',
                       help='Either "portrait" or "landscape".',
                       default='portrait')
@@ -173,24 +172,23 @@ def main():
                          (format, cls_renderer.name))
 
     # Parse paper size
-    if (options.paper_format != 'first') \
+    if (options.paper_format != 'default') \
             and options.paper_format not in KNOWN_PAPER_SIZE_NAMES:
-        parser.error("Invalid paper format. Allowed formats = first, %s"
+        parser.error("Invalid paper format. Allowed formats = default, %s"
                      % ', '.join(KNOWN_PAPER_SIZE_NAMES))
 
     # Determine actual paper size
-    compat_papers = sorted(cls_renderer.get_compatible_paper_sizes(bbox,
-         stylesheet.zoom_level),
-         key = lambda p: p[1])
+    compat_papers = cls_renderer.get_compatible_paper_sizes(bbox,
+         stylesheet.zoom_level)
     if not compat_papers:
         parser.error("No paper size compatible with this rendering.")
 
     paper_descr = None
-    if options.paper_format == 'first':
-        if len(compat_papers) > 1:
-            paper_descr = compat_papers[1] # First non-Best-fit
-        else:
-            paper_descr = compat_papers[0] # Best Fit
+    if options.paper_format == 'default':
+        for p in compat_papers:
+            if p[5]:
+                paper_descr = p
+                break
     else:
         # Make sure the requested paper size is in list
         for p in compat_papers:
