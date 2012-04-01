@@ -538,7 +538,7 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_width_pt,
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
-                                      transparent_background = True)
+                                      transparent_background=False)
         cairo_surface.show_page()
         ctx.restore()
 
