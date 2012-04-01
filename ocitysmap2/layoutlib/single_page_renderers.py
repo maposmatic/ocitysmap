@@ -70,20 +70,19 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
         """
+        Renderer.__init__(self, db, rc, tmpdir, dpi)
+
         # Prepare the index
-        try:
-            street_index = StreetIndex(db,
-                                       rc.polygon_wkt,
-                                       rc.i18n)
-        except IndexEmptyError:
+        self.street_index = StreetIndex(db,
+                                        rc.polygon_wkt,
+                                        rc.i18n)
+        if not self.street_index.categories:
             LOG.warning("Designated area leads to an empty index")
-            street_index = None
+            self.street_index = None
 
         # Dump the CSV street index
-        if street_index:
-            street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
-
-        Renderer.__init__(self, db, rc, tmpdir, dpi, street_index)
+        if self.street_index:
+            self.street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
@@ -154,8 +153,8 @@ class SinglePageRenderer(Renderer):
         self.grid = self._create_grid(self._map_canvas)
 
         # Update the street_index to reflect the grid's actual position
-        if self.grid and street_index:
-            street_index.apply_grid(self.grid)
+        if self.grid and self.street_index:
+            self.street_index.apply_grid(self.grid)
 
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
@@ -564,7 +563,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, street_index, 'side')
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'side')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,

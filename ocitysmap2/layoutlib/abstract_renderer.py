@@ -64,7 +64,7 @@ class Renderer:
     # on the rendered map of a kilometer
     DEFAULT_KM_IN_MM = 100
 
-    def __init__(self, db, rc, tmpdir, dpi, street_index):
+    def __init__(self, db, rc, tmpdir, dpi):
         """
         Create the renderer.
 
@@ -78,7 +78,6 @@ class Renderer:
         self.rc           = rc
         self.tmpdir       = tmpdir
         self.grid         = None # The implementation is in charge of it
-        self.street_index = street_index
 
         self.paper_width_pt = \
                 commons.convert_mm_to_pt(self.rc.paper_width_mm)
