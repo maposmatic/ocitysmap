@@ -495,7 +495,7 @@ class i18n_nl_generic(i18n):
                      u"Mgr.", u"Monseigneur", u"Mr.", u"Meester",
                      u"Burg.", u"Burgermeester", u"Dr.", u"Dokter",
                      u"Ir.", u"Ingenieur", u"Ds.", u"Dominee", u"Deken",
-                     u"Drs.",
+                     u"Drs.", u"Maj.", u"Majoor"
                      # counting words before street name,
                      # e.g. "1e Walstraat" => "Walstraat (1e)"
                      u"\d+e",
