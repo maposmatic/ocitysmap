@@ -209,14 +209,19 @@ class StreetIndex:
 
         result = []
         current_category = None
+        NUMBER_LIST = [str(i) for i in xrange(10)]
         for street_name, linestring in sorted_sl:
-
             # Create new category if needed
             if (not current_category
                 or not self._i18n.first_letter_equal(street_name[0],
-                                                     current_category.name)):
-                current_category = commons.IndexCategory(
-                    self._i18n.upper_unaccent_string(street_name[0]))
+                                                     current_category.name)
+                or (current_category.name == commons.NUMBER_CATEGORY_NAME
+                    and not street_name[0] in NUMBER_LIST)):
+                if street_name[0] in NUMBER_LIST:
+                    cat_name = commons.NUMBER_CATEGORY_NAME
+                else:
+                    cat_name = self._i18n.upper_unaccent_string(street_name[0])
+                current_category = commons.IndexCategory(cat_name)
                 result.append(current_category)
 
             # Parse the WKT from the largest linestring in shape
