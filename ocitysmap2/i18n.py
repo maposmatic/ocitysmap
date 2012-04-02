@@ -47,6 +47,9 @@ class i18n:
     def isrtl(self):
         return False
 
+    def upper_unaccent_string(self, s):
+        return s.upper()
+
 class i18n_template_code_CODE(i18n):
     def __init__(self, language, locale_path):
         """Install the _() function for the chosen locale other
