@@ -26,10 +26,10 @@ import math
 import datetime
 import cairo
 import locale
-try:
-    import mapnik2 as mapnik
-except ImportError:
-    import mapnik
+import mapnik
+assert mapnik.mapnik_version >= 200100, \
+    "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
+    "for more details." % mapnik.mapnik_version_string()
 import pango
 import pangocairo
 

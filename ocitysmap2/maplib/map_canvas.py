@@ -23,10 +23,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-try:
-    import mapnik2 as mapnik
-except ImportError:
-    import mapnik
+
+# Importing mapnik2 raises a DeprecationWarning as of mapnik
+# commit 14700dba. As mapnik 2.1 (or git version with support for
+# placement-type="simple") is required for OCitySMap (see INSTALL),
+# instead of importing mapnik2, we import mapnik and assert it isn't
+# an old version.
+import mapnik
+assert mapnik.mapnik_version >= 200100, \
+    "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
+    "for more details." % mapnik.mapnik_version_string()
+
 import os
 
 from ocitysmap2 import coords

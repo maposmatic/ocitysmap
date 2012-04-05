@@ -25,10 +25,16 @@
 import math
 
 import shapely.wkt
-try:
-    import mapnik2 as mapnik
-except ImportError:
-    import mapnik
+
+# Importing mapnik2 raises a DeprecationWarning as of mapnik
+# commit 14700dba. As mapnik 2.1 (or git version with support for
+# placement-type="simple") is required for OCitySMap (see INSTALL),
+# instead of importing mapnik2, we import mapnik and assert it isn't
+# an old version.
+import mapnik
+assert mapnik.mapnik_version >= 200100, \
+    "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
+    "for more details." % mapnik.mapnik_version_string()
 
 _MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
                      "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \

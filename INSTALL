@@ -145,7 +145,7 @@ are using. They have been tested on several x86_64 hosts.
 
  8. Install Mapnik
 
-    We need Mapnik 2.0.0, which is not yet available in stable
+    We need Mapnik 2.1.0, which is not yet available in stable
     Debian/Ubuntu, so we need to compile it from source.
 
     a. Install the dependencies
@@ -166,16 +166,13 @@ are using. They have been tested on several x86_64 hosts.
         libboost-regex1.46-dev libboost-serialization1.46-dev \
         libboost-system1.46-dev libboost-thread1.46-dev
 
-    b. Download Mapnik
+    b. Download the latest Mapnik from its Git repository
 
-    wget http://download.berlios.de/mapnik/mapnik-2.0.0.tar.bz2
+    git clone git://github.com/mapnik/mapnik.git
 
-    c. Compile and install Mapnik 2
+    cd mapnik
 
-    tar xvjf mapnik-2.0.0.tar.bz2
-    cd mapnik-2.0.0
-
-    (any version >= 2.0.0 should follow the same scheme)
+    c. Compile and install Mapnik
 
     python scons/scons.py configure INPUT_PLUGINS=all \
       OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
@@ -187,9 +184,21 @@ are using. They have been tested on several x86_64 hosts.
 
     python scons/scons.py install
 
-    d. Check the installation
+    d. If building Mapnik failed
 
-    Run a Python interpreter, and run "import mapnik2". If it doesn't
+    Cloning the repository (step 8b) implicitly runs 'git checkout HEAD',
+    giving you the latest version. Should you run into trouble either installing
+    or running this latest version, you can use the version we know to work:
+
+    git checkout c88fcc8f # Note: replace this with commit hash of version on dev.m.o
+
+    python scons/scons.py -c # Clean up failed build
+
+    Repeat step 8c.
+
+    e. Check the installation
+
+    Run a Python interpreter, and run "import mapnik". If it doesn't
     work and you didn't do a system-wide installation of Mapnik, don't
     forget to set the PYTHONPATH and LD_LIBRARY_PATH environment
     variables.
