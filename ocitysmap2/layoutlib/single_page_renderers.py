@@ -454,15 +454,14 @@ class SinglePageRenderer(Renderer):
 
     @staticmethod
     def _generic_get_compatible_paper_sizes(bounding_box,
-                                            resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM, index_position = None):
+                                            scale=Renderer.DEFAULT_SCALE, index_position = None):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            resolution_km_in_mm (int): size of a geographic kilometer in
-                milimeters on the rendered map.
+            scale (int): minimum mapnik scale of the map.
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
 
@@ -470,9 +469,17 @@ class SinglePageRenderer(Renderer):
         mm, portrait_ok, landscape_ok, is_default). Paper sizes are
         represented in portrait mode.
         """
+
+        # the mapnik scale depends on the latitude
+        lat = bounding_box.get_top_left()[0]
+        scale *= math.cos(math.radians(lat))
+
+        # by convention, mapnik uses 90 ppi whereas cairo uses 72 ppi
+        scale *= float(72) / 90
+
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
-        paper_width_mm = geo_width_m/1000.0 * resolution_km_in_mm
-        paper_height_mm = geo_height_m/1000.0 * resolution_km_in_mm
+        paper_width_mm = geo_width_m * 1000 / scale
+        paper_height_mm = geo_height_m * 1000 / scale
 
         LOG.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
                   'on paper.' % (geo_width_m, geo_height_m,
@@ -543,22 +550,21 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
-                                   resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
+                                   scale=Renderer.DEFAULT_SCALE):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            resolution_km_in_mm (int): size of a geographic kilometer in
-                milimeters on the rendered map.
+            scale (int): minimum mapnik scale of the map.
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok). Paper sizes are represented in
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, resolution_km_in_mm, None)
+            bounding_box, scale, None)
 
 
 class SinglePageRendererIndexOnSide(SinglePageRenderer):
@@ -578,22 +584,21 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
-                                   resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
+                                   scale=Renderer.DEFAULT_SCALE):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            resolution_km_in_mm (int): size of a geographic kilometer in
-                milimeters on the rendered map.
+            scale (int): minimum mapnik scale of the map.
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok). Paper sizes are represented in
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, resolution_km_in_mm, 'side')
+            bounding_box, scale, 'side')
 
 
 class SinglePageRendererIndexBottom(SinglePageRenderer):
@@ -613,22 +618,21 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
-                                   resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM):
+                                   scale=Renderer.DEFAULT_SCALE):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            resolution_km_in_mm (int): size of a geographic kilometer in
-                milimeters on the rendered map.
+            scale (int): minimum mapnik scale of the map.
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok). Paper sizes are represented in
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, resolution_km_in_mm, 'bottom')
+            bounding_box, scale, 'bottom')
 
 
 if __name__ == '__main__':

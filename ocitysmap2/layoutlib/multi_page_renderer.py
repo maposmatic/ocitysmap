@@ -78,7 +78,15 @@ class MultiPageRenderer(Renderer):
         self._usable_area_height_pt = (self.paper_height_pt -
                                        (2 * Renderer.PRINT_SAFE_MARGIN_PT))
 
-        scale_denom = 10000
+        scale_denom = Renderer.DEFAULT_SCALE
+
+        # the mapnik scale depends on the latitude
+        lat = self.rc.bounding_box.get_top_left()[0]
+        scale_denom *= math.cos(math.radians(lat))
+
+        # by convention, mapnik uses 90 ppi whereas cairo uses 72 ppi
+        scale_denom *= float(72) / 90
+
         GRAYED_MARGIN_MM  = 10
         OVERLAP_MARGIN_MM = 20
 
@@ -671,6 +679,8 @@ class MultiPageRenderer(Renderer):
         for map_number, (canvas, grid) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
+            LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+            LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
             mapnik.render(rendered_map, ctx)
 
             # Place the vertical and horizontal square labels
@@ -711,17 +721,6 @@ class MultiPageRenderer(Renderer):
 
         cairo_surface.flush()
 
-    # Convert a length in geometric meters (in the real life) into a
-    # length in paper millimiters (as drawn on the map).
-    def _geo_m_to_paper_mm(self, geo_m):
-        return geo_m / 1000.0 * Renderer.DEFAULT_KM_IN_MM * 2
-
-    def _paper_mm_to_geo_m(self, paper_mm):
-        return paper_mm * 1000.0 / (Renderer.DEFAULT_KM_IN_MM * 2)
-
-    def _paper_pt_to_geo_m(self, paper_pt):
-        return self._paper_mm_to_geo_m(commons.convert_pt_to_mm(paper_pt))
-
     # In multi-page mode, we only render pdf format
     @staticmethod
     def get_compatible_output_formats():
@@ -732,7 +731,7 @@ class MultiPageRenderer(Renderer):
     # The default paper size is A4 portrait
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
-                                   resolution_km_in_mm=Renderer.DEFAULT_KM_IN_MM,
+                                   scale=Renderer.DEFAULT_SCALE,
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
         acceptable_formats = [ 'A5', 'A4', 'US letter' ]

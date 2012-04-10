@@ -60,9 +60,10 @@ class Renderer:
 
     GRID_LEGEND_MARGIN_RATIO = .02
 
-    # The DEFAULT_KM_IN_MM represents the minimum acceptable size in milimeters
-    # on the rendered map of a kilometer
-    DEFAULT_KM_IN_MM = 100
+    # The DEFAULT_KM_IN_MM represents the minimum acceptable mapnik scale
+    # 12000 ensures that the zoom level will be 16 or higher
+    # see entities.xml.inc file from osm style sheet
+    DEFAULT_SCALE = 12000
 
     def __init__(self, db, rc, tmpdir, dpi):
         """
@@ -265,15 +266,14 @@ class Renderer:
         return [ "png", "svgz", "pdf", "csv" ]
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, resolution_km_in_mm):
+    def get_compatible_paper_sizes(bounding_box, scale):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
 
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
-            resolution_km_in_mm (int): size of a geographic kilometer in
-                milimeters on the rendered map.
+            scale (int): minimum mapnik scale of the map.
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok, is_default). Paper sizes are
