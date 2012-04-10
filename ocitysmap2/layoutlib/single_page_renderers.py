@@ -404,7 +404,8 @@ class SinglePageRenderer(Renderer):
         # Draw the rescaled Map
         ctx.save()
         rendered_map = self._map_canvas.get_rendered_map()
-        LOG.debug('Map scale: 1/%f' % rendered_map.scale_denominator())
+        LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+        LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
         mapnik.render(rendered_map, ctx)
         ctx.restore()
 
@@ -470,8 +471,8 @@ class SinglePageRenderer(Renderer):
         represented in portrait mode.
         """
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
-        paper_width_mm = int(geo_width_m/1000.0 * resolution_km_in_mm)
-        paper_height_mm = int(geo_height_m/1000.0 * resolution_km_in_mm)
+        paper_width_mm = geo_width_m/1000.0 * resolution_km_in_mm
+        paper_height_mm = geo_height_m/1000.0 * resolution_km_in_mm
 
         LOG.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
                   'on paper.' % (geo_width_m, geo_height_m,
@@ -485,9 +486,19 @@ class SinglePageRenderer(Renderer):
             paper_height_mm /= (1. -
                                 SinglePageRenderer.MAX_INDEX_OCCUPATION_RATIO)
 
+        # Take margins into account
+        paper_width_mm += 2 * commons.convert_pt_to_mm(Renderer.PRINT_SAFE_MARGIN_PT)
+        paper_height_mm += 2 * commons.convert_pt_to_mm(Renderer.PRINT_SAFE_MARGIN_PT)
+
+        # Take grid legend, title and copyright into account
+        paper_width_mm /= 1 - Renderer.GRID_LEGEND_MARGIN_RATIO
+        paper_height_mm /= 1 - (Renderer.GRID_LEGEND_MARGIN_RATIO + 0.05 + 0.02)
+
         # Transform the values into integers
         paper_width_mm  = int(math.ceil(paper_width_mm))
         paper_height_mm = int(math.ceil(paper_height_mm))
+
+        LOG.debug('Best fit is %.1fx%.1fcm.' % (paper_width_mm/10., paper_height_mm/10.))
 
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
