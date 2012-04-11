@@ -117,8 +117,7 @@ msgid ""
 msgstr ""
 "Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler. Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (cc-by-sa).\n"
 "Erstellt am %(date)s mit OSM-Daten vom %(osmdate)s. Dieser Plan kann ungenau oder unvollständig sein.\n"
-"Sie können helfen, diesen Plan zu verbessern.\n"
-" Siehe http://www.openstreetmap.de/faq.html"
+"Sie können helfen, diesen Plan zu verbessern. Siehe http://www.openstreetmap.de/faq.html"
 
 #: ocitysmap2/layoutlib/single_page_renderers.py:634
 msgid "Test gettext"
