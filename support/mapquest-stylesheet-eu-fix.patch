@@ -1,0 +1,56 @@
+commit c72ad2936e64b98f0182118424c64539d7ea84f0
+Author: Gael UTARD <gael.utard@kisis.fr>
+Date:   Fri Mar 30 19:22:43 2012 +0200
+
+    Fixed a mix-up between minscale and maxscale
+
+diff --git a/mapquest_inc/layer-transportation-eu.xml.inc b/mapquest_inc/layer-transportation-eu.xml.inc
+index efd7203..8784626 100755
+--- a/mapquest_inc/layer-transportation-eu.xml.inc
++++ b/mapquest_inc/layer-transportation-eu.xml.inc
+@@ -49,19 +49,19 @@
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom12;
+-		&maxscale_zoom12;
++		&minscale_zoom12;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="3"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom13;
+-		&maxscale_zoom14;
++		&minscale_zoom14;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="5"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom15;
+-		&maxscale_zoom16;
++		&minscale_zoom16;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="15"/>
+ 	</Rule>
+ 	<Rule>
+@@ -72,19 +72,19 @@
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom12;
+-		&maxscale_zoom12;
++		&minscale_zoom12;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="1"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom13;
+-		&maxscale_zoom14;
++		&minscale_zoom14;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="2"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom15;
+-		&maxscale_zoom16;
++		&minscale_zoom16;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="5"/>
+ 	</Rule>
+ 	<Rule>

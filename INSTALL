@@ -309,10 +309,18 @@ First, grab the MapQuest stylesheets:
 
  git clone git://github.com/MapQuest/MapQuest-Mapnik-Style.git
 
- (version tested: 9d6c5503194c58fc1f9f760b4e5af8a1602dfb30)
+ (tested versions:
+     9d6c5503194c58fc1f9f760b4e5af8a1602dfb30
+     6f7ea2723c07a1db2d17c2336dd3a0b3dd2d6fe9)
 
 Go into the MapQuest-Mapnik-Style directory, in which we will do all
 the configuration.
+
+With above tested version, there is a bug in the stylesheet. That should
+be fixed using a patch provided in the support/ directory.
+
+ patch -p1 < /path/to/ocitysmap/support/mapquest-stylesheet-eu-fix.patch
+ patch -p1 < /path/to/ocitysmap/support/mapquest-stylesheet-uk-fix.patch
 
 First, those stylesheets require the same "world boundaries"
 information as the original OSM stylesheet, so we are going to share

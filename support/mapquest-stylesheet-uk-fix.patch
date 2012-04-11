@@ -1,0 +1,63 @@
+From 18a0198983b30f45a0c2723d4444ff4f434ceca2 Mon Sep 17 00:00:00 2001
+From: David MENTRE <dmentre@linux-france.org>
+Date: Wed, 11 Apr 2012 17:13:15 +0200
+Subject: [PATCH] Fix scale errors in UK style sheet
+
+Signed-off-by: David MENTRE <dmentre@linux-france.org>
+---
+ mapquest_inc/layer-transportation-uk.xml.inc |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/mapquest_inc/layer-transportation-uk.xml.inc b/mapquest_inc/layer-transportation-uk.xml.inc
+index 84999a0..9a571d7 100755
+--- a/mapquest_inc/layer-transportation-uk.xml.inc
++++ b/mapquest_inc/layer-transportation-uk.xml.inc
+@@ -49,19 +49,19 @@
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom12;
+-		&maxscale_zoom12;
++		&minscale_zoom12;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="3"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom13;
+-		&maxscale_zoom14;
++		&minscale_zoom14;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="5"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'runway'</Filter>
+ 		&maxscale_zoom15;
+-		&maxscale_zoom16;
++		&minscale_zoom16;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="15"/>
+ 	</Rule>
+ 	<Rule>
+@@ -72,19 +72,19 @@
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom12;
+-		&maxscale_zoom12;
++		&minscale_zoom12;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="1"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom13;
+-		&maxscale_zoom14;
++		&minscale_zoom14;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="2"/>
+ 	</Rule>
+ 	<Rule>
+ 		<Filter>[aeroway] = 'taxiway'</Filter>
+ 		&maxscale_zoom15;
+-		&maxscale_zoom16;
++		&minscale_zoom16;
+ 		<LineSymbolizer stroke="#b4b4b4" stroke-width="5"/>
+ 	</Rule>
+ 	<Rule>
+-- 
+1.7.5.4
+
