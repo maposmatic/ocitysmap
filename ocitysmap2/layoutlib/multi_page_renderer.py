@@ -80,9 +80,10 @@ class MultiPageRenderer(Renderer):
 
         scale_denom = Renderer.DEFAULT_SCALE
 
-        # the mapnik scale depends on the latitude
-        lat = self.rc.bounding_box.get_top_left()[0]
-        scale_denom *= math.cos(math.radians(lat))
+        # the mapnik scale depends on the latitude. However we are
+        # always using Mapnik conversion functions (lat,lon <->
+        # mercator_meters) so we don't need to take into account
+        # latitude in following computations
 
         # by convention, mapnik uses 90 ppi whereas cairo uses 72 ppi
         scale_denom *= float(72) / 90
