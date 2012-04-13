@@ -2,78 +2,122 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitymap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-11 22:31+0100\n"
+"POT-Creation-Date: 2012-04-03 12:34+0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Konstantin Mochalov <incredible.angst@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "X-Poedit-Language: Russian\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "Религиозные места"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "Религиозное место"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
-#: ocitysmap/street_index.py:287
+#: ocitysmap2/indexlib/indexer.py:165
+#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Образование"
 
-#: ocitysmap/street_index.py:283
+#: ocitysmap2/indexlib/indexer.py:165
 msgid "Kindergarten"
 msgstr "Детский сад"
 
-#: ocitysmap/street_index.py:284
+#: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
 msgstr "Школа"
 
-#: ocitysmap/street_index.py:285
+#: ocitysmap2/indexlib/indexer.py:167
 msgid "College"
 msgstr "Колледж"
 
-#: ocitysmap/street_index.py:286
+#: ocitysmap2/indexlib/indexer.py:168
 msgid "University"
 msgstr "Университет"
 
-#: ocitysmap/street_index.py:287
+#: ocitysmap2/indexlib/indexer.py:169
 msgid "Library"
 msgstr "Библиотека"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
+#: ocitysmap2/indexlib/indexer.py:170
+#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap2/indexlib/indexer.py:172
+#: ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Публичные здания"
 
-#: ocitysmap/street_index.py:288
+#: ocitysmap2/indexlib/indexer.py:170
 msgid "Town hall"
 msgstr "Мэрия"
 
-#: ocitysmap/street_index.py:289
+#: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "Почтовое отделение"
 
-#: ocitysmap/street_index.py:290
-#, fuzzy
+#: ocitysmap2/indexlib/indexer.py:173
 msgid "Public building"
-msgstr "Публичные здания"
+msgstr "Публичное здание"
 
-#: ocitysmap/street_index.py:291
+#: ocitysmap2/indexlib/indexer.py:174
 msgid "Police"
-msgstr "Милиция"
+msgstr "Полиция"
 
-#: ocitysmap/draw_utils.py:150
+#: ocitysmap2/indexlib/indexer.py:384
+msgid "Villages"
+msgstr "Поселки"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:465
 #, python-format
-msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr ""
-
-#: ocitysmap/draw_utils.py:155
 msgid ""
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
+"http://www.maposmatic.org\n"
+"\n"
+"Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"http://www.openstreetmap.org\n"
+"\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
+"The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
+"See http://wiki.openstreetmap.org"
 msgstr ""
+"© %(year)d разработчики MapOSMatic/OCitySMap.\n"
+"http://www.maposmatic.org\n"
+"\n"
+"Данные карты © %(year)d участники OpenStreetMap.org (cc-by-sa).\n"
+"http://www.openstreetmap.org\n"
+"\n"
+"Карта отрисована: %(date)s. Данные OSM обновлены: %(osmdate)s.\n"
+"Данные этой карты могут быть неполными или неточными. Вы можете внести свой\n"
+"вклад в улучшение карты. См. http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:480
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
+msgid "unknown"
+msgstr "неизвестно"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:535
+msgid "This page is intentionally left blank."
+msgstr "Эта страница намеренно оставлена пустой."
+
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, python-format
+msgid ""
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+"© %(year)d разработчики MapOSMatic/OCitySMap. Данные карты © %(year)d участники проекта OpenStreetMap.org (cc-by-sa).\n"
+"Карта отрисована: %(date)s. Данные OSM обновлены: %(osmdate)s. Данные этой карты могут быть неполными или неточными. Вы можете внести свой вклад в улучшение карты. См. http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/single_page_renderers.py:630
+msgid "Test gettext"
+msgstr "Тест gettext"
+

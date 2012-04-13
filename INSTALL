@@ -1,14 +1,14 @@
 OCitySMap installation instructions
 ===================================
 
-These instructions refer to software dependencies by using
-Debian/Ubuntu package names. Minor adaptations might be needed for
+These instructions refer to software dependencies by using Ubuntu
+Lucid (10.04) package names. Minor adaptations might be needed for
 other distributions or for the precise Debian or Ubuntu release you
-are using (here respectively Lenny and Intrepid or Jaunty).
+are using. They have been tested on several x86_64 hosts.
 
  1. Installation of PostgreSQL and PostGIS
 
-    sudo aptitude install postgresql-8.3-postgis postgresql-contrib-8.3
+    sudo aptitude install postgresql postgresql-contrib
 
  2. Creation of a new PostgreSQL user
 
@@ -31,7 +31,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
  4. Enable PostGIS on the database
 
-    PostGIS is in fact a set of functions and datatypes for
+    PostGIS is in fact a set of functions and data types for
     PostgreSQL, and every PostgreSQL database needing these features
     must be initialized as follows. We do this initialization of the
     database with superuser privileges, and then later fix the table
@@ -41,25 +41,43 @@ are using (here respectively Lenny and Intrepid or Jaunty).
 
     sudo -u postgres createlang plpgsql maposmatic
 
-    b. Add the low-level PostGIS infrastructure
+    b. Download postgis 1.5.1
+
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+
+    sudo aptitude update
+    sudo aptitude dist-upgrade # Or safe-upgrade if you prefer
+
+    sudo aptitude install postgresql-8.4-postgis
+
+    If nothing happens, you may have to check the output of "apt-get
+    policy postgresql-8.4-postgis" and adjust your apt preferences.  A
+    sensible default preferences configuration file for this
+    repository could be:
+
+      Package: *
+      Pin: release o=LP-PPA-ubuntugis-ubuntugis-unstable
+      Pin-Priority: 700
+
+    c. Install PostGIS support in Postgres
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql-8.3-postgis/lwpostgis.sql \
+              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql \
               -d maposmatic
 
-    c. Add the list of spatial referential systems
+    Provide comments (Optional):
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql-8.3-postgis/spatial_ref_sys.sql \
+              -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql \
               -d maposmatic
 
-    d. Add the intarray extension for diff files support (osc)
+    d. Add the list of spatial referential systems
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql/8.3/contrib/_int.sql \
+              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql \
               -d maposmatic
 
     e. Change the owner of the new tables to maposmatic
@@ -73,8 +91,7 @@ are using (here respectively Lenny and Intrepid or Jaunty).
     osm2pgsql is the tool that takes OSM data as input, and creates a
     PostGIS database from it. At the time of the writing of this
     document, the osm2pgsql packaged in Debian/Ubuntu is not recent
-    enough, so we grab a fresh version from SVN (we used revision
-    17318).
+    enough, so we grab a fresh version from SVN.
 
     a. If needed, install SVN
 
@@ -83,128 +100,79 @@ are using (here respectively Lenny and Intrepid or Jaunty).
     b. Grab osm2pgsql code
 
     svn co http://svn.openstreetmap.org/applications/utils/export/osm2pgsql/
+    # Tested revisions: r27862
 
     c. Install the build dependencies
 
-    sudo aptitude install build-essential libxml2-dev libgeos-dev \
-                          libpq-dev libbz2-dev proj libbz2-dev
+    sudo apt-get build-dep osm2pgsql
 
     d. Compile
 
     cd osm2pgsql
+    ./autogen.sh
+    ./configure # with --prefix=.... as needed
     make
 
     e. Install
 
-    Just copy the osm2pgsql binary somewhere in your PATH or link to
-    it like:
+    Provided you supplied the correct --prefix=... option, just enter:
 
-    ln -s /path/to/osm2pgsql/osm2pgsql /usr/local/bin/osm2pgsql
+    make install
 
- 6. Import the Google spatial referential system
+ 6. Download the OSM data
 
-    The osm2pgsql tool creates data in the PostGIS database relative
-    to the 900913 (Google in leet language) spatial referential
-    system. As this system is not included in the default PostGIS
-    installation, we must add it manually. It is available in
-    osm2pgsql source code.
+    We give the example for Luxembourg.
 
-    psql -h localhost \
-         -U maposmatic \
-         -f /path/to/osm2pgsql/900913.sql \
-         -d maposmatic
+    wget http://download.geofabrik.de/osm/europe/luxembourg.osm.bz2
 
- 7. Download the OSM data
+ 7. Import the OSM data
 
-    We give the example for France.
-
-    wget http://download.geofabrik.de/osm/europe/france.osm.bz2
-
- 8. Import the OSM data
-
-    osm2pgsql -S '/path/to/osm2pgsql/default.style' \
-              -s -c -d maposmatic -m -U maposmatic -W \
-              -H localhost france.osm.bz2
+    osm2pgsql -s -c -d maposmatic -m -U maposmatic -W \
+              -H localhost luxembourg.osm.bz2
 
     If you have a lot of RAM, remove '-s', it will make the import
     faster. If you miss RAM (and have a lot of time available) you can
     also use the '-C' option together with '-s'. (See osm2pgsql -h).
 
- 9. Install Mapnik
+    If you want to add other OSM DB files, replace the '-c' option
+    with a '-a' option in the subsequent files you are adding: if you
+    keep the '-c' option, it will erase any previous GIS data you may
+    have. For example:
 
-    We used Mapnik 0.6.1, which was not yet available in stable
-    Debian/Ubuntu at the time we set up MapOSMatic, so we compiled it
-    from source.
+    osm2pgsql -s -a -d maposmatic -m -U maposmatic -W \
+              -H localhost ile-de-france.osm.bz2
+
+
+ 8. Install Mapnik
+
+    We need Mapnik 2.1.0, which is not yet available in stable
+    Debian/Ubuntu, so we need to compile it from source.
 
     a. Install the dependencies
 
-    sudo aptitude install \
-        libboost-dev libicu-dev libstdc++6-dev python-dev \
-        libfreetype6-dev libjpeg62-dev libltdl3-dev libpng12-dev \
-        libtiff4-dev libtiffxx0c2 python-imaging proj libcairo2-dev \
-        python-cairo-dev libcairomm-1.0-dev libpixman-1-dev \
-        libpthread-stubs0-dev ttf-dejavu ttf-dejavu-core \
-        ttf-dejavu-extra ttf-unifont libgdal-dev python-gdal \
-        postgresql-server-dev-8.3 postgresql-contrib-8.3 libxslt1-dev \
-        libxml2-dev
+    # Base dependencies (0.7.0 by default on lucid, a good start)
+    sudo apt-get build-dep python-mapnik
 
-    b. Download Mapnik
+    # Upgrade to libboost >= 1.41
+    sudo add-apt-repository ppa:thomasjj/backports
+    sudo aptitude update
+    sudo aptitude dist-upgrade # Or safe-upgrade if you prefer
 
-    wget http://download.berlios.de/mapnik/mapnik-0.6.1.tar.bz2
+    sudo aptitude purge libboost1.40-dev
 
-    c. Patch Mapnik
+    sudo aptitude install libboost1.46-dev libboost-date-time1.46-dev \
+        libboost-filesystem1.46-dev libboost-iostreams1.46-dev \
+        libboost-program-options1.46-dev libboost-python1.46-dev \
+        libboost-regex1.46-dev libboost-serialization1.46-dev \
+        libboost-system1.46-dev libboost-thread1.46-dev
 
-    In order to make Mapnik search recursively for fonts in the
-    SYSTEM_FONTS directory (see below), we had to patch Mapnik. Note
-    that this is because we still use Mapnik 0.6.1. Later versions of
-    Mapnik already search recursively for fonts by default. The patch
-    to apply follows:
+    b. Download the latest Mapnik from its Git repository
 
-===============================================================================
-diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindings/python/mapnik/__init__.py
---- mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py	2009-07-14 11:09:16.000000000 +0200
-+++ mapnik-0.6.1/bindings/python/mapnik/__init__.py	2010-03-20 15:04:27.000000000 +0100
-@@ -41,6 +41,8 @@
- 
- """
- 
-+import os
-+
- from sys import getdlopenflags,setdlopenflags
- try:
-     from dl import RTLD_NOW, RTLD_GLOBAL
-@@ -377,17 +379,18 @@
-     major_version = version / 100000
-     return '%s.%s.%s' % ( major_version, minor_version,patch_level)
- 
-+def register_fonts(path=fontscollectionpath):
-+    """Recursively register fonts using path argument as base directory"""
-+    for dirpath, _, filenames in os.walk(path):
-+        for filename in filenames:
-+            if os.path.splitext(filename)[1] == '.ttf':
-+                FontEngine.instance().register_font(os.path.join(dirpath, filename))
-+
- #register datasources
- from mapnik import DatasourceCache
- DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
- #register some fonts
--from mapnik import FontEngine
--from glob import glob
--fonts = glob('%s/*.ttf' % fontscollectionpath)
--if len( fonts ) == 0:
--    print "### WARNING: No ttf files found in '%s'." % fontscollectionpath
--else:
--    map(FontEngine.instance().register_font, fonts)
-+register_fonts()
- 
- #set dlopen flags back to the original
- setdlopenflags(flags)
-===============================================================================
+    git clone git://github.com/mapnik/mapnik.git
 
-    d. Compile and install Mapnik
+    cd mapnik
 
-    tar xvjf mapnik-0.6.1.tar.bz2
-    cd mapnik-0.6.1
+    c. Compile and install Mapnik
 
     python scons/scons.py configure INPUT_PLUGINS=all \
       OPTIMIZATION=3 SYSTEM_FONTS=/usr/share/fonts/
@@ -215,6 +183,18 @@ diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindi
     python scons/scons.py
 
     python scons/scons.py install
+
+    d. If building Mapnik failed
+
+    Cloning the repository (step 8b) implicitly runs 'git checkout HEAD',
+    giving you the latest version. Should you run into trouble either installing
+    or running this latest version, you can use the version we know to work:
+
+    git checkout c88fcc8f # Note: replace this with commit hash of version on dev.m.o
+
+    python scons/scons.py -c # Clean up failed build
+
+    Repeat step 8c.
 
     e. Check the installation
 
@@ -230,39 +210,30 @@ diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindi
 
     a. Download
 
-    svn co http://svn.openstreetmap.org/applications/rendering/mapnik mapnik-osm
+    svn co \
+        http://svn.openstreetmap.org/applications/rendering/mapnik \
+        mapnik2-osm
+    # Tested revision: r28170
 
     b. Installation of static data
 
     In addition to the OpenStreetMap data, some other static data are
     used to render the maps (world boundaries, etc.)
 
-    wget http://tile.openstreetmap.org/world_boundaries-spherical.tgz
-    cd /path/to/mapnik-osm/
-    tar xzf ~/download/world_boundaries-spherical.tgz
-
-    wget http://tile.openstreetmap.org/processed_p.tar.bz2
-    tar xjf ~/download/processed_p.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
-
-    wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
-    tar xjf ~/download/shoreline_300.tar.bz2 -C /path/to/mapnik-osm/world_boundaries
-
-    wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/10m-populated-places.zip
-    unzip 10m-populated-places.zip -d /path/to/mapnik-osm/world_boundaries
-
-    wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/110m-admin-0-boundary-lines.zip
-    unzip 110m-admin-0-boundary-lines.zip -d /path/to/mapnik-osm/world_boundaries
+    cd mapnik2-osm
+    sh ./get-coastlines.sh
 
     c. Enabling unifont
 
-    In order to get correct rendering for Korean, Chineese or Japanese
-    character, the unifont font must be used. In order do enable it,
-    edit inc/fontset-settings.xml.inc, and uncomment the following
-    line :
+    In order to get correct rendering for Korean, Chinese or Japanese
+    character, the unifont font must be used. In order do enable it:
 
-    	  <Font face_name="unifont Medium" />
+    sudo aptitude install ttf-unifont
 
-    in the book-fonts, bold-fonts and oblique-fonts sections.
+	(on debian, mapnik2 uses only ttf-dejavu, correct fontscollectionpath
+	in /usr/lib/python2.7/dist-packages/mapnik2/paths.py, replace
+	'/usr/share/fonts/truetype/ttf-dejavu' by '/usr/share/fonts'. Bug
+	report #665798).
 
     d. Configuration
 
@@ -274,34 +245,135 @@ diff -ru mapnik-0.6.1.orig/bindings/python/mapnik/__init__.py mapnik-0.6.1/bindi
 
     a. Install Git if needed
 
-    sudo aptitude install git-core
+    sudo aptitude install git-core git-email
 
     b. Grab the sources
 
     git clone git://git.savannah.nongnu.org/maposmatic/ocitysmap.git
 
-    c. Initialize OCitySMap SQL stuff
-
-    psql -h localhost  \
-         -U maposmatic \
-         -f /path/to/ocitysmap/ocitysmap-init.sql \
-         -d maposmatic
-
-    d. Install dependencies
+    c. Install dependencies
 
     sudo aptitude install python-psycopg2 python-gdal \
-                          python-gtk2 python-cairo
+                          python-gtk2 python-cairo \
+			  python-shapely
 
     Note that python-gtk2 is not needed for any graphical interface,
     but because it contains Pango and PangoCairo that we use to render
     text on the map.
 
-    e. Configuration file
+    d. Configuration file
 
     Create a ~/.ocitysmap.conf configuration file, modeled after the
-    provided ocitysmap.conf file.
+    provided ocitysmap2.conf-template file.
 
 12. Run OCitySMap
 
-    ./ocitysmap-render -f png -c Sanguinet
+    ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-411354  # Contern, LU
+    ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
 
+
+Appendix A:  Installation of maposmatic-printable stylesheet
+------------------------------------------------------------
+
+    This step builds on step 10 "Install Mapnik-OSM" and step 11
+    "Installation of OCitySMap".
+
+    a. Copy stylesheet/maposmatic-printable/symbols/* (i.e. all files in
+       symbols/ directory) into mapnik2-osm/symbols/ directory.
+
+    b. Add absolute path to file stylesheet/maposmatic-printable/osm.xml
+       into ~/.ocitysmap.conf.
+
+    c. Configure the stylesheet with database parameters and relevant
+       directories:
+
+       cd stylesheet/maposmatic-printable/
+
+       python ./generate_xml.py --dbname maposmatic --host 'localhost' \
+                             --user maposmatic --port 5432 \
+                             --password 'ereiamjh' \
+                    --world_boundaries mapnik2-osm/world_boundaries \
+		    --symbols mapnik2-osm/symbols
+
+Appendix B: installation of the MapQuest stylesheet
+-------------------------------------------------
+
+The above instructions, at step 10, describe how to set up ocitysmap
+with the default Mapnik stylesheet for OpenStreetMap. It is possible
+to install other stylesheets, such as the stylesheets made available
+by MapQuest. The instructions below detail how to install those
+additional stylesheets, making the assumption that ocitysmap is
+properly configured and running with the default OSM stylesheet.
+
+First, grab the MapQuest stylesheets:
+
+ git clone git://github.com/MapQuest/MapQuest-Mapnik-Style.git
+
+ (tested versions:
+     9d6c5503194c58fc1f9f760b4e5af8a1602dfb30
+     6f7ea2723c07a1db2d17c2336dd3a0b3dd2d6fe9)
+
+Go into the MapQuest-Mapnik-Style directory, in which we will do all
+the configuration.
+
+With above tested version, there is a bug in the stylesheet. That should
+be fixed using a patch provided in the support/ directory.
+
+ patch -p1 < /path/to/ocitysmap/support/mapquest-stylesheet-eu-fix.patch
+ patch -p1 < /path/to/ocitysmap/support/mapquest-stylesheet-uk-fix.patch
+
+First, those stylesheets require the same "world boundaries"
+information as the original OSM stylesheet, so we are going to share
+these informations by creating a symbolic link:
+
+ ln -s /path/to/original/osm/stylesheet/world_boundaries world_boundaries
+
+In addition to those world boundaries, the MapQuest stylesheets need a
+few other files. Download the corresponding tarball:
+
+ wget http://developer.mapquest.com/content/static/geotiffs/mercator_tiffs.tar
+
+Unpack this archive, and put the four mq_world_mercator_*.tiff files
+directory into the world_boundaries/ directory (this directory is
+shared with the original OSM stylesheet, but this is not a problem as
+the mq_world_mercator_*.tiff files are not used by the original OSM
+stylesheet).
+
+Now, to the configuration of the stylesheet itself (use the
+.inc.template files):
+
+ vi mapquest_inc/fontset-settings.xml.inc.template
+
+Not much to change here, the default value is fine. If you want to use
+the same font for the original OSM stylesheet and the MapQuest one,
+replace "Arial" by "DejaVu".
+
+Create the .inc files from the templates:
+
+ python /path/to/mapnik2-osm/generate_xml.py --inc mapquest_inc \
+                                             --symbols mapquest_symbols \
+                                             --dbname maposmatic \
+                                             --host 'localhost' \
+                                             --user maposmatic --port 5432 \
+                                             --password 'ereiamjh'
+
+The final step is to integrate this new stylesheet in ocitysmap. To do
+so, edit your ~/.ocitysmap.conf file, and add a new stylesheet
+section, like:
+
+[mapquest_eu]
+name: MapQuestEu
+description: MapQuest Europe stylesheet
+path: /path/to/MapQuest-Mapnik-Style/mapquest-eu.xml
+
+Don't forget to add "mapquest_eu" to the available_stylesheets
+variable, which lists all available stylesheets.
+
+You can then use it in ocitysmap2-render with the -s option:
+
+  ./ocitysmap2-render -s MapQuestEu ...
+
+Note that in addition to the MapQuest Europe stylesheet
+(mapquest-eu.xml), the Git repository also contains the MapQuest US
+and MapQuest UK stylesheets (mapquest-us.xml and mapquest-uk.xml),
+that you can similarly add to your ocitysmap.conf file.

@@ -1,4 +1,3 @@
-# Amenities names used MapOSMatic translated to Norwegian Bokmål.
 # Copyright (C) 2010 Hans Nordhaug
 # This file is distributed under the same license as the maposmatic package.
 #
@@ -8,77 +7,87 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-11 22:31+0100\n"
-"PO-Revision-Date: 2010-08-05 10:49+0100\n"
-"Last-Translator: Hans Fredrik Nordhaug <hans@nordhaug.priv.no>\n"
+"POT-Creation-Date: 2010-09-11 15:43+CEST\n"
+"PO-Revision-Date: 2012-01-25 21:24+0100\n"
+"Last-Translator: Guttorm Flatabø <post@guttormflatabo.com>\n"
 "Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.ui.no>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:144
 msgid "Places of worship"
 msgstr "Steder for gudsdyrkelse"
 
-#: ocitysmap/street_index.py:282
+#: ocitysmap2/indexlib/indexer.py:145
 msgid "Place of worship"
 msgstr "Sted for gudsdyrkelse"
 
-#: ocitysmap/street_index.py:283 ocitysmap/street_index.py:284
-#: ocitysmap/street_index.py:285 ocitysmap/street_index.py:286
-#: ocitysmap/street_index.py:287
-msgid "Education"
-msgstr "Utdanning"
-
-#: ocitysmap/street_index.py:283
+#: ocitysmap2/indexlib/indexer.py:146
 msgid "Kindergarten"
 msgstr "Barnehage"
 
-#: ocitysmap/street_index.py:284
+#: ocitysmap2/indexlib/indexer.py:146
+#: ocitysmap2/indexlib/indexer.py:147
+#: ocitysmap2/indexlib/indexer.py:148
+#: ocitysmap2/indexlib/indexer.py:149
+#: ocitysmap2/indexlib/indexer.py:150
+msgid "Education"
+msgstr "Utdanning"
+
+#: ocitysmap2/indexlib/indexer.py:147
 msgid "School"
 msgstr "Skole"
 
-#: ocitysmap/street_index.py:285
+#: ocitysmap2/indexlib/indexer.py:148
 msgid "College"
-msgstr "Videregående"
+msgstr "Videregående skole"
 
-#: ocitysmap/street_index.py:286
+#: ocitysmap2/indexlib/indexer.py:149
 msgid "University"
 msgstr "Universitet"
 
-#: ocitysmap/street_index.py:287
+#: ocitysmap2/indexlib/indexer.py:150
 msgid "Library"
 msgstr "Bilbliotek"
 
-#: ocitysmap/street_index.py:288 ocitysmap/street_index.py:289
-#: ocitysmap/street_index.py:290 ocitysmap/street_index.py:291
-msgid "Public buildings"
-msgstr "Offentlige bygninger"
-
-#: ocitysmap/street_index.py:288
+#: ocitysmap2/indexlib/indexer.py:151
 msgid "Town hall"
 msgstr "Rådhus"
 
-#: ocitysmap/street_index.py:289
+#: ocitysmap2/indexlib/indexer.py:151
+#: ocitysmap2/indexlib/indexer.py:152
+#: ocitysmap2/indexlib/indexer.py:153
+#: ocitysmap2/indexlib/indexer.py:155
+msgid "Public buildings"
+msgstr "Offentlige bygninger"
+
+#: ocitysmap2/indexlib/indexer.py:152
 msgid "Post office"
 msgstr "Postkontor"
 
-#: ocitysmap/street_index.py:290
+#: ocitysmap2/indexlib/indexer.py:154
 msgid "Public building"
 msgstr "Offentlig bygning"
 
-#: ocitysmap/street_index.py:291
+#: ocitysmap2/indexlib/indexer.py:155
 msgid "Police"
 msgstr "Politi"
 
-#: ocitysmap/draw_utils.py:150
-#, python-format
-msgid "This map has been rendered on %s and may be incomplete or inaccurate."
-msgstr "Dette kartet ble tegnet %s og kan være ufullstendig eller unøyaktig."
-
-#: ocitysmap/draw_utils.py:155
+#: ocitysmap2/layoutlib/renderers.py:555
 msgid ""
-"You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"This map has been rendered on %(date)s and may be incomplete or innacurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
 msgstr ""
-"Du kan hjelpe til med å lage dette kartet bedre - se http://wiki."
-"openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap utviklerene. Kartdata © %(year)d OpenStreetMap.org og bidragsytere (cc-by-sa).\n"
+"Dette kartet ble laget %(date)s og kan ha mangler og feil. Du kan være med å forbedre dette kartet. Se http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/renderers.py:898
+msgid "Test gettext"
+msgstr ""
+
+#~ msgid ""
+#~ "This map has been rendered on %s and may be incomplete or inaccurate."
+#~ msgstr ""
+#~ "Dette kartet ble tegnet %s og kan være ufullstendig eller unøyaktig."

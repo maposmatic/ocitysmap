@@ -1,0 +1,24 @@
+[datasource]
+host=localhost
+user=maposmatic
+password=mysecurepasswd
+dbname=maposmatic
+# Optional database port, defaults to 5432
+# port=5432
+
+[rendering]
+# List of available stylesheets, each needs to be described by an eponymous
+# configuration section in this file.
+available_stylesheets: stylesheet_osm1, stylesheet_osm2
+
+# The default Mapnik stylesheet.
+[stylesheet_osm1]
+name: Default
+description: The default OSM style
+path: /path/to/mapnik-osm/osm.xml
+
+# Another stylesheet
+[stylesheet_osm2]
+name: AnotherOne
+description: Another OSM Stylesheet
+path: /path/to/another/osm.xml
