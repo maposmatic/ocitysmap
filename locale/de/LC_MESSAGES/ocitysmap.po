@@ -34,7 +34,7 @@ msgstr "Kindergarten"
 #: ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
-msgstr "Bildungseinrichtungen"
+msgstr "Bildung"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -61,7 +61,7 @@ msgstr "Rathaus"
 #: ocitysmap2/indexlib/indexer.py:172
 #: ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
-msgstr "Öffentliche Einrichtungen"
+msgstr "Öffentlichen Gebäuden"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -69,7 +69,7 @@ msgstr "Postamt"
 
 #: ocitysmap2/indexlib/indexer.py:173
 msgid "Public building"
-msgstr "Öffentliche Einrichtung"
+msgstr "Öffentliches Gebäude"
 
 #: ocitysmap2/indexlib/indexer.py:174
 msgid "Police"
