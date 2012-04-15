@@ -495,42 +495,17 @@ Other views are necessary.
  4.3 Stylesheet generation
 
     cd /path/to/toner/mapnik/
+    cp /path/to/ocitysmap/stylesheet/toner/style-toner-ocitysmap.mml .
+    cp /path/to/ocitysmap/stylesheet/toner/labels-ocitysmap.mss .
 
-    # replace MS fonts with DejaVu
-    /path/to/ocitysmap/stylesheet/toner/correct_label_fonts.sh
-
-    # fix the mml file:
-    #   - change table names with our tables
-    #   - add the ability to specifiy a password to naturalearth database
-    #   - set manualy an extent when estimate_extent is set to false
-    /path/to/ocitysmap/stylesheet/toner/correct_mml.sh
-
-    # configure database access
-    vim style-toner-standard.mml
-
-    (...)
-    <!ENTITY nev_host "localhost">
-    <!ENTITY nev_name "naturalearth">
-    <!ENTITY nev_user "maposmatic">
-    <!ENTITY nev_pass "maposmatic_password">
-
-    <!ENTITY osm_host "localhost">
-    <!ENTITY osm_port "5432">
-    <!ENTITY osm_name "maposmatic">
-    <!ENTITY osm_user "maposmatic">
-    <!ENTITY osm_pass "maposmatic_password">
-
-    <!ENTITY included_data_host "localhost">
-    <!ENTITY included_data_port "5432">
-    <!ENTITY included_data_name "naturalearth">
-    <!ENTITY included_data_user "maposmatic">
-    <!ENTITY included_data_pass "maposmatic_password">
-    (...)
+    # configure database access: change host, name, user and password
+    # for each database listed at top of the file
+    vim style-toner-ocitysmap.mml
 
     # generate the stylesheet
-    /path/to/cascadenik/cascadenik-compile.py style-toner-standard.mml \
-                                       /tmp/style-toner-standard-mapnik2.xml
-    mv /tmp/style-toner-standard-mapnik2.xml /path/to/toner/mapnik/
+    /path/to/cascadenik/cascadenik-compile.py style-toner-ocitysmap.mml \
+                                       /tmp/style-toner-ocitysmap.xml
+    mv /tmp/style-toner-ocitysmap.xml /path/to/ocitysmap/stylesheet/toner/
 
  5. ocitysmap configuration
 
@@ -541,7 +516,7 @@ Edit properly the configuration file.
     [Toner]
     name: Toner
     description: Stamen Toner stylesheet
-    path: /path/to/toner/mapnik/style-toner-standard-mapnik2.xml
+    path: /path/to/ocitysmap/stylesheet/toner/style-toner-ocitysmap.xml
 
 Don't forget to add "Toner" to the available_stylesheets variable, which lists
 all available stylesheets.
