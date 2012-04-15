@@ -1,0 +1,108 @@
+From a886e5018e0e4413bd9ffc18ec7c792fca53cf24 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C3=89tienne=20Loks?= <etienne.loks@peacefrogs.net>
+Date: Sun, 15 Apr 2012 01:47:10 +0200
+Subject: [PATCH] Fixes output.py to make it compatible with mapnik 2.1
+
+Change TextSymbolizer attributes to make them compatible with new
+version of Mapnik.
+---
+ cascadenik/output.py |   42 +++++++++++++++++++++---------------------
+ 1 file changed, 21 insertions(+), 21 deletions(-)
+
+diff --git a/cascadenik/output.py b/cascadenik/output.py
+index a696df9..77a9f2b 100644
+--- a/cascadenik/output.py
++++ b/cascadenik/output.py
+@@ -232,7 +232,7 @@ class LineSymbolizer:
+ 
+ class TextSymbolizer:
+     def __init__(self, name, face_name, size, color, wrap_width=None, \
+-        label_spacing=None, label_position_tolerance=None, max_char_angle_delta=None, \
++        label_spacing=None, label_position_tolerance=None, maximum_angle_char_delta=None, \
+         halo_color=None, halo_radius=None, dx=None, dy=None, avoid_edges=None, \
+         minimum_distance=None, allow_overlap=None, label_placement=None, \
+         character_spacing=None, line_spacing=None, text_transform=None, fontset=None, \
+@@ -247,7 +247,7 @@ class TextSymbolizer:
+         assert wrap_width is None or type(wrap_width) is int
+         assert label_spacing is None or type(label_spacing) is int
+         assert label_position_tolerance is None or type(label_position_tolerance) is int
+-        assert max_char_angle_delta is None or type(max_char_angle_delta) is int
++        assert maximum_angle_char_delta is None or type(maximum_angle_char_delta) is int
+         assert halo_color is None or halo_color.__class__ is style.color
+         assert halo_radius is None or type(halo_radius) is int
+         assert dx is None or type(dx) is int
+@@ -271,7 +271,7 @@ class TextSymbolizer:
+         self.wrap_width = wrap_width
+         self.label_spacing = label_spacing
+         self.label_position_tolerance = label_position_tolerance
+-        self.max_char_angle_delta = max_char_angle_delta
++        self.maximum_angle_char_delta = maximum_angle_char_delta
+         self.halo_color = halo_color
+         self.halo_radius = halo_radius
+         self.dx = dx
+@@ -312,23 +312,23 @@ class TextSymbolizer:
+         sym = mapnik.TextSymbolizer(expr, self.face_name, self.size,
+                                     mapnik.Color(str(self.color)))
+ 
+-        sym.wrap_width = self.wrap_width or sym.wrap_width
+-        sym.label_spacing = self.label_spacing or sym.label_spacing
+-        sym.label_position_tolerance = self.label_position_tolerance or sym.label_position_tolerance
+-        sym.max_char_angle_delta = self.max_char_angle_delta or sym.max_char_angle_delta
+-        sym.halo_fill = mapnik.Color(str(self.halo_color)) if self.halo_color else sym.halo_fill
+-        sym.halo_radius = self.halo_radius or sym.halo_radius
+-        sym.character_spacing = self.character_spacing or sym.character_spacing
+-        sym.line_spacing = self.line_spacing or sym.line_spacing
+-        sym.avoid_edges = self.avoid_edges.value if self.avoid_edges else sym.avoid_edges
+-        sym.force_odd_labels = self.force_odd_labels.value if self.force_odd_labels else sym.force_odd_labels
+-        sym.minimum_distance = self.minimum_distance or sym.minimum_distance
+-        sym.allow_overlap = self.allow_overlap.value if self.allow_overlap else sym.allow_overlap
++        sym.placements.defaults.wrap_width = self.wrap_width or sym.placements.defaults.wrap_width
++        sym.placements.defaults.label_spacing = self.label_spacing or sym.placements.defaults.label_spacing
++        sym.placements.defaults.label_position_tolerance = self.label_position_tolerance or sym.placements.defaults.label_position_tolerance
++        sym.placements.defaults.maximum_angle_char_delta = self.maximum_angle_char_delta or sym.placements.defaults.maximum_angle_char_delta
++        sym.format.halo_fill = mapnik.Color(str(self.halo_color)) if self.halo_color else sym.format.halo_fill
++        sym.format.halo_radius = self.halo_radius or sym.format.halo_radius
++        sym.format.character_spacing = self.character_spacing or sym.format.character_spacing
++        sym.format.line_spacing = self.line_spacing or sym.format.line_spacing
++        sym.placements.defaults.avoid_edges = self.avoid_edges.value if self.avoid_edges else sym.placements.defaults.avoid_edges
++        sym.placements.defaults.force_odd_labels = self.force_odd_labels.value if self.force_odd_labels else sym.placements.defaults.force_odd_labels
++        sym.placements.defaults.minimum_distance = self.minimum_distance or sym.placements.defaults.minimum_distance
++        sym.placements.defaults.allow_overlap = self.allow_overlap.value if self.allow_overlap else sym.placements.defaults.allow_overlap
+         if self.label_placement:
+-            sym.label_placement = mapnik.label_placement.names.get(self.label_placement,mapnik.label_placement.POINT_PLACEMENT)
++            sym.placements.defaults.label_placement = mapnik.label_placement.names.get(self.label_placement,mapnik.label_placement.POINT_PLACEMENT)
+         # note-renamed in Mapnik2 to 'text_transform'
+         if self.text_transform:
+-            sym.text_transform = convert_enums.get(self.text_transform,mapnik.text_transform.NONE)
++            sym.format.text_transform = convert_enums.get(self.text_transform,mapnik.text_transform.NONE)
+         if self.vertical_alignment:
+             # match the logic in load_map.cpp for conditionally applying vertical_alignment default
+             default_vertical_alignment = mapnik.vertical_alignment.MIDDLE
+@@ -337,10 +337,10 @@ class TextSymbolizer:
+             elif self.dy < 0.0:
+                 default_vertical_alignment = mapnik.vertical_alignment.TOP
+             
+-            sym.vertical_alignment = mapnik.vertical_alignment.names.get(self.vertical_alignment,
++            sym.placements.defaults.vertical_alignment = mapnik.vertical_alignment.names.get(self.vertical_alignment,
+                 default_vertical_alignment)
+         if self.justify_alignment:
+-            sym.justify_alignment = mapnik.justify_alignment.names.get(self.justify_alignment,
++            sym.placements.defaults.justify_alignment = mapnik.justify_alignment.names.get(self.justify_alignment,
+               mapnik.justify_alignment.MIDDLE)
+ 
+         if self.fontset:
+@@ -349,9 +349,9 @@ class TextSymbolizer:
+             sys.stderr.write('\nCascadenik debug: Warning, FontSets will be ignored as they are not yet supported in Mapnik via Python...\n')
+         
+         try:
+-            sym.displacement = (self.dx or 0.0, self.dy or 0.0)
++            sym.placements.defaults.displacement = (self.dx or 0.0, self.dy or 0.0)
+         except:
+-            sym.displacement(self.dx or 0.0, self.dy or 0.0)
++            sym.placements.defaults.displacement(self.dx or 0.0, self.dy or 0.0)
+             
+         return sym
+ 
+-- 
+1.7.9.5
+

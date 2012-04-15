@@ -377,3 +377,171 @@ Note that in addition to the MapQuest Europe stylesheet
 (mapquest-eu.xml), the Git repository also contains the MapQuest US
 and MapQuest UK stylesheets (mapquest-us.xml and mapquest-uk.xml),
 that you can similarly add to your ocitysmap.conf file.
+
+Appendix C: installation of the Stamen Toner stylesheet
+-------------------------------------------------------
+
+Toner is a black and white stylesheet initialy provided by Stamen
+(http://maps.stamen.com/#toner). The instructions below detail how to install
+this stylesheets, making the assumption that ocitysmap is properly configured
+and running with the default OSM stylesheet.
+
+ 1. Cascadenik installation
+
+Cascadenik implements cascading stylesheets for Mapnik. Cascadenik is a
+requisite for Toner stylesheet.
+
+    # install dependancies
+    sudo aptitude install python-cssutils python-imaging
+    # clone the repository
+    git clone https://github.com/mapnik/Cascadenik.git
+    cd Cascadenik/
+    git checkout mapnik2 # switch to mapnik2 branch
+
+When tested (rev. 7dc2587) Cascadenik mapnik2 branch was not fully functionnal
+(at least with mapnik 2.1). If no correction has been made since a patch is
+provided to fix that:
+
+    git checkout 7dc2587
+    git am --signoff < /path/to/ocitysmap/stylesheet/toner/0001-Fixes-output.py-to-make-it-compatible-with-mapnik-2..patch
+
+Then you can install it:
+
+    python setup.py install
+
+ 2. Coastline table
+
+Toner stylesheet reads the coastline datas in the postgis database. We need to
+import it in our database.
+
+    cd path/to/mapnik-osm/world_boundaries
+    shp2pgsql -s 900913 -I  processed_p.shp coastline \
+        | psql -U maposmatic -d maposmatic -h localhost
+
+ 3. Natural Earth Data database
+
+Toner stylesheet uses many data from the natural earth database
+(http://www.naturalearthdata.com/). We are going to import all theses datas
+inside another postgis database.
+
+    mkdir naturalearth
+    cd naturalearth
+    wget http://kelso.it/x/nevector # download all Natural Earth Data shape
+                          # files cf. http://www.naturalearthdata.com/downloads/
+    unzip nevector
+    sudo su postgres
+    # create db
+    createdb  -E UTF-8 -O maposmatic naturalearth
+    # add geographic extensions
+    psql -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql \
+                                                        -d naturalearth
+    psql -f /usr/share/postgresql/9.1/contrib/postgis_comments.sql \
+                                                        -d naturalearth
+    psql -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql \
+                                                        -d naturalearth
+    # fix permissions
+    echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
+       ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | psql -d naturalearth
+
+    # import data from shapefiles
+    for FILE in `find . -name *.shp`; do \
+             BASE=`basename $FILE .shp`; \
+                shp2pgsql -W LATIN1 -s 900913 -I $FILE $BASE \
+                                        | psql naturalearth; done
+
+    # fix permissions
+    for FILE in `find . -name *.shp`; do   BASE=`basename $FILE .shp`; \
+        echo "ALTER TABLE "$BASE" OWNER TO maposmatic;" \
+                                        | psql -d naturalearth ; done
+
+ 4. Install Toner
+
+    git clone https://github.com/Citytracking/toner.git
+
+The installation has been tested with the commit 58369be
+
+    git checkout 58369be
+
+ 4.1 Install toner specific datas
+
+Toner stylesheet is provided with some labels and some roads. We are
+importing them in the naturalearth database.
+
+    cd /path/to/toner/
+    # fixes manualy set database parameters with ours
+    sed  -i 's/psql -d toner -U osm/psql -h localhost -d naturalearth -U maposmatic/' \
+                                                         import_toner_v2_shps.sh
+    # if you don't want to type too many times the database pass
+    vim ~/.pgpass
+
+    localhost::naturalearth:maposmatic:maposmatic_password
+
+    chmod 0600 ~/.pgpass
+    # import
+    sh import_toner_v2_shps.sh
+
+ 4.2 Specific planet views
+
+A specific view is used for motorway in the OSM database.
+
+    cd /path/to/toner/osm
+    psql -h localhost -U maposmatic maposmatic < motorways.pgsql
+
+Other views are necessary.
+
+    cd /path/to/toner/mapnik/
+    psql -h localhost -U maposmatic maposmatic < views.pgsql
+
+ 4.3 Stylesheet generation
+
+    cd /path/to/toner/mapnik/
+
+    # replace MS fonts with DejaVu
+    /path/to/ocitysmap/stylesheet/toner/correct_label_fonts.sh
+
+    # fix the mml file:
+    #   - change table names with our tables
+    #   - add the ability to specifiy a password to naturalearth database
+    #   - set manualy an extent when estimate_extent is set to false
+    /path/to/ocitysmap/stylesheet/toner/correct_mml.sh
+
+    # configure database access
+    vim style-toner-standard.mml
+
+    (...)
+    <!ENTITY nev_host "localhost">
+    <!ENTITY nev_name "naturalearth">
+    <!ENTITY nev_user "maposmatic">
+    <!ENTITY nev_pass "maposmatic_password">
+
+    <!ENTITY osm_host "localhost">
+    <!ENTITY osm_port "5432">
+    <!ENTITY osm_name "maposmatic">
+    <!ENTITY osm_user "maposmatic">
+    <!ENTITY osm_pass "maposmatic_password">
+
+    <!ENTITY included_data_host "localhost">
+    <!ENTITY included_data_port "5432">
+    <!ENTITY included_data_name "naturalearth">
+    <!ENTITY included_data_user "maposmatic">
+    <!ENTITY included_data_pass "maposmatic_password">
+    (...)
+
+    # generate the stylesheet
+    /path/to/cascadenik/cascadenik-compile.py style-toner-standard.mml \
+                                       /tmp/style-toner-standard-mapnik2.xml
+    mv /tmp/style-toner-standard-mapnik2.xml /path/to/toner/mapnik/
+
+ 5. ocitysmap configuration
+
+Edit properly the configuration file.
+
+    vim /home/$USER/.ocitysmap.conf
+
+    [Toner]
+    name: Toner
+    description: Stamen Toner stylesheet
+    path: /path/to/toner/mapnik/style-toner-standard-mapnik2.xml
+
+Don't forget to add "Toner" to the available_stylesheets variable, which lists
+all available stylesheets.
