@@ -449,7 +449,7 @@ SELECT ST_AsText(ST_LongestLine(
         jobid = file_prefix.split('_')[0]
 
         # Create a temporary directory for all our shape files
-        tmpdir = tempfile.mkdtemp(prefix='ocitysmap-%d-', int(jobid))
+        tmpdir = tempfile.mkdtemp(prefix='ocitysmap-%d-' % int(jobid))
         try:
             LOG.debug('Rendering in temporary directory %s' % tmpdir)
 
