@@ -444,8 +444,12 @@ SELECT ST_AsText(ST_LongestLine(
 
         osm_date = self.get_osm_database_last_update()
 
+        # Ugly way to get the job id, that we need for debugging
+        # purposes to get a useful name for the temporary directory.
+        jobid = file_prefix.split('_')[0]
+
         # Create a temporary directory for all our shape files
-        tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
+        tmpdir = tempfile.mkdtemp(prefix='ocitysmap-%d-', int(jobid))
         try:
             LOG.debug('Rendering in temporary directory %s' % tmpdir)
 
