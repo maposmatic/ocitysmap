@@ -446,7 +446,7 @@ SELECT ST_AsText(ST_LongestLine(
 
         # Ugly way to get the job id, that we need for debugging
         # purposes to get a useful name for the temporary directory.
-        jobid = file_prefix.split('_')[0]
+        jobid = os.path.basename(file_prefix).split('_')[0]
 
         # Create a temporary directory for all our shape files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap-%d-' % int(jobid))
