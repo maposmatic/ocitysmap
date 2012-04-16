@@ -80,10 +80,6 @@ class SinglePageRenderer(Renderer):
             LOG.warning("Designated area leads to an empty index")
             self.street_index = None
 
-        # Dump the CSV street index
-        if self.street_index:
-            self.street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
-
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
@@ -155,6 +151,10 @@ class SinglePageRenderer(Renderer):
         # Update the street_index to reflect the grid's actual position
         if self.grid and self.street_index:
             self.street_index.apply_grid(self.grid)
+
+        # Dump the CSV street index
+        if self.street_index:
+            self.street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
 
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
