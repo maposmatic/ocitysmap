@@ -267,10 +267,10 @@ from
   (select name,
           -- highway as street_kind, -- only when group by name, street_kind
           st_intersection(%(wkb_limits)s,
-                          st_linemerge(st_collect(way))) as street_path
+                          st_linemerge(st_collect(%%(way)s))) as street_path
    from planet_osm_line
           where trim(name) != '' and highway is not null
-                and st_intersects(way, %(wkb_limits)s)
+                and st_intersects(%%(way)s, %(wkb_limits)s)
    group by name ---, street_kind -- (optional)
    order by name) as foo;
 """ % dict(wkb_limits = ("st_transform(GeomFromText('%s', 4002), 900913)"
@@ -278,7 +278,15 @@ from
 
         # l.debug("Street query (nogrid): %s" % query)
 
-        cursor.execute(query)
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
         sl = cursor.fetchall()
 
         l.debug("Got %d streets." % len(sl))
@@ -320,27 +328,34 @@ select amenity_name,
                               4002)) as longest_linestring
 from (
        select name as amenity_name,
-              st_intersection(%(wkb_limits)s, way) as amenity_contour
+              st_intersection(%(wkb_limits)s, %%(way)s) as amenity_contour
        from planet_osm_point
        where trim(name) != ''
-             and amenity = %(amenity)s and ST_intersects(way, %(wkb_limits)s)
+             and amenity = %(amenity)s and ST_intersects(%%(way)s, %(wkb_limits)s)
       union
        select name as amenity_name,
-              st_intersection(%(wkb_limits)s, way) as amenity_contour
+              st_intersection(%(wkb_limits)s , %%(way)s) as amenity_contour
        from planet_osm_polygon
        where trim(name) != '' and amenity = %(amenity)s
-             and ST_intersects(way, %(wkb_limits)s)
+             and ST_intersects(%%(way)s, %(wkb_limits)s)
      ) as foo
 order by amenity_name""" \
                 % {'amenity': _sql_escape_unicode(db_amenity),
-                   'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
+                   'wkb_limits': ("st_transform(GeomFromText('%s' , 4002), 900913)"
                                   % (polygon_wkt,))}
 
 
             # l.debug("Amenity query for for %s/%s (nogrid): %s" \
             #             % (catname, db_amenity, query))
-
-            cursor.execute(query)
+            try:
+                cursor.execute(query % {'way':'way'})
+            except psycopg2.InternalError:
+                # This exception generaly occurs when inappropriate ways have
+                # to be cleaned. Using a buffer of 0 generaly helps to clean
+                # them. This operation is not applied by default for
+                # performance.
+                db.rollback()
+                cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
             for amenity_name, linestring in cursor.fetchall():
                 # Parse the WKT from the largest linestring in shape
@@ -391,13 +406,13 @@ select village_name,
                               4002)) as longest_linestring
 from (
        select name as village_name,
-              st_intersection(%(wkb_limits)s, way) as village_contour
+              st_intersection(%(wkb_limits)s, %%(way)s) as village_contour
        from planet_osm_point
        where trim(name) != ''
              and (place = 'locality'
                   or place = 'hamlet'
                   or place = 'isolated_dwelling')
-             and ST_intersects(way, %(wkb_limits)s)
+             and ST_intersects(%%(way)s, %(wkb_limits)s)
      ) as foo
 order by village_name""" \
             % {'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
@@ -407,7 +422,15 @@ order by village_name""" \
         # l.debug("Villages query for %s (nogrid): %s" \
         #             % ('Villages', query))
 
-        cursor.execute(query)
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
         for village_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
