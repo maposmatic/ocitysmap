@@ -115,9 +115,10 @@ class i18n_fr_generic(i18n):
     # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(ur"[áàâäãæ]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(ur"[óòôöõœ]", re.IGNORECASE | re.UNICODE)
     U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    Y_ACCENT = re.compile(ur"[ÿ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -129,6 +130,7 @@ class i18n_fr_generic(i18n):
         s = self.A_ACCENT.sub("a", s)
         s = self.O_ACCENT.sub("o", s)
         s = self.U_ACCENT.sub("u", s)
+        s = self.Y_ACCENT.sub("y", s)
         return s.upper()
 
     def language_code(self):
