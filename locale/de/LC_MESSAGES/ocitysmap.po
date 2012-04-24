@@ -61,7 +61,7 @@ msgstr "Rathaus"
 #: ocitysmap2/indexlib/indexer.py:172
 #: ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
-msgstr "Öffentlichen Gebäuden"
+msgstr "Öffentliche Gebäude"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
