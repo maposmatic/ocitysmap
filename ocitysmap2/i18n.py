@@ -115,9 +115,10 @@ class i18n_fr_generic(i18n):
     # for IndexPageGenerator.upper_unaccent_string
     E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
     I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(ur"[áàâäãæ]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(ur"[óòôöõœ]", re.IGNORECASE | re.UNICODE)
     U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    Y_ACCENT = re.compile(ur"[ÿ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -129,6 +130,7 @@ class i18n_fr_generic(i18n):
         s = self.A_ACCENT.sub("a", s)
         s = self.O_ACCENT.sub("o", s)
         s = self.U_ACCENT.sub("u", s)
+        s = self.Y_ACCENT.sub("y", s)
         return s.upper()
 
     def language_code(self):
@@ -361,17 +363,18 @@ class i18n_ca_generic(i18n):
         return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
 class i18n_pt_br_generic(i18n):
-    APPELLATIONS = [ u"Aeroporto", u"Alameda", u"Área", u"Avenida",
-                     u"Campo", u"Chácara", u"Colônia",
-                     u"Condomínio", u"Conjunto", u"Distrito", u"Esplanada", u"Estação",
-                     u"Estrada", u"Favela", u"Fazenda",
-                     u"Feira", u"Jardim", u"Ladeira", u"Lago",
+    APPELLATIONS = [ u"Aeroporto", u"Aer.", u"Alameda", u"Al.", u"Apartamento", u"Ap.", 
+                     u"Área", u"Avenida", u"Av.", u"Beco", u"Bc.", u"Bloco", u"Bl.", 
+                     u"Caminho", u"Cam.", u"Campo", u"Chácara", u"Colônia",
+                     u"Condomínio", u"Conjunto", u"Cj.", u"Distrito", u"Esplanada", u"Espl.", 
+                     u"Estação", u"Est.", u"Estrada", u"Estr.", u"Favela", u"Fazenda",
+                     u"Feira", u"Jardim", u"Jd.", u"Ladeira", u"Lago",
                      u"Lagoa", u"Largo", u"Loteamento", u"Morro", u"Núcleo",
-                     u"Parque", u"Passarela", u"Pátio", u"Praça", u"Quadra",
-                     u"Recanto", u"Residencial", u"Rua",
-                     u"Setor", u"Sítio", u"Travessa", u"Trecho", u"Trevo",
-                     u"Vale", u"Vereda", u"Via", u"Viaduto", u"Viela",
-                     u"Vila" ]
+                     u"Parque", u"Pq.", u"Passarela", u"Pátio", u"Praça", u"Pç.", u"Quadra",
+                     u"Recanto", u"Residencial", u"Resid.", u"Rua", u"R.", 
+                     u"Setor", u"Sítio", u"Travessa", u"Tv.", u"Trecho", u"Trevo",
+                     u"Vale", u"Vereda", u"Via", u"V.", u"Viaduto", u"Viela",
+                     u"Vila", u"Vl." ]
     DETERMINANTS = [ u" do", u" da", u" dos", u" das", u"" ]
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
