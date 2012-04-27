@@ -194,8 +194,9 @@ class i18n_es_generic(i18n):
             u"Calzada", u"Camino", u"Camí", u"Carrer", u"Carretera",
             u"Glorieta", u"Parque", u"Pasaje", u"Pasarela", u"Paseo", u"Plaza",
             u"Plaça", u"Privada", u"Puente", u"Ronda", u"Salida", u"Travesia" ]
-    DETERMINANTS = [ u" de", u" de la", u" del", u" de las",
-                     u" dels", u" de los", u" d'", u" de l'", u"" ]
+    DETERMINANTS = [ u" de la", u" de los", u" de las",
+                     u" dels", u" del", u" d'", u" de l'",
+                     u" de", u"" ]
 
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
