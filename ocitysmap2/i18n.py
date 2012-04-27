@@ -857,7 +857,7 @@ language_class_map = {
     'pl_PL.UTF-8': i18n_pl_generic,
     'nb_NO.UTF-8': i18n_generic,
     'nn_NO.UTF-8': i18n_generic,
-    'tr_TR.UTF-8': i18_tr_TR_generic,
+    'tr_TR.UTF-8': i18n_tr_TR_generic,
 }
 
 def install_translation(locale_name, locale_path):
