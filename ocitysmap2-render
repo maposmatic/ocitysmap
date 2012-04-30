@@ -126,6 +126,13 @@ def main():
             bbox = BoundingBox.parse_latlon_strtuple(options.bbox)
         except ValueError:
             parser.error('Invalid bounding box!')
+        # Check that latitude and langitude are different
+        lat1, lon1 = bbox.get_top_left()
+        lat2, lon2 = bbox.get_bottom_right()
+        if lat1 == lat2:
+            parser.error('Same latitude in bounding box corners')
+        if lon1 == lon2:
+            parser.error('Same longitude in bounding box corners')
 
     # Parse OSM id when given
     if options.osmid:
