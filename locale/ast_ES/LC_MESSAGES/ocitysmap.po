@@ -1,0 +1,124 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# Xuacu Saturio <xuacusat@softastur.org>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"PO-Revision-Date: 2012-05-03 22:22+0200\n"
+"Last-Translator: Xuacu Saturio <xuacusat@softastur.org>\n"
+"Language-Team: http://softastur.org/\n"
+"Language: ast\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: ocitysmap2/indexlib/indexer.py:163
+msgid "Places of worship"
+msgstr "Llugares de cultu"
+
+#: ocitysmap2/indexlib/indexer.py:164
+msgid "Place of worship"
+msgstr "Llugar de cultu"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "Escuela infantil"
+
+#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap2/indexlib/indexer.py:169
+msgid "Education"
+msgstr "Educación"
+
+#: ocitysmap2/indexlib/indexer.py:166
+msgid "School"
+msgstr "Escuela"
+
+#: ocitysmap2/indexlib/indexer.py:167
+msgid "College"
+msgstr "Institutu"
+
+#: ocitysmap2/indexlib/indexer.py:168
+msgid "University"
+msgstr "Universidá"
+
+#: ocitysmap2/indexlib/indexer.py:169
+msgid "Library"
+msgstr "Biblioteca"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "Casa del Conceyu"
+
+#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+msgid "Public buildings"
+msgstr "Edificios públicos"
+
+#: ocitysmap2/indexlib/indexer.py:171
+msgid "Post office"
+msgstr "Oficina de Correos"
+
+#: ocitysmap2/indexlib/indexer.py:173
+msgid "Public building"
+msgstr "Edificiu públicu"
+
+#: ocitysmap2/indexlib/indexer.py:174
+msgid "Police"
+msgstr "Policía"
+
+#: ocitysmap2/indexlib/indexer.py:379
+msgid "Villages"
+msgstr "Aldees"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:484
+msgid ""
+"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers.\n"
+"http://www.maposmatic.org\n"
+"\n"
+"Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"http://www.openstreetmap.org\n"
+"\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
+"The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
+"See http://wiki.openstreetmap.org"
+msgstr ""
+"Copyright \\302\\251 %(year)d desendolcadores de MapOSMatic/OCitySMap.\n"
+"http://www.maposmatic.org\n"
+"\n"
+"Datos del mapa \\302\\251 %(year)d OpenStreetMap.org y collaboradores (cc-by-"
+"sa).\n"
+"http://www.openstreetmap.org\n"
+"\n"
+"Mapa renderizáu el: %(date)s. Datos d'OSM anovaos el: %(osmdate)s.\n"
+"El mapa pue tar incompletu o desaxustáu. Tu tamién pues conllaborar "
+"p'ameyorar esti mapa.\n"
+"Visita http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:499
+#: ocitysmap2/layoutlib/single_page_renderers.py:306
+msgid "unknown"
+msgstr "desconocíu"
+
+#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+msgid "This page is intentionally left blank."
+msgstr "Asta páxina ta balera arrémente."
+
+#: ocitysmap2/layoutlib/single_page_renderers.py:293
+msgid ""
+"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers. Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr ""
+"Copyright \\302\\251 %(year)d desendolcadores de MapOSMatic/OCitySMap. Datos "
+"del mapa \\302\\251 %(year)d OpenStreetMap.org y collaboradores (cc-by-sa).\n"
+"Mapa renderizáu el: %(date)s. Datos d'OSM anovaos el: %(osmdate)s. El mapa "
+"pue tar incompletu o desaxustáu. Tu tamién pues conllaborar p'ameyorar esti "
+"mapa. Visita http://wiki.openstreetmap.org"
+
+#: ocitysmap2/layoutlib/single_page_renderers.py:634
+msgid "Test gettext"
+msgstr "Prueba de gettext"
