@@ -9,6 +9,7 @@ msgstr ""
 "PO-Revision-Date: 2012-04-02 18:18+0100\n"
 "Last-Translator: Esben Damgaard <ebbe@hvemder.dk>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,10 +27,8 @@ msgstr "Kirke"
 msgid "Kindergarten"
 msgstr "Børnehave"
 
-#: ocitysmap2/indexlib/indexer.py:165
-#: ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Uddannelse"
@@ -54,10 +53,8 @@ msgstr "Bibliotek"
 msgid "Town hall"
 msgstr "Rådhus"
 
-#: ocitysmap2/indexlib/indexer.py:170
-#: ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Offentlige bygninger"
 
@@ -79,14 +76,15 @@ msgstr "Byer"
 
 #: ocitysmap2/layoutlib/multi_page_renderer.py:484
 msgid ""
-"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers.\n"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
 "\n"
-"Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
 "http://www.openstreetmap.org\n"
 "\n"
 "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
-"The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
+"The map may be incomplete or inaccurate. You can contribute to improve this "
+"map.\n"
 "See http://wiki.openstreetmap.org"
 msgstr ""
 
@@ -101,11 +99,13 @@ msgstr "Denne side er med vilje blank."
 
 #: ocitysmap2/layoutlib/single_page_renderers.py:293
 msgid ""
-"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers. Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be "
+"incomplete or inaccurate. You can contribute to improve this map. See http://"
+"wiki.openstreetmap.org"
 msgstr ""
 
 #: ocitysmap2/layoutlib/single_page_renderers.py:634
 msgid "Test gettext"
 msgstr "Test gettext"
-
