@@ -327,6 +327,8 @@ SELECT ST_AsText(ST_LongestLine(
         records = cursor.fetchall()
         try:
             ((wkt,),) = records
+            if wkt is None:
+                raise ValueError
         except ValueError:
             raise LookupError("OSM ID %d not found in table %s" %
                               (osmid, table))
