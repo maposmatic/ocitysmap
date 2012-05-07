@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"POT-Creation-Date: 2012-05-07 16:00+0200\n"
 "PO-Revision-Date: 2010-01-12 17:30+0300\n"
 "Last-Translator: Bassem JARKAS <jarkas@gmail.com>\n"
 "Language-Team: Arabic Translation\n"
@@ -26,15 +26,15 @@ msgstr "معابد"
 msgid "Place of worship"
 msgstr "معبد"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "حضانة أطفال"
-
 #: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
 #: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "تعليم"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "حضانة أطفال"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -52,14 +52,14 @@ msgstr "جامعة"
 msgid "Library"
 msgstr "مكتبة"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "مبنى بلدية"
-
 #: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
 #: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "مباني عامة"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "مبنى بلدية"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -73,12 +73,12 @@ msgstr "مبنى عام"
 msgid "Police"
 msgstr "شرطة"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap2/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
-#, fuzzy
+#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
@@ -93,17 +93,17 @@ msgid ""
 msgstr ""
 "بإمكانك المساهمة بتحسين هذه الخريطة. انظر http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap2/layoutlib/multi_page_renderer.py:489
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap2/layoutlib/multi_page_renderer.py:544
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
-#, fuzzy
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
@@ -113,7 +113,7 @@ msgid ""
 msgstr ""
 "بإمكانك المساهمة بتحسين هذه الخريطة. انظر http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap2/layoutlib/single_page_renderers.py:645
 msgid "Test gettext"
 msgstr ""
 

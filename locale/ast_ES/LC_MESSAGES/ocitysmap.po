@@ -4,7 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-07 16:00+0200\n"
 "PO-Revision-Date: 2012-05-03 22:22+0200\n"
 "Last-Translator: Xuacu Saturio <xuacusat@softastur.org>\n"
 "Language-Team: http://softastur.org/\n"
@@ -24,15 +25,15 @@ msgstr "Llugares de cultu"
 msgid "Place of worship"
 msgstr "Llugar de cultu"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "Escuela infantil"
-
 #: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
 #: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Educación"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "Escuela infantil"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -50,14 +51,14 @@ msgstr "Universidá"
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "Casa del Conceyu"
-
 #: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
 #: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Edificios públicos"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "Casa del Conceyu"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -71,27 +72,28 @@ msgstr "Edificiu públicu"
 msgid "Police"
 msgstr "Policía"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap2/indexlib/indexer.py:399
 msgid "Villages"
 msgstr "Aldees"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
+#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#, python-format
 msgid ""
-"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers.\n"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
 "\n"
-"Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
 "http://www.openstreetmap.org\n"
 "\n"
 "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
-"The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
+"The map may be incomplete or inaccurate. You can contribute to improve this "
+"map.\n"
 "See http://wiki.openstreetmap.org"
 msgstr ""
-"Copyright \302\251 %(year)d desendolcadores de MapOSMatic/OCitySMap.\n"
+"Copyright © %(year)d desendolcadores de MapOSMatic/OCitySMap.\n"
 "http://www.maposmatic.org\n"
 "\n"
-"Datos del mapa \302\251 %(year)d OpenStreetMap.org y collaboradores (cc-by-"
-"sa).\n"
+"Datos del mapa © %(year)d OpenStreetMap.org y collaboradores (cc-by-sa).\n"
 "http://www.openstreetmap.org\n"
 "\n"
 "Mapa renderizáu el: %(date)s. Datos d'OSM anovaos el: %(osmdate)s.\n"
@@ -99,26 +101,30 @@ msgstr ""
 "p'ameyorar esti mapa.\n"
 "Visita http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap2/layoutlib/multi_page_renderer.py:489
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
 msgid "unknown"
 msgstr "desconocíu"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap2/layoutlib/multi_page_renderer.py:544
 msgid "This page is intentionally left blank."
 msgstr "Asta páxina ta balera arrémente."
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, python-format
 msgid ""
-"Copyright \302\251 %(year)d MapOSMatic/OCitySMap developers. Map data \302\251 %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+"OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be "
+"incomplete or inaccurate. You can contribute to improve this map. See http://"
+"wiki.openstreetmap.org"
 msgstr ""
-"Copyright \302\251 %(year)d desendolcadores de MapOSMatic/OCitySMap. Datos "
-"del mapa \302\251 %(year)d OpenStreetMap.org y collaboradores (cc-by-sa).\n"
+"Copyright © %(year)d desendolcadores de MapOSMatic/OCitySMap. Datos del mapa "
+"© %(year)d OpenStreetMap.org y collaboradores (cc-by-sa).\n"
 "Mapa renderizáu el: %(date)s. Datos d'OSM anovaos el: %(osmdate)s. El mapa "
 "pue tar incompletu o desaxustáu. Tu tamién pues conllaborar p'ameyorar esti "
 "mapa. Visita http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap2/layoutlib/single_page_renderers.py:645
 msgid "Test gettext"
 msgstr "Prueba de gettext"

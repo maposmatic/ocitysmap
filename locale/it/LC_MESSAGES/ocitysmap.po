@@ -6,13 +6,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"POT-Creation-Date: 2012-05-07 16:00+0200\n"
 "PO-Revision-Date: 2009-12-26 20:59+0100\n"
 "Last-Translator: Thomas Petazzoni <thomas.petazzoni@enix.org>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "X-Poedit-Language: Italian\n"
@@ -26,15 +26,15 @@ msgstr "Luoghi di culto"
 msgid "Place of worship"
 msgstr "Luogo di culto"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "Asilo"
-
 #: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
 #: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Educazione"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "Asilo"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -52,14 +52,14 @@ msgstr "Università"
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "Municipio"
-
 #: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
 #: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Uffici Pubblici"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "Municipio"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -73,11 +73,12 @@ msgstr "Ufficio Pubblico"
 msgid "Police"
 msgstr "Polizia"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap2/indexlib/indexer.py:399
 msgid "Villages"
 msgstr "Frazioni"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
+#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
@@ -101,16 +102,17 @@ msgstr ""
 "migliorarla.\n"
 "Vedi http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap2/layoutlib/multi_page_renderer.py:489
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
 msgid "unknown"
 msgstr "sconosciuto"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap2/layoutlib/multi_page_renderer.py:544
 msgid "This page is intentionally left blank."
 msgstr "Questa pagina è stata intenzionalmente lasciata in bianco."
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
@@ -118,12 +120,12 @@ msgid ""
 "incomplete or inaccurate. You can contribute to improve this map. See http://"
 "wiki.openstreetmap.org"
 msgstr ""
-"Copyright © %(year)d Gli sviluppatori di MapOSMatic/OCitySMap. Dati © %(year)d "
-"OpenStreetMap.org e contributori (cc-by-sa).\n"
-"Mappa renderizzata il: %(date)s. Dati OSM aggiornati al: %(osmdate)s. La mappa potrebbe "
-"essere incompleta o non accurata. Puoi contribuire a migliorarla. Vedi http://"
-"wiki.openstreetmap.org"
+"Copyright © %(year)d Gli sviluppatori di MapOSMatic/OCitySMap. Dati © "
+"%(year)d OpenStreetMap.org e contributori (cc-by-sa).\n"
+"Mappa renderizzata il: %(date)s. Dati OSM aggiornati al: %(osmdate)s. La "
+"mappa potrebbe essere incompleta o non accurata. Puoi contribuire a "
+"migliorarla. Vedi http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap2/layoutlib/single_page_renderers.py:645
 msgid "Test gettext"
 msgstr "Test gettext"

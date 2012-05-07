@@ -5,7 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-07 16:00+0200\n"
 "PO-Revision-Date: 2012-04-26 14:19+0100\n"
 "Last-Translator: Hakan Tandoğan <hakan@gurkensalat.com>\n"
 "Language-Team: \n"
@@ -25,15 +26,15 @@ msgstr "İbadet yerleri"
 msgid "Place of worship"
 msgstr "İbadethane"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "Kreş"
-
 #: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
 #: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Eğitim"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "Kreş"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -51,14 +52,14 @@ msgstr "Üniversite"
 msgid "Library"
 msgstr "Kütüphane"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "Belediye binası"
-
 #: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
 #: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Kamu binaları"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "Belediye binası"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -72,11 +73,12 @@ msgstr "Kamu binası"
 msgid "Police"
 msgstr "Polis"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap2/indexlib/indexer.py:399
 msgid "Villages"
 msgstr "Köyler"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
+#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
@@ -101,16 +103,17 @@ msgstr ""
 "katkıda bulunabilirsiniz.\n"
 "Bakınız http://www.openstreetmap.de/faq.html"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap2/layoutlib/multi_page_renderer.py:489
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
 msgid "unknown"
 msgstr "bilinmiyor"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap2/layoutlib/multi_page_renderer.py:544
 msgid "This page is intentionally left blank."
 msgstr "Bu sayfa bilerek boş bırakılmıştır."
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
@@ -125,6 +128,6 @@ msgstr ""
 "katkıda bulunabilirsiniz.\n"
 "Bakınız http://www.openstreetmap.de/faq.html"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap2/layoutlib/single_page_renderers.py:645
 msgid "Test gettext"
 msgstr "gettext denemesi"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"POT-Creation-Date: 2012-05-07 16:00+0200\n"
 "PO-Revision-Date: 2010-02-08 10:28+0100\n"
 "Last-Translator: Łukasz Jernaś <deejay1@srem.org>\n"
 "Language-Team: \n"
@@ -27,15 +27,15 @@ msgstr "Miejsca kultu"
 msgid "Place of worship"
 msgstr "Miejsce kultu"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "Przedszkole"
-
 #: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
 #: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
 #: ocitysmap2/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Edukacja"
+
+#: ocitysmap2/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "Przedszkole"
 
 #: ocitysmap2/indexlib/indexer.py:166
 msgid "School"
@@ -53,14 +53,14 @@ msgstr "Uniwersytet"
 msgid "Library"
 msgstr "Biblioteka"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "Ratusz"
-
 #: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
 #: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Budynki użyteczności publicznej"
+
+#: ocitysmap2/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "Ratusz"
 
 #: ocitysmap2/indexlib/indexer.py:171
 msgid "Post office"
@@ -74,12 +74,12 @@ msgstr "Budynek użyteczności publicznej"
 msgid "Police"
 msgstr "Policja"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap2/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
-#, fuzzy
+#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
@@ -95,17 +95,17 @@ msgstr ""
 "Aby pomóc ulepszyć tą mapę, zajrzyj na stronę internetową http://wiki."
 "openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap2/layoutlib/multi_page_renderer.py:489
+#: ocitysmap2/layoutlib/single_page_renderers.py:305
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap2/layoutlib/multi_page_renderer.py:544
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
-#, fuzzy
+#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
@@ -116,7 +116,7 @@ msgstr ""
 "Aby pomóc ulepszyć tą mapę, zajrzyj na stronę internetową http://wiki."
 "openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap2/layoutlib/single_page_renderers.py:645
 msgid "Test gettext"
 msgstr ""
 
