@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-07 16:00+0200\n"
+"POT-Creation-Date: 2012-05-07 19:07-0700\n"
 "PO-Revision-Date: 2010-10-29 23:55+0300\n"
 "Last-Translator: Yauhen Kharuzhy <jekhor@gmail.com>\n"
 "Language-Team: Belarusian <kde-i18n-doc@kde.org>\n"
@@ -17,66 +17,66 @@ msgstr ""
 "X-Generator: Lokalize 1.0\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: ocitysmap2/indexlib/indexer.py:163
+#: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "Культавыя месцы"
 
-#: ocitysmap2/indexlib/indexer.py:164
+#: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "Культавае месца"
 
-#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Адукацыя"
 
-#: ocitysmap2/indexlib/indexer.py:165
+#: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
 msgstr "Дзіцячы сад"
 
-#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:166
 msgid "School"
 msgstr "Школа"
 
-#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap/indexlib/indexer.py:167
 msgid "College"
 msgstr "Каледж"
 
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:168
 msgid "University"
 msgstr "Універсітэт"
 
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
 msgstr "Бібліятэка"
 
-#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Грамадскія будынкі"
 
-#: ocitysmap2/indexlib/indexer.py:170
+#: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
 msgstr "Ратуша"
 
-#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "Пошта"
 
-#: ocitysmap2/indexlib/indexer.py:173
+#: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
 msgstr "Грамадскі будынак"
 
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
 msgstr "Міліцыя"
 
-#: ocitysmap2/indexlib/indexer.py:399
+#: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#: ocitysmap/layoutlib/multi_page_renderer.py:470
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
@@ -95,16 +95,16 @@ msgstr ""
 "Гэтая мапа была створана %(date)s і можа быць няпоўнай альбо недакладнай. Вы "
 "можаце паўдзельнічаць у яе паляпшэнні. Глядзіце http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:489
-#: ocitysmap2/layoutlib/single_page_renderers.py:305
+#: ocitysmap/layoutlib/multi_page_renderer.py:485
+#: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:544
+#: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#: ocitysmap/layoutlib/single_page_renderers.py:290
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -118,6 +118,6 @@ msgstr ""
 "Гэтая мапа была створана %(date)s і можа быць няпоўнай альбо недакладнай. Вы "
 "можаце паўдзельнічаць у яе паляпшэнні. Глядзіце http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:645
+#: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr "Тэст gettext"

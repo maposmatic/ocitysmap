@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-07 16:00+0200\n"
+"POT-Creation-Date: 2012-05-07 19:07-0700\n"
 "PO-Revision-Date: 2011-12-23 22:12+PDT\n"
 "Last-Translator: Jeff Haack <jeff.haack@gmail.com>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
@@ -18,66 +18,66 @@ msgstr ""
 "X-Poedit-Language: Indonesian\n"
 "X-Poedit-Country: INDONESIA\n"
 
-#: ocitysmap2/indexlib/indexer.py:163
+#: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "Tempat beribadah"
 
-#: ocitysmap2/indexlib/indexer.py:164
+#: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "Tempat beribadah"
 
-#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Pendidikan"
 
-#: ocitysmap2/indexlib/indexer.py:165
+#: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
 msgstr "Taman Kanak-Kanak"
 
-#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:166
 msgid "School"
 msgstr "Sekolah"
 
-#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap/indexlib/indexer.py:167
 msgid "College"
 msgstr "Perguruan Tinggi"
 
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:168
 msgid "University"
 msgstr "Universitas"
 
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
 msgstr "Perpustakaan"
 
-#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Bangunan Publik"
 
-#: ocitysmap2/indexlib/indexer.py:170
+#: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
 msgstr "Balai Kota"
 
-#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "Kantor Pos"
 
-#: ocitysmap2/indexlib/indexer.py:173
+#: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
 msgstr "Bangunan Publik"
 
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
 msgstr "Polisi"
 
-#: ocitysmap2/indexlib/indexer.py:399
+#: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#: ocitysmap/layoutlib/multi_page_renderer.py:470
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
@@ -95,16 +95,16 @@ msgstr ""
 "belum lengkap atau kurang akurat. Anda dapat berkontribusi untuk memperbaiki "
 "peta ini. Silahkan lihat http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:489
-#: ocitysmap2/layoutlib/single_page_renderers.py:305
+#: ocitysmap/layoutlib/multi_page_renderer.py:485
+#: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:544
+#: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#: ocitysmap/layoutlib/single_page_renderers.py:290
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -117,6 +117,6 @@ msgstr ""
 "belum lengkap atau kurang akurat. Anda dapat berkontribusi untuk memperbaiki "
 "peta ini. Silahkan lihat http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:645
+#: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr "Test gettext"

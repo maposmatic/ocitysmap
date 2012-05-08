@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-07 16:00+0200\n"
+"POT-Creation-Date: 2012-05-07 19:07-0700\n"
 "PO-Revision-Date: 2012-04-01 10:15+CEST\n"
 "Last-Translator: Jeroen van Rijn <jvrnix@gmail.com>\n"
 "Language-Team: MapOSMatic <contact@maposmatic.org>\n"
@@ -15,66 +15,66 @@ msgstr ""
 "X-Poedit-Country: NETHERLANDS\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ocitysmap2/indexlib/indexer.py:163
+#: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "Gebedshuizen"
 
-#: ocitysmap2/indexlib/indexer.py:164
+#: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "Gebedshuis"
 
-#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Onderwijs"
 
-#: ocitysmap2/indexlib/indexer.py:165
+#: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
 msgstr "Kleuterschool"
 
-#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:166
 msgid "School"
 msgstr "School"
 
-#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap/indexlib/indexer.py:167
 msgid "College"
 msgstr "College"
 
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:168
 msgid "University"
 msgstr "Universiteit"
 
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
 msgstr "Bibliotheek"
 
-#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Openbare gebouwen"
 
-#: ocitysmap2/indexlib/indexer.py:170
+#: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
 msgstr "Gemeentehuis"
 
-#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "Postkantoor"
 
-#: ocitysmap2/indexlib/indexer.py:173
+#: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
 msgstr "Openbaar gebouw"
 
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
 msgstr "Politie"
 
-#: ocitysmap2/indexlib/indexer.py:399
+#: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
 msgstr "Dorpen"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#: ocitysmap/layoutlib/multi_page_renderer.py:470
 #, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
@@ -98,16 +98,16 @@ msgstr ""
 "Deze kaart kan incompleet of inaccuraat zijn; U kunt deze kaart beter maken "
 "met uw bijdrage. Zie http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:489
-#: ocitysmap2/layoutlib/single_page_renderers.py:305
+#: ocitysmap/layoutlib/multi_page_renderer.py:485
+#: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
 msgstr "onbekend"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:544
+#: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
 msgstr "Deze pagina is met opzet blanco."
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#: ocitysmap/layoutlib/single_page_renderers.py:290
 #, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -122,7 +122,7 @@ msgstr ""
 "Deze kaart kan incompleet of inaccuraat zijn; U kunt deze kaart beter maken "
 "met uw bijdrage. Zie http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:645
+#: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr "Test gettext"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ocitysmap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-07 16:00+0200\n"
+"POT-Creation-Date: 2012-05-07 19:07-0700\n"
 "PO-Revision-Date: 2010-10-20 11:43+0200\n"
 "Last-Translator: Joan Montané <joan--sense-spam--montane.cat>\n"
 "Language-Team: Català <joan--sense-spam--montane.cat>\n"
@@ -19,66 +19,66 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 
-#: ocitysmap2/indexlib/indexer.py:163
+#: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "Llocs de culte"
 
-#: ocitysmap2/indexlib/indexer.py:164
+#: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "Lloc de culte"
 
-#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
 msgstr "Educació"
 
-#: ocitysmap2/indexlib/indexer.py:165
+#: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
 msgstr "Llar d'infants"
 
-#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:166
 msgid "School"
 msgstr "Escola"
 
-#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap/indexlib/indexer.py:167
 msgid "College"
 msgstr "Institut"
 
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:168
 msgid "University"
 msgstr "Universitat"
 
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "Edificis públics"
 
-#: ocitysmap2/indexlib/indexer.py:170
+#: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
 msgstr "Ajuntament"
 
-#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "Oficina de correus"
 
-#: ocitysmap2/indexlib/indexer.py:173
+#: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
 msgstr "Edifici públic"
 
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
 msgstr "Policia"
 
-#: ocitysmap2/indexlib/indexer.py:399
+#: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:474
+#: ocitysmap/layoutlib/multi_page_renderer.py:470
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
@@ -99,16 +99,16 @@ msgstr ""
 "Podeu col·laborar en millorar aquest mapa. Visiteu http://wiki.openstreetmap."
 "org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:489
-#: ocitysmap2/layoutlib/single_page_renderers.py:305
+#: ocitysmap/layoutlib/multi_page_renderer.py:485
+#: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:544
+#: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:292
+#: ocitysmap/layoutlib/single_page_renderers.py:290
 #, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
@@ -124,7 +124,7 @@ msgstr ""
 "Podeu col·laborar en millorar aquest mapa. Visiteu http://wiki.openstreetmap."
 "org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:645
+#: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr "Prova el gettext"
 
