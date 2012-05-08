@@ -1,17 +1,26 @@
 #!/bin/sh
 
-LOG_FILE="/home/thomas/maposmatic/planet-update.log"
-PID_FILE="/home/thomas/maposmatic/planet-update.pid"
+BASE_PATH=${HOME}/maposmatic
 
-OSM2PGSQL="/home/thomas/maposmatic/osm2pgsql/osm2pgsql"
-OSM2PGSQL_STYLE="/home/thomas/maposmatic/osm2pgsql/default.style"
+# Name of the PostgreSQL database to connect to.
+DB_NAME=maposmatic
 
-OSMOSIS="/home/thomas/maposmatic/osmosis/osmosis-0.36/bin/osmosis"
-OSMOSIS_WD="${HOME}/maposmatic/osmosis"
-OSMOSIS_STATE="${OSMOSIS_WD}/state.txt"
-OSMOSIS_CONFIG="${OSMOSIS_WD}/configuration.txt"
+LOG_FILE=${BASE_PATH}/planet-update.log
+PID_FILE=${BASE_PATH}/planet-update.pid
 
-CURRENT_OSC="${OSMOSIS_WD}/changes.$$.osc.gz"
+# Path to the osm2pgsql utility and default import style.
+OSM2PGSQL=${BASE_PATH}/osm2pgsql/osm2pgsql
+OSM2PGSQL_STYLE=${BASE_PATH}/osm2pgsql/default.style
+
+# Path to the osmosis utility.
+OSMOSIS=${BASE_PATH}/osmosis/osmosis/bin/osmosis
+
+# Osmosis working directory and state file locations.
+OSMOSIS_WD=${BASE_PATH}/osmosis
+OSMOSIS_STATE=${OSMOSIS_WD}/state.txt
+OSMOSIS_CONFIG=${OSMOSIS_WD}/configuration.txt
+
+CURRENT_OSC=${OSMOSIS_WD}/changes.$$.osc.gz
 
 log()
 {
@@ -83,7 +92,7 @@ rels=`zgrep '<rel' ${CURRENT_OSC} | wc -l`
 log "Expecting Node("$((${nodes}/1000))"k) Way("$((${ways}/1000))"k) Relation("$((${rels}/1000))"k)"
 
 log "Importing diff..."
-if ! ${OSM2PGSQL} -a -s -S ${OSM2PGSQL_STYLE} -d maposmatic -H localhost -U maposmatic ${CURRENT_OSC} 1>&2 2>> "${LOG_FILE}" ; then
+if ! ${OSM2PGSQL} -a -s -S ${OSM2PGSQL_STYLE} -C 5000 --cache-strategy=sparse -d ${DB_NAME} -H localhost -U maposmatic ${CURRENT_OSC} 1>&2 2>> "${LOG_FILE}" ; then
   error "Osm2pgsql error. Update failed!"
   exit 3
 fi
@@ -97,7 +106,8 @@ log "Update complete, now at ${rep} UTC (replication lag is `${HOME}/replag.sh`)
 
 # Update the maposmatic_admin table with the last update timestamp of
 # the OSM data
-echo "UPDATE maposmatic_admin SET last_update='${rep}';" | psql -h localhost -U maposmatic maposmatic2
+log "Updating last_update time to ${rep} in information table..."
+echo "UPDATE maposmatic_admin SET last_update='${rep}';" | psql -h localhost -U maposmatic -d ${DB_NAME} >> "${LOG_FILE}"
 
 rm -f ${PID_FILE} ${CURRENT_OSC}
 
