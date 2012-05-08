@@ -238,8 +238,8 @@ are using. They have been tested on several x86_64 hosts.
     d. Configuration
 
     python ./generate_xml.py --dbname maposmatic --host 'localhost' \
-                             --user maposmatic --port 5432 \
-                             --password 'ereiamjh'
+      --user maposmatic --port 5432 \
+      --password 'ereiamjh'
 
 11. Installation of OCitySMap
 
@@ -264,7 +264,7 @@ are using. They have been tested on several x86_64 hosts.
     d. Configuration file
 
     Create a ~/.ocitysmap.conf configuration file, modeled after the
-    provided ocitysmap2.conf-template file.
+    provided ocitysmap2.conf.dist file.
 
 12. Run OCitySMap
 
@@ -290,10 +290,10 @@ Appendix A:  Installation of maposmatic-printable stylesheet
        cd stylesheet/maposmatic-printable/
 
        python ./generate_xml.py --dbname maposmatic --host 'localhost' \
-                             --user maposmatic --port 5432 \
-                             --password 'ereiamjh' \
-                    --world_boundaries mapnik2-osm/world_boundaries \
-		    --symbols mapnik2-osm/symbols
+         --user maposmatic --port 5432 \
+         --password 'ereiamjh' \
+         --world_boundaries mapnik2-osm/world_boundaries \
+         --symbols mapnik2-osm/symbols
 
 Appendix B: installation of the MapQuest stylesheet
 -------------------------------------------------
@@ -351,11 +351,11 @@ replace "Arial" by "DejaVu".
 Create the .inc files from the templates:
 
  python /path/to/mapnik2-osm/generate_xml.py --inc mapquest_inc \
-                                             --symbols mapquest_symbols \
-                                             --dbname maposmatic \
-                                             --host 'localhost' \
-                                             --user maposmatic --port 5432 \
-                                             --password 'ereiamjh'
+   --symbols mapquest_symbols \
+   --dbname maposmatic \
+   --host 'localhost' \
+   --user maposmatic --port 5432 \
+   --password 'ereiamjh'
 
 The final step is to integrate this new stylesheet in ocitysmap. To do
 so, edit your ~/.ocitysmap.conf file, and add a new stylesheet

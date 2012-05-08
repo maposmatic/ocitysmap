@@ -18,12 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
-import ocitysmap2.layoutlib.commons as UTILS
+import math
 import pango
 import pangocairo
-import math
+
 import draw_utils
-from ocitysmap2.layoutlib.abstract_renderer import Renderer
+import ocitysmap.layoutlib.commons as UTILS
+from ocitysmap.layoutlib.abstract_renderer import Renderer
 
 # FIXME: refactoring
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
@@ -223,6 +224,7 @@ class MultiPageStreetIndexRenderer:
 if __name__ == '__main__':
     import random
     import string
+
     import commons
     import coords
 

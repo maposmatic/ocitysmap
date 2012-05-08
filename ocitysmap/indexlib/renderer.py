@@ -29,7 +29,7 @@ import pango
 import pangocairo
 
 import commons
-import ocitysmap2.layoutlib.commons as UTILS
+import ocitysmap.layoutlib.commons as UTILS
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -495,7 +495,6 @@ if __name__ == '__main__':
     import random
     import string
 
-    from ocitysmap2 import coords
     import commons
 
     logging.basicConfig(level=logging.DEBUG)
@@ -505,7 +504,7 @@ if __name__ == '__main__':
 
     random.seed(42)
 
-    bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
+    bbox = ocitysmap.coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699)
 
     surface = cairo.PDFSurface('/tmp/myindex_render.pdf', width, height)
 

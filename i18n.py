@@ -32,9 +32,9 @@ def make_pot():
     print "Make locale/ocitysmap.pot"
     subprocess.check_call(['xgettext', '-o', 'ocitysmap.pot', '-p', 'locale',
                            '-L', 'Python',
-                           'ocitysmap2/indexlib/indexer.py',
-                           'ocitysmap2/layoutlib/multi_page_renderer.py',
-                           'ocitysmap2/layoutlib/single_page_renderers.py'])
+                           'ocitysmap/indexlib/indexer.py',
+                           'ocitysmap/layoutlib/multi_page_renderer.py',
+                           'ocitysmap/layoutlib/single_page_renderers.py'])
     return
 
 def make_po(languages):
