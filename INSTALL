@@ -264,12 +264,12 @@ are using. They have been tested on several x86_64 hosts.
     d. Configuration file
 
     Create a ~/.ocitysmap.conf configuration file, modeled after the
-    provided ocitysmap2.conf.dist file.
+    provided ocitysmap.conf.dist file.
 
 12. Run OCitySMap
 
-    ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-411354  # Contern, LU
-    ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
+    ./render.py -t "Ceci n'est pas Paris" --osmid=-411354  # Contern, LU
+    ./render.py -t "Ceci n'est pas Paris" --osmid=-943886  # Chevreuse, FR
 
 
 Appendix A:  Installation of maposmatic-printable stylesheet
@@ -369,9 +369,9 @@ path: /path/to/MapQuest-Mapnik-Style/mapquest-eu.xml
 Don't forget to add "mapquest_eu" to the available_stylesheets
 variable, which lists all available stylesheets.
 
-You can then use it in ocitysmap2-render with the -s option:
+You can then use it in render.py with the -s option:
 
-  ./ocitysmap2-render -s MapQuestEu ...
+  ./render.py -s MapQuestEu ...
 
 Note that in addition to the MapQuest Europe stylesheet
 (mapquest-eu.xml), the Git repository also contains the MapQuest US
