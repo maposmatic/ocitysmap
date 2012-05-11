@@ -457,18 +457,53 @@ class i18n_ar_generic(i18n):
         return True
 
 class i18n_ru_generic(i18n):
-    APPELLATIONS = [ u"ул", u"бул", u"пер", u"пр", u"улица", u"бульвар", u"проезд",
-                     u"проспект", u"площадь", u"сквер", u"парк" ]
-    # only "ул." and "пер." are recommended shortenings, however other words can 
-    # occur shortened.
-    #
-    # http://bit.ly/6ASISp (OSM wiki)
-    #
+    # Based on list from Streetmangler:
+    # https://github.com/AMDmi3/streetmangler/blob/master/lib/locales/ru.cc
+    STATUS_PARTS = [
+        (u"улица", [u"ул"]),
+        (u"площадь", [u"пл"]),
+        (u"переулок", [u"пер", u"пер-к"]),
+        (u"проезд", [u"пр-д"]),
+        (u"шоссе", [u"ш"]),
+        (u"бульвар", [u"бул", u"б-р"]),
+        (u"тупик", [u"туп"]),
+        (u"набережная", [u"наб"]),
+        (u"проспект", [u"просп", u"пр-кт", u"пр-т"]),
+        (u"линия", []),
+        (u"аллея", []),
+        (u"метромост", []),
+        (u"мост", []),
+        (u"просек", []),
+        (u"просека", []),
+        (u"путепровод", []),
+        (u"тракт", [u"тр-т", u"тр"]),
+        (u"тропа", []),
+        (u"туннель", []),
+        (u"тоннель", []),
+        (u"эстакада", [u"эст"]),
+        (u"дорога", [u"дор"]),
+        (u"спуск", []),
+        (u"подход", []),
+        (u"подъезд", []),
+        (u"съезд", []),
+        (u"заезд", []),
+        (u"разъезд", []),
+        (u"слобода", []),
+        (u"район", [u"р-н"]),
+        (u"микрорайон", [u"мкр-н", u"мк-н", u"мкр", u"мкрн"]),
+        (u"посёлок", [u"поселок", u"пос"]),
+        (u"деревня", [u"дер", u"д"]),
+        (u"квартал", [u"кв-л", u"кв"]),
+    ]
 
     SPACE_REDUCE = re.compile(r"\s+")
-    PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)\.?)\s?\b(?P<name>.+)" %
-                                    ("|".join(APPELLATIONS)), re.IGNORECASE
-                                                                 | re.UNICODE)
+    STATUS_PARTS_MAPPING = dict((f, t) for t, ff in STATUS_PARTS for f in ff)
+    STATUS_REGEXP = re.compile(r"\b(%s)\.?(?=\W|$)" % u"|".join(
+        f for t, ff in STATUS_PARTS for f in ff), re.IGNORECASE | re.UNICODE)
+    PREFIX_REGEXP = re.compile(
+        ur"^(?P<num_prefix>\d+-?(ы?й|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
+        (u"|".join(f for f,t in STATUS_PARTS)), re.IGNORECASE | re.UNICODE)
+    STARTING_NUMBER_REGEXP = re.compile(ur"^(?P<prefix>\d+-?(ы?й|я))\s+(?P<name>.+)")
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -482,10 +517,31 @@ class i18n_ru_generic(i18n):
     def language_code(self):
         return self.language
 
+    @staticmethod
+    def _rewrite_street_parts(matches):
+        if matches.group('num_prefix') is None and matches.group('prefix') is None:
+            return matches.group(0)
+        elif matches.group('name') is None:
+            return matches.group(0)
+        else:
+            #print matches.group('num_prefix', 'prefix', 'name')
+            return ", ".join((matches.group('name'),
+                " ". join(s.lower()
+                    for s in matches.group('prefix', 'num_prefix')
+                    if s is not None)
+                ))
+
     def user_readable_street(self, name):
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
-        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        # Normalize abbreviations
+        name = self.STATUS_REGEXP.sub(lambda m:
+                self.STATUS_PARTS_MAPPING.get(
+                    m.group(0).replace('.', ''), m.group(0)),
+            name)
+        # Move prefixed status parts to the end for sorting
+        name = self.PREFIX_REGEXP.sub(self._rewrite_street_parts, name)
+        # TODO: move "малая", "большая" after name but before status
         return name
 
     def first_letter_equal(self, a, b):
