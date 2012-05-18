@@ -496,14 +496,19 @@ class i18n_ru_generic(i18n):
         (u"квартал", [u"кв-л", u"кв"]),
     ]
 
+    # matches one or more spaces
     SPACE_REDUCE = re.compile(r"\s+")
-    STATUS_PARTS_MAPPING = dict((f, t) for t, ff in STATUS_PARTS for f in ff)
-    STATUS_REGEXP = re.compile(r"\b(%s)\.?(?=\W|$)" % u"|".join(
+    # mapping from status abbreviations (w/o '.') to full status names
+    STATUS_PARTS_ABBREV_MAPPING = dict((f, t) for t, ff in STATUS_PARTS for f in ff)
+    # set of full (not abbreviated) status parts
+    STATUS_PARTS_FULL = set((x[0] for x in STATUS_PARTS))
+    # matches any abbreviated status part with optional '.'
+    STATUS_ABBREV_REGEXP = re.compile(r"\b(%s)\.?(?=\W|$)" % u"|".join(
         f for t, ff in STATUS_PARTS for f in ff), re.IGNORECASE | re.UNICODE)
+    # matches status prefixes at start of name used to move prefixes to the end
     PREFIX_REGEXP = re.compile(
         ur"^(?P<num_prefix>\d+-?(ы?й|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
         (u"|".join(f for f,t in STATUS_PARTS)), re.IGNORECASE | re.UNICODE)
-    STARTING_NUMBER_REGEXP = re.compile(ur"^(?P<prefix>\d+-?(ы?й|я))\s+(?P<name>.+)")
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -519,7 +524,11 @@ class i18n_ru_generic(i18n):
 
     @staticmethod
     def _rewrite_street_parts(matches):
-        if matches.group('num_prefix') is None and matches.group('prefix') is None:
+        if (matches.group('num_prefix') is None and
+            matches.group('prefix') is not None and
+            matches.group('name') in i18n_ru_generic.STATUS_PARTS_FULL):
+            return matches.group(0)
+        elif matches.group('num_prefix') is None and matches.group('prefix') is None:
             return matches.group(0)
         elif matches.group('name') is None:
             return matches.group(0)
@@ -535,8 +544,8 @@ class i18n_ru_generic(i18n):
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
         # Normalize abbreviations
-        name = self.STATUS_REGEXP.sub(lambda m:
-                self.STATUS_PARTS_MAPPING.get(
+        name = self.STATUS_ABBREV_REGEXP.sub(lambda m:
+                self.STATUS_PARTS_ABBREV_MAPPING.get(
                     m.group(0).replace('.', ''), m.group(0)),
             name)
         # Move prefixed status parts to the end for sorting
