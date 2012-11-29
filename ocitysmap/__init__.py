@@ -38,27 +38,27 @@ How to use OCitySMap?
 
 The API of OCitySMap is very simple. First, you need to instanciate the main
 OCitySMap class with the path to your OCitySMap configuration file (see
-ocitysmap.conf-template):
+ocitysmap.conf.dist):
 
 
-    ocitysmap = ocitysmap2.OCitySMap('/path/to/your/config')
+    renderer = ocitysmap.OCitySMap('/path/to/your/config')
 
 The next step is to create a RenderingConfiguration, the object that
 encapsulates all the information to parametize the rendering, including the
 Mapnik stylesheet. You can retrieve the list of supported stylesheets (directly
 as Stylesheet objects) with:
 
-    styles = ocitysmap.get_all_style_configurations()
+    styles = renderer.get_all_style_configurations()
 
 Fill in your RenderingConfiguration with the map title, the OSM ID or bounding
 box, the chosen map language, the Stylesheet object and the paper size (in
 millimeters) and simply pass it to OCitySMap's render method:
 
-    ocitysmap.render(rendering_configuration, layout_name,
-                     output_formats, prefix)
+    renderer.render(rendering_configuration, layout_name,
+                    output_formats, prefix)
 
 The layout name is the renderer's key name. You can get the list of all
-supported renderers with ocitysmap.get_all_renderers(). The output_formats is a
+supported renderers with renderer.get_all_renderers(). The output_formats is a
 list of output formats. For now, the following formats are supported:
 
     * PNG at 72dpi
@@ -83,17 +83,14 @@ import os
 import psycopg2
 import re
 import tempfile
-
 import shapely
 import shapely.wkt
 import shapely.geometry
 
 import coords
 import i18n
-
 from indexlib.indexer import StreetIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
-
 from layoutlib import PAPER_SIZES, renderers
 import layoutlib.commons
 
@@ -167,6 +164,9 @@ class Stylesheet:
 
         s.name = parser.get(section_name, 'name')
         s.path = parser.get(section_name, 'path')
+        if not os.path.exists(s.path):
+            raise ValueError, \
+                'Could not find stylesheet file for stylesheet %s!' % s.name
         assign_if_present('description')
 
         assign_if_present('grid_line_color')
@@ -217,7 +217,7 @@ class OCitySMap:
             config_files = [config_files]
 
         config_files = map(os.path.expanduser, config_files)
-        LOG.info('Reading OCitySMap configuration from %s...' %
+        LOG.debug('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
         self._parser = ConfigParser.RawConfigParser()
@@ -229,8 +229,7 @@ class OCitySMap:
 
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
-        LOG.debug('Found %d Mapnik stylesheets.'
-                  % len(self.STYLESHEET_REGISTRY))
+        LOG.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
 
     @property
     def _db(self):
@@ -327,6 +326,8 @@ SELECT ST_AsText(ST_LongestLine(
         records = cursor.fetchall()
         try:
             ((wkt,),) = records
+            if wkt is None:
+                raise ValueError
         except ValueError:
             raise LookupError("OSM ID %d not found in table %s" %
                               (osmid, table))

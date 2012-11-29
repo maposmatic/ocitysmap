@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-31 23:23+CEST\n"
+"POT-Creation-Date: 2012-05-07 19:07-0700\n"
 "PO-Revision-Date: 2010-01-12 17:30+0300\n"
 "Last-Translator: Bassem JARKAS <jarkas@gmail.com>\n"
 "Language-Team: Arabic Translation\n"
@@ -18,67 +18,67 @@ msgstr ""
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 "X-Generator: Virtaal 0.5.0\n"
 
-#: ocitysmap2/indexlib/indexer.py:163
+#: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
 msgstr "معابد"
 
-#: ocitysmap2/indexlib/indexer.py:164
+#: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
 msgstr "معبد"
 
-#: ocitysmap2/indexlib/indexer.py:165
-msgid "Kindergarten"
-msgstr "حضانة أطفال"
-
-#: ocitysmap2/indexlib/indexer.py:165 ocitysmap2/indexlib/indexer.py:166
-#: ocitysmap2/indexlib/indexer.py:167 ocitysmap2/indexlib/indexer.py:168
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
 msgstr "تعليم"
 
-#: ocitysmap2/indexlib/indexer.py:166
+#: ocitysmap/indexlib/indexer.py:165
+msgid "Kindergarten"
+msgstr "حضانة أطفال"
+
+#: ocitysmap/indexlib/indexer.py:166
 msgid "School"
 msgstr "مدرسة"
 
-#: ocitysmap2/indexlib/indexer.py:167
+#: ocitysmap/indexlib/indexer.py:167
 msgid "College"
 msgstr "كلّية"
 
-#: ocitysmap2/indexlib/indexer.py:168
+#: ocitysmap/indexlib/indexer.py:168
 msgid "University"
 msgstr "جامعة"
 
-#: ocitysmap2/indexlib/indexer.py:169
+#: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
 msgstr "مكتبة"
 
-#: ocitysmap2/indexlib/indexer.py:170
-msgid "Town hall"
-msgstr "مبنى بلدية"
-
-#: ocitysmap2/indexlib/indexer.py:170 ocitysmap2/indexlib/indexer.py:171
-#: ocitysmap2/indexlib/indexer.py:172 ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
 msgstr "مباني عامة"
 
-#: ocitysmap2/indexlib/indexer.py:171
+#: ocitysmap/indexlib/indexer.py:170
+msgid "Town hall"
+msgstr "مبنى بلدية"
+
+#: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
 msgstr "مكتب بريد"
 
-#: ocitysmap2/indexlib/indexer.py:173
+#: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
 msgstr "مبنى عام"
 
-#: ocitysmap2/indexlib/indexer.py:174
+#: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
 msgstr "شرطة"
 
-#: ocitysmap2/indexlib/indexer.py:379
+#: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:484
-#, fuzzy
+#: ocitysmap/layoutlib/multi_page_renderer.py:470
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers.\n"
 "http://www.maposmatic.org\n"
@@ -93,17 +93,17 @@ msgid ""
 msgstr ""
 "بإمكانك المساهمة بتحسين هذه الخريطة. انظر http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:499
-#: ocitysmap2/layoutlib/single_page_renderers.py:306
+#: ocitysmap/layoutlib/multi_page_renderer.py:485
+#: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
 msgstr ""
 
-#: ocitysmap2/layoutlib/multi_page_renderer.py:574
+#: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
 msgstr ""
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:293
-#, fuzzy
+#: ocitysmap/layoutlib/single_page_renderers.py:290
+#, fuzzy, python-format
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
 "OpenStreetMap.org and contributors (cc-by-sa).\n"
@@ -113,7 +113,7 @@ msgid ""
 msgstr ""
 "بإمكانك المساهمة بتحسين هذه الخريطة. انظر http://wiki.openstreetmap.org"
 
-#: ocitysmap2/layoutlib/single_page_renderers.py:634
+#: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr ""
 

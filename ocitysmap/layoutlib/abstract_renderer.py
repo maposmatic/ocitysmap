@@ -23,27 +23,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import math
-import os
-import sys
 import cairo
+import logging
 import mapnik
 assert mapnik.mapnik_version >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
+import math
 import pango
+import os
 import re
-
-from ocitysmap2.maplib.map_canvas import MapCanvas
-from ocitysmap2.maplib.grid import Grid
-import commons
-from ocitysmap2 import maplib
-from ocitysmap2 import draw_utils
 import shapely.wkt
+import sys
 
-import logging
+import commons
+from ocitysmap.maplib.map_canvas import MapCanvas
+from ocitysmap.maplib.grid import Grid
+from ocitysmap import draw_utils, maplib
 
 LOG = logging.getLogger('ocitysmap')
+
 
 class Renderer:
     """
@@ -102,7 +101,7 @@ class Renderer:
             os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.png'))
         if not os.path.exists(logo_path):
             logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap2',
+                sys.exec_prefix, 'share', 'images', 'ocitysmap',
                 'osm-logo.png')
 
         try:

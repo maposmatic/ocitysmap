@@ -1,7 +1,6 @@
 *~
 *.mo
-/ocitysmap.conf.mine
-/support/planet-update-daily.sh
+/ocitysmap.conf
 /support/shoreline-update.sh
 /stylesheet/maposmatic-printable/inc/datasource-settings.xml.inc
 /stylesheet/maposmatic-printable/inc/fontset-settings.xml.inc

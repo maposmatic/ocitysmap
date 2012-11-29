@@ -182,7 +182,7 @@ class PolyShapeFile(_ShapeFile):
         return self
 
 if __name__ == "__main__":
-    from ocitysmap2 import coords
+    from ocitysmap import coords
 
     logging.basicConfig(level=logging.DEBUG)
     (LineShapeFile(coords.BoundingBox(44.4883, -1.0901, 44.4778, -1.0637),

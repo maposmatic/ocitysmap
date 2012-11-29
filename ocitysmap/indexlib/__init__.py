@@ -23,30 +23,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if __name__ == '__main__':
-    import os
-    import string
-    import random
-    import psycopg2
     import cairo
     import logging
+    import os
+    import psycopg2
+    import random
+    import string
 
-    logging.basicConfig(level=logging.DEBUG)
-
-    from ocitysmap2 import i18n, coords
-    from ocitysmap2.maplib.grid import Grid
-
+    from ocitysmap import i18n, coords
+    from ocitysmap.maplib.grid import Grid
     from indexer  import StreetIndex
     from renderer import StreetIndexRenderer
     from commons  import IndexCategory, IndexItem
 
+
+    logging.basicConfig(level=logging.DEBUG)
     random.seed(42)
 
     lang = "fr_FR.UTF-8"
     #lang = "ar_MA.UTF-8"
     #lang = "zh_CN.utf8"
     i18n = i18n.install_translation(lang,
-                                    os.path.join(os.path.dirname(__file__),
-                                                 "..", "..", "locale"))
+                os.path.join(os.path.dirname(__file__),
+                             "..", "..", "locale"))
 
     bbox = coords.BoundingBox(48.8162, 2.3417, 48.8063, 2.3699) # France
     #bbox = coords.BoundingBox(34.0322, -6.8648, 34.0073, -6.8133) # Moroco

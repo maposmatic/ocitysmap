@@ -22,24 +22,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import math
-import datetime
 import cairo
+import datetime
 import locale
+import logging
 import mapnik
 assert mapnik.mapnik_version >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
+import math
 import pango
 import pangocairo
 
 import commons
-import ocitysmap2
+import ocitysmap
 from abstract_renderer import Renderer
-from ocitysmap2.indexlib.renderer import StreetIndexRenderer
-
-import logging
-
+from ocitysmap.indexlib.renderer import StreetIndexRenderer
 from indexlib.indexer import StreetIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
@@ -510,7 +508,7 @@ class SinglePageRenderer(Renderer):
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
         valid_sizes = []
-        for name, w, h in ocitysmap2.layoutlib.PAPER_SIZES:
+        for name, w, h in ocitysmap.layoutlib.PAPER_SIZES:
             portrait_ok  = paper_width_mm <= w and paper_height_mm <= h
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 
@@ -638,7 +636,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
 if __name__ == '__main__':
     import renderers
     import coords
-    from ocitysmap2 import i18n
+    from ocitysmap import i18n
 
     # Hack to fake gettext
     try:

@@ -22,11 +22,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import pango
+import sys
 
-import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import draw_utils
+
 
 class IndexEmptyError(Exception):
     """This exception is raised when no data is to be rendered in the index."""
@@ -206,7 +208,7 @@ class IndexItem:
         Update the location_str field from the given Grid object.
 
         Args:
-           grid (ocitysmap2.Grid): the Grid object from which we
+           grid (ocitysmap.Grid): the Grid object from which we
            compute the location strings
 
         Returns:

@@ -7,11 +7,11 @@ including a street index and city grid.
 
 For example, for a simple Chevreuse rendering, run:
 
- ./ocitysmap2-render -t "Ceci n'est pas Paris" --osmid=-943886
+ ./render.py -t "Ceci n'est pas Paris" --osmid=-943886
 
 Alternatively you may specify a bounding box rather than an OSM ID:
 
- ./ocitysmap2-render -t "Ceci n'est pas Paris" -b 48.7268,1.9946 48.6801,2.0742
+ ./render.py -t "Ceci n'est pas Paris" -b 48.7268,1.9946 48.6801,2.0742
 
 This is useful when OpenStreetMap does not contain the administrative
 boundary of the city you want to render. To determine the OSM ID
@@ -22,7 +22,7 @@ By default, the maps are generated in PDF format with the street index
 at the bottom, with an additional CSV containing the street index. To
 see the available options to change this behavior, please run:
 
-  ./ocitysmap2-render --help
+  ./render.py --help
 
 See INSTALL for installation instructions.
 

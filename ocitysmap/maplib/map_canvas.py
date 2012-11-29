@@ -34,12 +34,12 @@ assert mapnik.mapnik_version >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 
+import math
 import os
 
-from ocitysmap2 import coords
+import ocitysmap
 from layoutlib.commons import convert_pt_to_dots
 import shapes
-import math
 
 l = logging.getLogger('ocitysmap')
 
@@ -199,7 +199,7 @@ class MapCanvas:
         bounding box."""
         c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
-        return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
+        return ocitysmap.coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -208,7 +208,7 @@ if __name__ == '__main__':
         def __init__(self):
             self.path = '/home/sam/src/python/maposmatic/mapnik-osm/osm.xml'
 
-    bbox = coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
+    bbox = ocitysmap.coords.BoundingBox(48.7148, 2.0155, 48.6950, 2.0670)
     canvas = MapCanvas(StylesheetMock(), bbox, 297.0/210)
     new_bbox = canvas.get_actual_bounding_box()
 

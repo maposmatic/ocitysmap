@@ -22,14 +22,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.1'
+__version__ = '0.22'
 
 import logging
 import optparse
-import sys, os
+import os
+import sys
 
-import ocitysmap2
-import ocitysmap2.layoutlib.renderers
+import ocitysmap
+import ocitysmap.layoutlib.renderers
 from coords import BoundingBox
 
 def main():
@@ -38,13 +39,13 @@ def main():
     # Paper sizes, sorted in increasing widths
     KNOWN_PAPER_SIZE_NAMES = \
         map(lambda p: p[0],
-            sorted(ocitysmap2.layoutlib.PAPER_SIZES,
+            sorted(ocitysmap.layoutlib.PAPER_SIZES,
                    key=lambda p: p[1]))
 
     # Known renderer names
     KNOWN_RENDERERS_NAMES = \
         map(lambda r: "%s (%s)" % (r.name, r.description),
-            ocitysmap2.layoutlib.renderers.get_renderers())
+            ocitysmap.layoutlib.renderers.get_renderers())
 
     # Known paper orientations
     KNOWN_PAPER_ORIENTATIONS = ['portrait', 'landscape']
@@ -53,46 +54,49 @@ def main():
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
     parser.add_option('-C', '--config', dest='config_file', metavar='FILE',
-                      help='Specify the location of the config file.')
+                      help='specify the location of the config file.')
     parser.add_option('-p', '--prefix', dest='output_prefix', metavar='PREFIX',
-                      help='Specify the prefix of generated files. '
+                      help='set a prefix to the generated file names. '
                            'Defaults to "citymap".',
                       default='citymap')
     parser.add_option('-f', '--format', dest='output_formats', metavar='FMT',
-                      help='Specify the output formats. Supported file '
+                      help='specify the output formats. Supported file '
                            'formats: svg, svgz, pdf, ps, ps.gz, png, and csv. '
                            'Defaults to PDF. May be specified multiple times.',
                       action='append')
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
-                      help='Specify the title displayed in the output files.',
+                      help='specify the title displayed in the output files.',
                       default="My Map")
     parser.add_option('--osmid', dest='osmid', metavar='OSMID',
-                      help='OSM id representing the polygon of the city '
+                      help='OSM ID representing the polygon of the city '
                       'to render.', type="int"),
     parser.add_option('-b', '--bounding-box', dest='bbox',  nargs=2,
                       metavar='LAT1,LON1 LAT2,LON2',
-                      help='Bounding box (EPSG: 4326).')
+                      help='bounding box (EPSG: 4326).')
     parser.add_option('-L', '--language', dest='language',
                       metavar='LANGUAGE_CODE',
-                      help='Language to use when generating the index'
-                           ' (default=fr_FR.UTF-8).',
+                      help='language to use when generating the index '
+                           '(default=fr_FR.UTF-8). The map language is '
+                           'driven by the system\' locale setting.',
                       default='fr_FR.UTF-8')
     parser.add_option('-s', '--stylesheet', dest='stylesheet',
                       metavar='NAME',
-                      help="Name of the stylesheet to use. Defaults to the "
-                      "first specified in the config file.")
+                      help='specify which stylesheet to use. Defaults to the '
+                      'first specified in the configuration file.')
     parser.add_option('-l', '--layout', dest='layout',
                       metavar='NAME',
                       default=KNOWN_RENDERERS_NAMES[0].split()[0],
-                      help= ("Name of the layout to use, among %s. Default: %s."
-                             % (', '.join(KNOWN_RENDERERS_NAMES),
-                                KNOWN_RENDERERS_NAMES[0].split()[0])))
+                      help=('specify which layout to use. Available layouts '
+                            'are: %s. Defaults to %s.' %
+                            (', '.join(KNOWN_RENDERERS_NAMES),
+                             KNOWN_RENDERERS_NAMES[0].split()[0])))
     parser.add_option('--paper-format', metavar='FMT',
-                      help='Either "default", or one of %s.'\
-                          % ', '.join(KNOWN_PAPER_SIZE_NAMES),
+                      help='set the output paper format. Either "default", '
+                           'or one of %s.' % ', '.join(KNOWN_PAPER_SIZE_NAMES),
                       default='default')
     parser.add_option('--orientation', metavar='ORIENTATION',
-                      help='Either "portrait" or "landscape".',
+                      help='set the output paper orientation. Either '
+                            '"portrait" or "landscape". Defaults to portrait.',
                       default='portrait')
 
     (options, args) = parser.parse_args()
@@ -115,9 +119,8 @@ def main():
                      "or --osmid are exclusive")
 
     # Parse config file and instanciate main object
-    mapper = ocitysmap2.OCitySMap([options.config_file
-                                   or os.path.join(os.environ["HOME"],
-                                                   '.ocitysmap.conf')])
+    mapper = ocitysmap.OCitySMap(
+        [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')])
 
     # Parse bounding box arguments when given
     bbox = None
@@ -126,6 +129,13 @@ def main():
             bbox = BoundingBox.parse_latlon_strtuple(options.bbox)
         except ValueError:
             parser.error('Invalid bounding box!')
+        # Check that latitude and langitude are different
+        lat1, lon1 = bbox.get_top_left()
+        lat2, lon2 = bbox.get_bottom_right()
+        if lat1 == lat2:
+            parser.error('Same latitude in bounding box corners')
+        if lon1 == lon2:
+            parser.error('Same longitude in bounding box corners')
 
     # Parse OSM id when given
     if options.osmid:
@@ -143,21 +153,20 @@ def main():
             stylesheet = mapper.get_stylesheet_by_name(options.stylesheet)
         except LookupError, ex:
             parser.error("%s. Available stylesheets: %s."
-                 % (ex, ', '.join(map(lambda s: "%s (%s)"
-                          % (s.name, s.description),
-                          mapper.STYLESHEET_REGISTRY))))
+                 % (ex, ', '.join(map(lambda s: s.name,
+                      mapper.STYLESHEET_REGISTRY))))
 
     # Parse rendering layout
     if options.layout is None:
-        cls_renderer = ocitysmap2.layoutlib.renderers.get_renderers()[0]
+        cls_renderer = ocitysmap.layoutlib.renderers.get_renderers()[0]
     else:
         try:
-            cls_renderer = ocitysmap2.layoutlib.renderers.get_renderer_class_by_name(options.layout)
+            cls_renderer = ocitysmap.layoutlib.renderers.get_renderer_class_by_name(options.layout)
         except LookupError, ex:
             parser.error("%s\nAvailable layouts: %s."
                  % (ex, ', '.join(map(lambda lo: "%s (%s)"
                           % (lo.name, lo.description),
-                          ocitysmap2.layoutlib.renderers.get_renderers()))))
+                          ocitysmap.layoutlib.renderers.get_renderers()))))
 
     # Output file formats
     if not options.output_formats:
@@ -211,7 +220,7 @@ def main():
         parser.error("Requested paper orientation %s not compatible with this rendering at this paper size." % options.orientation)
 
     # Prepare the rendering config
-    rc              = ocitysmap2.RenderingConfiguration()
+    rc              = ocitysmap.RenderingConfiguration()
     rc.title        = options.output_title
     rc.osmid        = options.osmid or None # Force to None if absent
     rc.bounding_box = bbox

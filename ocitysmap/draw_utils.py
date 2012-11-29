@@ -26,7 +26,8 @@
 import cairo
 import pango
 import pangocairo
-import ocitysmap2.layoutlib.commons as commons
+
+import ocitysmap.layoutlib.commons as commons
 
 def draw_text(ctx, pc, layout, fascent, fheight,
               baseline_x, baseline_y, text, pango_alignment):

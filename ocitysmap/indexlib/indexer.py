@@ -23,15 +23,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import logging
-import locale
-import psycopg2
 import csv
 import datetime
 from itertools import groupby
-
-import commons
-from ocitysmap2 import coords
+import locale
+import logging
+import os
+import psycopg2
 
 import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
@@ -39,6 +37,8 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # SQL string escaping routine
 _sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
+import commons
+import ocitysmap
 
 l = logging.getLogger('ocitysmap')
 
@@ -76,7 +76,7 @@ class StreetIndex:
         mapping them onto the given grid.
 
         Args:
-           grid (ocitysmap2.Grid): the Grid object from which we
+           grid (ocitysmap.Grid): the Grid object from which we
            compute the location strings
 
         Returns:
@@ -232,8 +232,8 @@ class StreetIndex:
                 l.exception("Error parsing %s for %s" % (repr(linestring),
                                                          repr(street_name)))
                 raise
-            endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
-            endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
+            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(commons.IndexItem(street_name,
                                                             endpoint1,
                                                             endpoint2,
@@ -368,8 +368,8 @@ order by amenity_name""" \
                                    repr(amenity_name)))
                     continue
                     ## raise
-                endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
-                endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
+                endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
+                endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
                 current_category.items.append(commons.IndexItem(amenity_name,
                                                                 endpoint1,
                                                                 endpoint2,
@@ -443,8 +443,8 @@ order by village_name""" \
                                repr(village_name)))
                 continue
                 ## raise
-            endpoint1 = coords.Point(s_endpoint1[1], s_endpoint1[0])
-            endpoint2 = coords.Point(s_endpoint2[1], s_endpoint2[0])
+            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(commons.IndexItem(village_name,
                                                             endpoint1,
                                                             endpoint2,
@@ -456,9 +456,7 @@ order by village_name""" \
         return [category for category in result if category.items]
 
 if __name__ == "__main__":
-    import os
-    import psycopg2
-    from ocitysmap2 import i18n
+    from ocitysmap import i18n
 
     logging.basicConfig(level=logging.DEBUG)
 
@@ -472,7 +470,7 @@ if __name__ == "__main__":
                                                  "..", "..", "locale"))
 
     # Chevreuse
-    chevreuse_bbox = coords.BoundingBox(48.7097, 2.0333, 48.7048, 2.0462)
+    chevreuse_bbox = ocitysmap.coords.BoundingBox(48.7097, 2.0333, 48.7048, 2.0462)
     limits_wkt = chevreuse_bbox.as_wkt()
 
     # Paris envelope:

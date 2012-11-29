@@ -19,41 +19,37 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import logging
-import tempfile
-import math
-import sys
 import cairo
+import datetime
+from itertools import groupby
+import locale
+import logging
 import mapnik
 assert mapnik.mapnik_version >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
-import coords
-import locale
+import math
+import os
 import pangocairo
 import pango
-import datetime
+import shapely.wkt
+import sys
+import tempfile
 
-from itertools import groupby
-
+import ocitysmap
+import coords
+import commons
 from abstract_renderer import Renderer
-
-from ocitysmap2.maplib.map_canvas import MapCanvas
-from ocitysmap2.maplib.grid import Grid
-from ocitysmap2.maplib.overview_grid import OverviewGrid
+from indexlib.commons import IndexCategory
 from indexlib.indexer import StreetIndex
 from indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
-
-import ocitysmap2
-import commons
-import shapely.wkt
-from ocitysmap2 import maplib
-from ocitysmap2 import draw_utils
-
-from indexlib.commons import IndexCategory
+from ocitysmap import draw_utils, maplib
+from ocitysmap.maplib.map_canvas import MapCanvas
+from ocitysmap.maplib.grid import Grid
+from ocitysmap.maplib.overview_grid import OverviewGrid
 
 LOG = logging.getLogger('ocitysmap')
+
 
 class MultiPageRenderer(Renderer):
     """
@@ -736,7 +732,7 @@ class MultiPageRenderer(Renderer):
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
         acceptable_formats = [ 'A5', 'A4', 'US letter' ]
-        for sz in ocitysmap2.layoutlib.PAPER_SIZES:
+        for sz in ocitysmap.layoutlib.PAPER_SIZES:
             # Skip unsupported paper formats
             if sz[0] not in acceptable_formats:
                 continue
