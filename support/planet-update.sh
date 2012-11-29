@@ -102,7 +102,7 @@ rep=`cat ${OSMOSIS_STATE} |\
 	awk '{split($0, a, "="); print a[2]}' |\
 	tr 'T' ' ' |\
 	xargs -I{} date --utc --date "{}" +"%Y-%m-%d %H:%M:%S"`
-log "Update complete, now at ${rep} UTC (replication lag is `${HOME}/replag.sh`)."
+log "Update complete, database is now at ${rep} UTC."
 
 # Update the maposmatic_admin table with the last update timestamp of
 # the OSM data
