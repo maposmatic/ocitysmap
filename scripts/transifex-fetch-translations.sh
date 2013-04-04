@@ -37,8 +37,8 @@ do
 
     # git config --list
 
-    # git add ${translation}
-    # git commit -m "Translated ${translation} on transifex.com" ${translation}
+    git add ${translation}
+    git commit -m "Translated ${translation} on transifex.com" ${translation}
 
 done
 
