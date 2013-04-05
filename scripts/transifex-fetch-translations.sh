@@ -1,7 +1,7 @@
 #! /bin/sh -x
 
 # Pull translations from transifex
-tx pull --force
+tx pull
 
 # Commit any changes
 # git diff
