@@ -1,7 +1,9 @@
 #! /bin/sh -x
 
 # Pull translations from transifex
-tx pull
+# Forcibly pull all translations becase git clone in a fresh repo causes the local files to
+# be more recent then translations on transifex, therefore the translastion is skipped
+tx pull --force
 
 # Commit any changes
 # git diff
