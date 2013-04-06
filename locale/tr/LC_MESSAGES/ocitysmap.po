@@ -3,11 +3,12 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Hakan Tandogan <hakan.tandogan@gmail.com>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: https://savannah.nongnu.org/bugs/?group=maposmatic\n"
-"PO-Revision-Date: 2013-04-04 22:30+0000\n"
+"PO-Revision-Date: 2013-04-05 16:06+0000\n"
 "Last-Translator: Hakan Tandogan <hakan.tandogan@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/projects/p/maposmatic/language/tr/)\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +19,7 @@ msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
-msgstr "İbadet yerleri"
+msgstr "İbadethane"
 
 #: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
@@ -65,7 +66,7 @@ msgstr "Postahane"
 
 #: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
-msgstr "Kamu binası"
+msgstr "Kamu binaları"
 
 #: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
@@ -107,4 +108,4 @@ msgstr "Telif hakkı © %(year)d MapOSMatic/OCitySMap geliştiricileri. Harita v
 
 #: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
-msgstr ""
+msgstr "Türkçe Test gettext"
