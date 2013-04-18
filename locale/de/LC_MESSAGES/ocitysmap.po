@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Hakan Tandogan <hakan.tandogan@gmail.com>, 2013.
+# Hakan Tandogan <hakan.tandogan@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
