@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-#   <translatorky@lavabit.com>, 2012.
+# chingis <translatorky@lavabit.com>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
