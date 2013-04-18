@@ -3,10 +3,10 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Guttorm Flatabø <dittaeva@gmail.com>, 2012-2013.
-# Guttorm Flatabø <post@guttormflatabo.com>, 2012.
-# Hans Fredrik Nordhaug <hans@nordhaug.priv.no>, 2010.
-# Hans Fredrik Nordhaug &lt;hans@nordhaug.priv.no&gt;, 2010.
+# Guttorm Flatabø <post@guttormflatabo.com>, 2012-2013
+# Guttorm Flatabø <post@guttormflatabo.com>, 2012
+# Hans Fredrik Nordhaug <hans@nordhaug.priv.no>, 2010
+# Hans Fredrik Nordhaug &lt;hans@nordhaug.priv.no&gt;, 2010
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
