@@ -4,12 +4,13 @@
 # 
 # Translators:
 # Xuacu Saturio <xuacusat@softastur.org>, 2012
+# Xuacu Saturio <xuacusk8@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: https://savannah.nongnu.org/bugs/?group=maposmatic\n"
-"PO-Revision-Date: 2013-04-04 22:30+0000\n"
-"Last-Translator: Hakan Tandogan <hakan.tandogan@gmail.com>\n"
+"PO-Revision-Date: 2013-04-22 20:12+0000\n"
+"Last-Translator: Xuacu Saturio <xuacusk8@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -108,4 +109,4 @@ msgstr "Copyright © %(year)d desendolcadores de MapOSMatic/OCitySMap. Datos del
 
 #: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
-msgstr ""
+msgstr "Prueba de gettext"
