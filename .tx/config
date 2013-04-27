@@ -1,0 +1,8 @@
+[main]
+host = https://www.transifex.com
+
+[maposmatic.ocitysmap]
+file_filter = locale/<lang>/LC_MESSAGES/ocitysmap.po
+source_file = locale/ocitysmap.pot
+source_lang = en
+type = PO

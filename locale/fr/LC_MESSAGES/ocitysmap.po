@@ -1,21 +1,21 @@
-# French translation for OCitySMap 2
-# Copyright (C) 2010 The MapOSMatic developers
-#
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# mpetazzoni <maxime.petazzoni@bulix.org>, 2013
 msgid ""
 msgstr ""
-"Project-Id-Version: ocitysmap\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-07 19:07-0700\n"
-"PO-Revision-Date: 2012-03-31 23:30+0100\n"
-"Last-Translator: Thomas Petazzoni <thomas.petazzoni@enix.org>\n"
-"Language-Team: MapOSMatic <contact@maposmatic.org>\n"
-"Language: \n"
+"Project-Id-Version: MapOSMatic\n"
+"Report-Msgid-Bugs-To: https://savannah.nongnu.org/bugs/?group=maposmatic\n"
+"PO-Revision-Date: 2013-04-26 13:53+0000\n"
+"Last-Translator: mpetazzoni <maxime.petazzoni@bulix.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
-"X-Poedit-Language: French\n"
-"X-Poedit-Country: FRANCE\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
@@ -86,21 +86,9 @@ msgid ""
 "http://www.openstreetmap.org\n"
 "\n"
 "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
-"The map may be incomplete or inaccurate. You can contribute to improve this "
-"map.\n"
+"The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
 "See http://wiki.openstreetmap.org"
-msgstr ""
-"Copyright © %(year)d développeurs MapOSMatic/OCitySMap.\n"
-"http://www.maposmatic.org\n"
-"\n"
-"Données cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-"
-"sa).\n"
-"http://www.openstreetmap.org\n"
-"\n"
-"Carte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s.\n"
-"Cette carte peut être incomplète ou imprécise. Vous pouvez contribuer à "
-"améliorer cette carte.\n"
-"Voir http://wiki.openstreetmap.org"
+msgstr "Copyright © %(year)d développeurs MapOSMatic/OCitySMap.\nhttp://www.maposmatic.org\n\nDonnées cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-sa).\nhttp://www.openstreetmap.org\n\nCarte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s.\nCette carte peut être incomplète ou imprécise. Vous pouvez contribuer à améliorer cette carte.\nVoir http://wiki.openstreetmap.org"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:485
 #: ocitysmap/layoutlib/single_page_renderers.py:303
@@ -114,23 +102,10 @@ msgstr "Cette page est laissée intentionnellement vide."
 #: ocitysmap/layoutlib/single_page_renderers.py:290
 #, python-format
 msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
-"OpenStreetMap.org and contributors (cc-by-sa).\n"
-"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be "
-"incomplete or inaccurate. You can contribute to improve this map. See http://"
-"wiki.openstreetmap.org"
-msgstr ""
-"Copyright © %(year)d développeurs MapOSMatic/OCitySMap. Données "
-"cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-sa).\n"
-"Carte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s. Cette carte "
-"peut être incomplète ou imprécise. Vous pouvez contribuer à améliorer cette "
-"carte. Voir http://wiki.openstreetmap.org"
+"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
+"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
+msgstr "Copyright © %(year)d développeurs MapOSMatic/OCitySMap. Données cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-sa).\nCarte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s. Cette carte peut être incomplète ou imprécise. Vous pouvez contribuer à améliorer cette carte. Voir http://wiki.openstreetmap.org"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
 msgstr "Test de gettext"
-
-#~ msgid ""
-#~ "This map has been rendered on %s and may be incomplete or inaccurate."
-#~ msgstr ""
-#~ "Cette carte a été générée le %s et peut être incomplète ou inexacte."

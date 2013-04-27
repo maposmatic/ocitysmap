@@ -3,78 +3,77 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Esben Damgaard <ebbe@hvemder.dk>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: https://savannah.nongnu.org/bugs/?group=maposmatic\n"
 "PO-Revision-Date: 2013-04-26 13:53+0000\n"
 "Last-Translator: Hakan Tandogan <hakan.tandogan@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: Greek (http://www.transifex.com/projects/p/maposmatic/language/el/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: da\n"
+"Language: el\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
-msgstr "Kirker"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
-msgstr "Kirke"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:165 ocitysmap/indexlib/indexer.py:166
 #: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
 #: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
-msgstr "Uddannelse"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
-msgstr "Børnehave"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:166
 msgid "School"
-msgstr "Skole"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:167
 msgid "College"
-msgstr "Gymnasium"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:168
 msgid "University"
-msgstr "Universitet"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:169
 msgid "Library"
-msgstr "Bibliotek"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:170 ocitysmap/indexlib/indexer.py:171
 #: ocitysmap/indexlib/indexer.py:172 ocitysmap/indexlib/indexer.py:174
 msgid "Public buildings"
-msgstr "Offentlige bygninger"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
-msgstr "Rådhus"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
-msgstr "Postkontor"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:173
 msgid "Public building"
-msgstr "Offentlig bygning"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:174
 msgid "Police"
-msgstr "Politi"
+msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:399
 msgid "Villages"
-msgstr "Byer"
+msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:470
 #, python-format
@@ -93,11 +92,11 @@ msgstr ""
 #: ocitysmap/layoutlib/multi_page_renderer.py:485
 #: ocitysmap/layoutlib/single_page_renderers.py:303
 msgid "unknown"
-msgstr "ukendt"
+msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:540
 msgid "This page is intentionally left blank."
-msgstr "Denne side er med vilje blank."
+msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:290
 #, python-format

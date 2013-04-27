@@ -727,7 +727,7 @@ class i18n_pl_generic(i18n):
     def first_letter_equal(self, a, b):
         return a == b
 
-class i18n_tr_TR_generic(i18n):
+class i18n_tr_generic(i18n):
     APPELLATIONS = [ u"Sokak", u"Sokağı" ]
     DETERMINANTS = []
     SPACE_REDUCE = re.compile(r"\s+")
@@ -1028,7 +1028,7 @@ language_class_map = {
     'pl_PL.UTF-8': i18n_pl_generic,
     'nb_NO.UTF-8': i18n_generic,
     'nn_NO.UTF-8': i18n_generic,
-    'tr_TR.UTF-8': i18n_tr_TR_generic,
+    'tr_TR.UTF-8': i18n_tr_generic,
     'ast_ES.UTF-8': i18n_ast_generic,
     'sk_SK.UTF-8': i18n_generic,
 }

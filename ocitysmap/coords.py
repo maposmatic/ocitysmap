@@ -197,6 +197,12 @@ class BoundingBox:
             (self._lat1, self._long1, self._lat2, self._long2,
              name_str, color_str)
 
+    def as_json_bounds(self):
+        """Returns this bounding box as an array of arrays that can be
+        serialized as JSON."""
+        return [[self._lat1, self._long1],
+                [self._lat2, self._long2]]
+
 if __name__ == "__main__":
     wkt = 'POINT(2.0333 48.7062132250362)'
     pt = Point.parse_wkt(wkt)
