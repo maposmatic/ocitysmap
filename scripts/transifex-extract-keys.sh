@@ -6,7 +6,7 @@ extract_gettext() {
     if [ -d ${DIR} ]
     then    
 	pushd ${DIR}
-	${DIR}/i18n.py --make-pot
+	python2 ${DIR}/i18n.py --make-pot
 	grep -v "POT-Creation-Date:" ${DIR}/locale/ocitysmap.pot > ${DIR}/locale/temp.pot
 	mv ${DIR}/locale/temp.pot ${DIR}/locale/ocitysmap.pot
     fi
