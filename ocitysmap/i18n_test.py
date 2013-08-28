@@ -68,5 +68,28 @@ class i18n_ru_generic_test(unittest.TestCase):
         for fr, to in conversions:
             self.assertEqual(to, self.r.user_readable_street(fr))
 
+class i18n_be_generic_test(unittest.TestCase):
+    def setUp(self):
+        self.r = i18n.i18n_be_generic('be', '')
+
+    def test_readable_street(self):
+        conversions = [
+            (u"праспект Незалежнасці", u"Незалежнасці, праспект"),
+            (u"Кастрычніцкая вуліца", u"Кастрычніцкая вуліца"),
+            (u"вуліца Янкі Купалы", u"Янкі Купалы, вуліца"),
+            (u"вуліца Раманаўская Слабада", u"Раманаўская Слабада, вуліца"),
+            (u"Аляксандраўскі сквер", u"Аляксандраўскі сквер"),
+            (u"Музычны завулак", u"Музычны завулак"),
+            (u"Парк Цівалі", u"Цівалі, парк"),
+            (u"вуліца 60 год БССР", u"60 год БССР, вуліца"),
+            (u"вул. 8 сакавіка", u"8 сакавіка, вуліца"),
+            (u"завулак Баўмана", u"Баўмана, завулак"),
+            (u"плошча 17 Верасня", u"17 Верасня, плошча"),
+            (u"пл. 17 Верасня", u"17 Верасня, плошча"),
+            (u"2-і завулак Цімашэнкі", u"Цімашэнкі, 2-і завулак"),
+        ]
+        for fr, to in conversions:
+            self.assertEqual(to, self.r.user_readable_street(fr))
+
 if __name__ == '__main__':
     unittest.main()
