@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
-"Report-Msgid-Bugs-To: https://savannah.nongnu.org/bugs/?group=maposmatic\n"
-"PO-Revision-Date: 2013-06-29 10:47+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2013-11-20 09:54+0000\n"
 "Last-Translator: Hakan Tandogan <hakan.tandogan@gmail.com>\n"
 "Language-Team: Pirate English (http://www.transifex.com/projects/p/maposmatic/language/en@pirate/)\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: ocitysmap/indexlib/indexer.py:163
 msgid "Places of worship"
-msgstr ""
+msgstr "Ze Place Of Ze Flying Sphagetti Monschtr"
 
 #: ocitysmap/indexlib/indexer.py:164
 msgid "Place of worship"
