@@ -5,7 +5,7 @@
 # Translators:
 # POPularMAN, 2013
 # Łukasz Jernaś <deejay1@srem.org>, 2010
-# Michał Gątkowski <gatkowski.michal@gmail.com>, 2013
+# Michal Gatkowski <gatkowski.michal@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
