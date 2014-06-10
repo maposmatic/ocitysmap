@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# rodrigo.avila <rodrigo@avila.net.br>, 2013
+# Rodrigo de Avila <rodrigo@avila.net.br>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
