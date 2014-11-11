@@ -2,7 +2,7 @@ OCitySMap installation instructions
 ===================================
 
 These instructions refer to software dependencies by using Ubuntu
-Lucid (10.04) package names. Minor adaptations might be needed for
+Lucid (14.04) package names. Minor adaptations might be needed for
 other distributions or for the precise Debian or Ubuntu release you
 are using. They have been tested on several x86_64 hosts.
 
@@ -41,19 +41,19 @@ are using. They have been tested on several x86_64 hosts.
 
     sudo -u postgres createlang plpgsql maposmatic
 
-    b. Download postgis 1.5.1
+    b. Download postgis 2.1
 
     sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
 
     sudo aptitude update
     sudo aptitude dist-upgrade # Or safe-upgrade if you prefer
 
-    sudo aptitude install postgresql-8.4-postgis
+    sudo aptitude install postgresql-9.3-postgis-2.1
 
     If nothing happens, you may have to check the output of "apt-get
-    policy postgresql-8.4-postgis" and adjust your apt preferences.  A
-    sensible default preferences configuration file for this
-    repository could be:
+    policy postgresql-9.3-postgis-2.1" and adjust your apt preferences.  A
+    sensible default preferences configuration file for this repository could
+    be:
 
       Package: *
       Pin: release o=LP-PPA-ubuntugis-ubuntugis-unstable
@@ -63,21 +63,21 @@ are using. They have been tested on several x86_64 hosts.
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql \
+              -f /usr/share/postgresql/9.3/contrib/postgis-2.1/postgis.sql \
               -d maposmatic
 
     Provide comments (Optional):
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql \
+              -f /usr/share/postgresql/9.3/contrib/postgis-2.1/postgis_comments.sql \
               -d maposmatic
 
     d. Add the list of spatial referential systems
 
     sudo -u postgres \
          psql \
-              -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql \
+              -f /usr/share/postgresql/9.3/contrib/postgis-2.1/spatial_ref_sys.sql \
               -d maposmatic
 
     e. Change the owner of the new tables to maposmatic
@@ -85,6 +85,10 @@ are using. They have been tested on several x86_64 hosts.
     echo "ALTER TABLE geometry_columns OWNER TO maposmatic;
           ALTER TABLE spatial_ref_sys OWNER TO maposmatic;" | \
     sudo -u postgres psql -d maposmatic
+
+    e. Add hstore extension support
+
+    echo "CREATE EXTENSION hstore;" | sudo -u postgres psql -d maposmatic
 
  5. Installation of osm2pgsql
 
@@ -128,7 +132,7 @@ are using. They have been tested on several x86_64 hosts.
  7. Import the OSM data
 
     osm2pgsql -s -c -d maposmatic -m -U maposmatic -W \
-              -H localhost luxembourg.osm.bz2
+              -H localhost -k luxembourg.osm.bz2
 
     If you have a lot of RAM, remove '-s', it will make the import
     faster. If you miss RAM (and have a lot of time available) you can
@@ -140,7 +144,7 @@ are using. They have been tested on several x86_64 hosts.
     have. For example:
 
     osm2pgsql -s -a -d maposmatic -m -U maposmatic -W \
-              -H localhost ile-de-france.osm.bz2
+              -H localhost -k ile-de-france.osm.bz2
 
 
  8. Install Mapnik
