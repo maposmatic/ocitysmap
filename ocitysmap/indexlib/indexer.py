@@ -273,7 +273,7 @@ from
                 and st_intersects(%%(way)s, %(wkb_limits)s)
    group by name ---, street_kind -- (optional)
    order by name) as foo;
-""" % dict(wkb_limits = ("st_transform(GeomFromText('%s', 4002), 900913)"
+""" % dict(wkb_limits = ("st_transform(ST_GeomFromText('%s', 4002), 900913)"
                          % (polygon_wkt,)))
 
         # l.debug("Street query (nogrid): %s" % query)
@@ -341,7 +341,7 @@ from (
      ) as foo
 order by amenity_name""" \
                 % {'amenity': _sql_escape_unicode(db_amenity),
-                   'wkb_limits': ("st_transform(GeomFromText('%s' , 4002), 900913)"
+                   'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4002), 900913)"
                                   % (polygon_wkt,))}
 
 
@@ -415,7 +415,7 @@ from (
              and ST_intersects(%%(way)s, %(wkb_limits)s)
      ) as foo
 order by village_name""" \
-            % {'wkb_limits': ("st_transform(GeomFromText('%s', 4002), 900913)"
+            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4002), 900913)"
                               % (polygon_wkt,))}
 
 
