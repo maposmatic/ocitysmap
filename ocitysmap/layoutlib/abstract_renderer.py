@@ -158,11 +158,16 @@ class Renderer:
             else:
                 continue
 
-            draw_utils.draw_simpletext_center(ctx, label,
-                                         x, grid_legend_margin_dots/2.0)
-            draw_utils.draw_simpletext_center(ctx, label,
-                                         x, map_area_height_dots -
-                                         grid_legend_margin_dots/2.0)
+            # At the top clear the right corner of the horizontal label
+            if (i < map_grid.horiz_count-1):
+                draw_utils.draw_simpletext_center(ctx, label,
+                                             x, grid_legend_margin_dots/2.0)
+
+            # At the bottom clear the left corner of the horizontal label
+            if (i > 0):
+                draw_utils.draw_simpletext_center(ctx, label,
+                                             x, map_area_height_dots -
+                                             grid_legend_margin_dots/2.0)
 
         for i, label in enumerate(map_grid.vertical_labels):
             y = i * step_vert
@@ -174,9 +179,14 @@ class Renderer:
             else:
                 continue
 
-            draw_utils.draw_simpletext_center(ctx, label,
+            # On the left clear the upper corner of the vertical label
+            if (i > 0):
+                draw_utils.draw_simpletext_center(ctx, label,
                                          grid_legend_margin_dots/2.0, y)
-            draw_utils.draw_simpletext_center(ctx, label,
+
+            # On the right clear the bottom corner of the vertical label
+            if (i < map_grid.vert_count -1):
+                draw_utils.draw_simpletext_center(ctx, label,
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 
